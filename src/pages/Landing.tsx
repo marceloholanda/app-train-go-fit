@@ -22,9 +22,6 @@ const Landing = () => {
       <header className="p-4 flex justify-between items-center">
         <Logo size="medium" />
         <div className="flex space-x-2">
-          <Link to="/prototype">
-            <Button variant="outline" size="sm">Ver Protótipo</Button>
-          </Link>
           <Link to="/login">
             <Button variant="ghost" size="sm">Entrar</Button>
           </Link>
@@ -41,24 +38,15 @@ const Landing = () => {
             Acompanhe seu progresso, personalize seus treinos e alcance seus objetivos com o TrainGO.
           </p>
           
-          <div className="flex flex-col space-y-4 max-w-xs mx-auto">
+          <div className="flex flex-col items-center max-w-xs mx-auto">
             <Button 
               fullWidth 
               size="lg" 
               rightIcon={<ChevronRight />}
               onClick={() => navigate('/onboarding')}
+              className="py-5 text-lg"
             >
               Começar Agora
-            </Button>
-            <Button 
-              variant="outline" 
-              fullWidth
-              onClick={() => {
-                const featuresSection = document.getElementById('features');
-                featuresSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Saiba Mais
             </Button>
           </div>
         </div>
@@ -96,7 +84,11 @@ const Landing = () => {
           </div>
           
           <div className="mt-12 text-center">
-            <Button size="lg" onClick={() => navigate('/onboarding')}>
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/onboarding')}
+              className="px-10 py-5 text-lg mx-auto"
+            >
               Descubra Seu Perfil
             </Button>
           </div>
