@@ -21,9 +21,6 @@ const Landing = () => {
       <header className="p-4 flex justify-between items-center">
         <Logo size="medium" />
         <div className="flex space-x-2">
-          <Link to="/prototype">
-            <Button variant="outline" size="sm">Ver Protótipo</Button>
-          </Link>
           <Link to="/login">
             <Button variant="ghost" size="sm">Entrar</Button>
           </Link>
