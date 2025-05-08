@@ -1,7 +1,6 @@
 
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import { ChevronRight, Dumbbell, Zap, Users } from 'lucide-react';
 
