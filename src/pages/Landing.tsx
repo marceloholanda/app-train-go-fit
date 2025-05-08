@@ -1,6 +1,7 @@
 
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import { ChevronRight, Dumbbell, Zap, Users } from 'lucide-react';
 
@@ -22,6 +23,7 @@ const Landing = () => {
         <Logo size="medium" />
         <div className="flex space-x-2">
           <Link to="/prototype">
+            <Button variant="outline" size="sm">Ver Protótipo</Button>
           </Link>
           <Link to="/login">
             <Button variant="ghost" size="sm">Entrar</Button>
