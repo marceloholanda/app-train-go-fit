@@ -6,7 +6,7 @@ interface CardProps {
   className?: string;
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: 'default' | 'outline' | 'filled';
+  variant?: 'default' | 'outline' | 'filled' | 'exercise';
 }
 
 export const Card: React.FC<CardProps> = ({ 
@@ -16,9 +16,10 @@ export const Card: React.FC<CardProps> = ({
   variant = 'default'
 }) => {
   const variantClasses = {
-    default: 'bg-traingo-gray',
+    default: 'bg-white text-black',
     outline: 'bg-transparent border border-gray-700',
-    filled: 'bg-traingo-primary/10'
+    filled: 'bg-traingo-primary/10',
+    exercise: 'bg-white text-black border border-gray-200'
   };
 
   return (

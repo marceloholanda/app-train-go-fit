@@ -21,9 +21,14 @@ const Landing = () => {
       {/* Header */}
       <header className="p-4 flex justify-between items-center">
         <Logo size="medium" />
-        <Link to="/login">
-          <Button variant="ghost" size="sm">Entrar</Button>
-        </Link>
+        <div className="flex space-x-2">
+          <Link to="/prototype">
+            <Button variant="outline" size="sm">Ver Protótipo</Button>
+          </Link>
+          <Link to="/login">
+            <Button variant="ghost" size="sm">Entrar</Button>
+          </Link>
+        </div>
       </header>
 
       {/* Hero Section */}
@@ -53,7 +58,7 @@ const Landing = () => {
                 featuresSection?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              ba Mais
+              Saiba Mais
             </Button>
           </div>
         </div>

@@ -16,6 +16,7 @@ import Settings from "./pages/Settings";
 import Upgrade from "./pages/Upgrade";
 import NotFound from "./pages/NotFound";
 import AuthLayout from "./layouts/AuthLayout";
+import WorkoutPrototype from "./pages/WorkoutPrototype"; // Add the new page import
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/prototype" element={<WorkoutPrototype />} />  {/* Add the new route */}
           
           {/* Protected routes with tab navigation */}
           <Route path="/" element={<AuthLayout />}>
