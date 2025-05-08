@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
+import PrimaryButton from '@/components/PrimaryButton';
 import { ChevronRight, Dumbbell, Zap, Users } from 'lucide-react';
 
 const Landing = () => {
@@ -38,16 +39,13 @@ const Landing = () => {
             Acompanhe seu progresso, personalize seus treinos e alcance seus objetivos com o TrainGO.
           </p>
           
-          <div className="flex flex-col items-center max-w-xs mx-auto">
-            <Button 
-              fullWidth 
-              size="lg" 
-              rightIcon={<ChevronRight />}
+          <div className="flex flex-col items-center justify-center">
+            <PrimaryButton 
               onClick={() => navigate('/onboarding')}
-              className="py-5 text-lg"
+              className="mx-auto"
             >
               Começar Agora
-            </Button>
+            </PrimaryButton>
           </div>
         </div>
       </section>
@@ -84,13 +82,12 @@ const Landing = () => {
           </div>
           
           <div className="mt-12 text-center">
-            <Button 
-              size="lg" 
+            <PrimaryButton 
               onClick={() => navigate('/onboarding')}
-              className="px-10 py-5 text-lg mx-auto"
+              className="mx-auto"
             >
               Descubra Seu Perfil
-            </Button>
+            </PrimaryButton>
           </div>
         </div>
       </section>
