@@ -18,7 +18,12 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     <button
       type={type}
       onClick={onClick}
-      className={`bg-traingo-primary hover:bg-yellow-300 text-black font-semibold py-4 px-10 rounded-xl shadow-lg text-lg transition-all duration-300 active:scale-95 ${className}`}
+      className={`
+        bg-traingo-primary hover:bg-yellow-300 text-black font-semibold 
+        py-4 px-10 rounded-xl shadow-lg text-lg 
+        transition-all duration-300 ease-in-out transform 
+        hover:scale-105 active:scale-95
+        ${className}`}
     >
       {children}
     </button>
@@ -26,3 +31,4 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 };
 
 export default PrimaryButton;
+
