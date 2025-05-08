@@ -53,7 +53,7 @@ const Landing = () => {
                 featuresSection?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              Saiba Mais
+              ba Mais
             </Button>
           </div>
         </div>
