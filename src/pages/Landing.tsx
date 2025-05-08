@@ -42,7 +42,6 @@ const Landing = () => {
           <div className="flex flex-col items-center justify-center">
             <PrimaryButton 
               onClick={() => navigate('/onboarding')}
-              className="mx-auto"
             >
               Começar Agora
             </PrimaryButton>
