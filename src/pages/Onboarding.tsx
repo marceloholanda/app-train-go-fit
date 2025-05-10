@@ -181,18 +181,22 @@ const Onboarding = () => {
             
             <div className="grid grid-cols-2 gap-4">
               {currentQuestion.options.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => handleOptionSelect(currentQuestion.id, option.value)}
-                  className={`flex flex-col items-center justify-center p-6 rounded-xl transition-all 
-                    ${answers[currentQuestion.id] === option.value 
-                      ? 'bg-traingo-primary text-black' 
-                      : 'bg-traingo-gray hover:bg-gray-800'}`}
-                >
-                  <span className="text-4xl mb-3">{option.image}</span>
-                  <span className="font-medium text-center">{option.label}</span>
-                </button>
-              ))}
+  <button
+    key={option.value}
+    onClick={() => handleOptionSelect(currentQuestion.id, option.value)}
+    className={`relative h-36 w-full rounded-xl overflow-hidden bg-cover bg-center transition-transform duration-200 transform hover:scale-105 ${
+      answers[currentQuestion.id] === option.value 
+        ? 'ring-4 ring-traingo-primary' 
+        : 'ring-1 ring-gray-700'
+    }`}
+    style={{ backgroundImage: `url(${option.image_url})` }}
+  >
+    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-3">
+      <span className="text-3xl">{option.image}</span>
+      <span className="text-sm font-semibold text-center mt-2">{option.label}</span>
+    </div>
+  </button>
+))}
             </div>
           </div>
         ) : (
