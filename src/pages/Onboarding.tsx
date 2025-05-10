@@ -6,25 +6,36 @@ import Button from '@/components/Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
+
 // Define quiz questions
 const quizQuestions = [
   {
     id: 'objective',
-    question: 'Qual é o seu principal objetivo?',
+    question: 'Qual é o seu principal objetivo com os treinos?',
     options: [
-      { value: 'lose_weight', label: 'Perder peso', image: '🏃' },
+      { value: 'lose_fat', label: 'Perder gordura corporal', image: '🔥' },
       { value: 'gain_muscle', label: 'Ganhar massa muscular', image: '💪' },
-      { value: 'maintain', label: 'Manter a forma', image: '⚖️' },
-      { value: 'home_training', label: 'Treinar em casa', image: '🏠' },
+      { value: 'health_energy', label: 'Melhorar disposição e saúde', image: '⚡' },
+      { value: 'create_habit', label: 'Criar uma rotina consistente', image: '🧠' },
+    ]
+  },
+  {
+    id: 'environment',
+    question: 'Onde você prefere treinar?',
+    options: [
+      { value: 'gym', label: 'Na academia', image: '🏋️' },
+      { value: 'home', label: 'Em casa', image: '🏠' },
+      { value: 'outdoor', label: 'Ao ar livre', image: '🌳' },
+      { value: 'anywhere', label: 'Onde for mais prático', image: '📍' },
     ]
   },
   {
     id: 'level',
-    question: 'Qual é o seu nível de experiência?',
+    question: 'Qual é o seu nível atual de atividade física?',
     options: [
-      { value: 'beginner', label: 'Iniciante', image: '🌱' },
-      { value: 'intermediate', label: 'Intermediário', image: '🌿' },
-      { value: 'advanced', label: 'Avançado', image: '🌳' },
+      { value: 'beginner', label: 'Iniciante (não pratico nada)', image: '🌱' },
+      { value: 'returning', label: 'Intermediário (estou parado)', image: '🌿' },
+      { value: 'advanced', label: 'Avançado (treino com frequência)', image: '🌳' },
     ]
   },
   {
@@ -34,60 +45,51 @@ const quizQuestions = [
       { value: '2', label: '2 dias', image: '2️⃣' },
       { value: '3', label: '3 dias', image: '3️⃣' },
       { value: '4', label: '4 dias', image: '4️⃣' },
-      { value: '5+', label: '5 ou mais', image: '5️⃣' },
-    ]
-  },
-  {
-    id: 'environment',
-    question: 'Onde você prefere treinar?',
-    options: [
-      { value: 'gym', label: 'Academia', image: '🏋️' },
-      { value: 'home_with_equipment', label: 'Casa com equipamentos', image: '🏠' },
-      { value: 'home_no_equipment', label: 'Casa sem equipamentos', image: '🧘' },
-      { value: 'outdoor', label: 'Ar livre', image: '🌳' },
+      { value: '5_plus', label: '5 ou mais', image: '5️⃣' },
     ]
   },
   {
     id: 'time_per_session',
-    question: 'Quanto tempo você tem para cada treino?',
+    question: 'Quanto tempo por dia você pode dedicar aos treinos?',
     options: [
-      { value: '15_30', label: '15-30 minutos', image: '⏱️' },
-      { value: '30_45', label: '30-45 minutos', image: '⏱️' },
-      { value: '45_60', label: '45-60 minutos', image: '⏱️' },
-      { value: '60+', label: 'Mais de 60 minutos', image: '⏱️' },
+      { value: '15', label: 'Até 15 minutos', image: '🕒' },
+      { value: '20_30', label: '20 a 30 minutos', image: '⏱️' },
+      { value: '30_45', label: '30 a 45 minutos', image: '⌛' },
+      { value: '60+', label: 'Mais de 1 hora', image: '🕐' },
     ]
   },
   {
-    id: 'limitations',
-    question: 'Você tem alguma lesão ou limitação?',
+    id: 'personality',
+    question: 'Como você se descreveria quando o assunto é treino?',
     options: [
-      { value: 'none', label: 'Nenhuma', image: '✅' },
-      { value: 'back', label: 'Problemas nas costas', image: '🔄' },
-      { value: 'knees', label: 'Problemas nos joelhos', image: '🦵' },
-      { value: 'shoulders', label: 'Problemas nos ombros', image: '🧍' },
+      { value: 'focused', label: 'Focado, só preciso de um plano', image: '🎯' },
+      { value: 'needs_motivation', label: 'Preciso de motivação pra começar', image: '💡' },
+      { value: 'procrastinator', label: 'Procrastino, mas quero mudar', image: '⏳' },
+      { value: 'busy', label: 'Tenho rotina apertada', image: '📆' },
     ]
   },
   {
-    id: 'motivation',
-    question: 'Qual frase mais combina com você?',
+    id: 'body_focus',
+    question: 'Qual área do corpo você mais quer melhorar?',
     options: [
-      { value: 'results', label: 'Quero ver resultados rápidos', image: '🚀' },
-      { value: 'consistency', label: 'Prefiro progredir consistentemente', image: '📈' },
-      { value: 'enjoyment', label: 'Quero me divertir treinando', image: '😊' },
-      { value: 'challenge', label: 'Busco desafios constantes', image: '🏆' },
+      { value: 'abs', label: 'Abdômen', image: '🧍‍♂️' },
+      { value: 'legs_glutes', label: 'Pernas e glúteos', image: '🦵' },
+      { value: 'upper_body', label: 'Peito e braços', image: '💪' },
+      { value: 'full_body', label: 'Corpo inteiro', image: '🏋️' },
     ]
   },
   {
-    id: 'routine',
-    question: 'Você já tem uma rotina de treinos?',
+    id: 'training_history',
+    question: 'Você já tentou seguir um plano de treino antes?',
     options: [
-      { value: 'yes', label: 'Sim, mas quero melhorar', image: '👍' },
-      { value: 'inconsistent', label: 'Sim, mas sou inconsistente', image: '📅' },
-      { value: 'no_experience', label: 'Não, sou iniciante', image: '🆕' },
-      { value: 'returning', label: 'Estou retornando após uma pausa', image: '🔄' },
+      { value: 'yes_gave_up', label: 'Sim, mas parei no meio', image: '🛑' },
+      { value: 'yes_no_results', label: 'Sim, mas não tive resultados', image: '❌' },
+      { value: 'no_first_time', label: 'Não, será minha primeira vez', image: '✨' },
+      { value: 'yes_still_doing', label: 'Sim, mas quero algo melhor', image: '✅' },
     ]
   }
 ];
+
 
 const Onboarding = () => {
   const navigate = useNavigate();
