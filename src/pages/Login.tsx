@@ -87,7 +87,7 @@ const Login = () => {
                   Senha
                 </label>
                 <a href="#" className="text-sm text-traingo-primary hover:underline">
-                  Esqueceu?
+                  Esqueci minha senha
                 </a>
               </div>
               <input
