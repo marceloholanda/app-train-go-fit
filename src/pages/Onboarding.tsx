@@ -157,21 +157,33 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="p-4 flex justify-between items-center">
-        <Logo size="small" />
-        <div className="flex space-x-2 items-center">
-          {currentStep > 0 && !isLastQuestion && (
-            <button
-              onClick={() => setCurrentStep(prev => prev - 1)}
-              className="p-2 rounded-full hover:bg-gray-800"
-            >
-              <ArrowLeft size={20} />
-            </button>
-          )}
-          <span className="text-sm text-gray-400">
-            {isLastQuestion ? 'Finalizar' : `${currentStep + 1}/${quizQuestions.length}`}
-          </span>
-        </div>
-      </header>
+  <Logo size="small" />
+  <div className="flex space-x-2 items-center">
+    {currentStep > 0 && !isLastQuestion && (
+      <button
+        onClick={() => setCurrentStep(prev => prev - 1)}
+        className="p-2 rounded-full hover:bg-gray-800"
+      >
+        <ArrowLeft size={20} />
+      </button>
+    )}
+  </div>
+</header>
+
+{/* Progress bar */}
+<div className="w-full px-4 mt-2">
+  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+    <div
+      className="bg-traingo-primary h-2 transition-all duration-300"
+      style={{ width: `${(currentStep / quizQuestions.length) * 100}%` }}
+    />
+  </div>
+  <div className="text-sm text-gray-400 text-center mt-2">
+    Etapa {Math.min(currentStep + 1, quizQuestions.length)} de {quizQuestions.length} (
+    {Math.round((currentStep / quizQuestions.length) * 100)}%)
+  </div>
+</div>
+
 
       <div className="flex-1 flex flex-col justify-center px-4 py-8">
         {!isLastQuestion ? (
