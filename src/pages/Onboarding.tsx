@@ -13,83 +13,82 @@ const quizQuestions = [
     id: 'objective',
     question: 'Qual é o seu principal objetivo com os treinos?',
     options: [
-      { value: 'lose_fat', label: 'Perder gordura corporal', image: '🔥', image_url: 'https://images.unsplash.com/photo-1571019613914-85f342c1d1f1?fit=crop&w=400&h=250' },
-      { value: 'gain_muscle', label: 'Ganhar massa muscular', image: '💪', image_url: 'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?fit=crop&w=400&h=250' },
-      { value: 'health_energy', label: 'Melhorar disposição e saúde', image: '⚡', image_url: 'https://images.unsplash.com/photo-1605296867429-8e08b7eb3f36?fit=crop&w=400&h=250' },
-      { value: 'create_habit', label: 'Criar uma rotina consistente', image: '🧠', image_url: 'https://images.unsplash.com/photo-1518611012118-f0c5f24e2c5a?fit=crop&w=400&h=250' },
+      { value: 'lose_fat', label: 'Perder gordura corporal', image: '🔥' },
+      { value: 'gain_muscle', label: 'Ganhar massa muscular', image: '💪' },
+      { value: 'health_energy', label: 'Melhorar disposição e saúde', image: '⚡' },
+      { value: 'create_habit', label: 'Criar uma rotina consistente', image: '🧠' },
     ]
   },
   {
     id: 'environment',
     question: 'Onde você prefere treinar?',
     options: [
-      { value: 'gym', label: 'Na academia', image: '🏋️', image_url: 'https://images.unsplash.com/photo-1571019613914-85f342c1d1f1?fit=crop&w=400&h=250' },
-      { value: 'home', label: 'Em casa', image: '🏠', image_url: 'https://images.unsplash.com/photo-1601582583127-b1f7c1a08041?fit=crop&w=400&h=250' },
-      { value: 'outdoor', label: 'Ao ar livre', image: '🌳', image_url: 'https://images.unsplash.com/photo-1508780709619-79562169bc64?fit=crop&w=400&h=250' },
-      { value: 'anywhere', label: 'Onde for mais prático', image: '📍', image_url: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?fit=crop&w=400&h=250' },
+      { value: 'gym', label: 'Na academia', image: '🏋️' },
+      { value: 'home', label: 'Em casa', image: '🏠' },
+      { value: 'outdoor', label: 'Ao ar livre', image: '🌳' },
+      { value: 'anywhere', label: 'Onde for mais prático', image: '📍' },
     ]
   },
   {
     id: 'level',
     question: 'Qual é o seu nível atual de atividade física?',
     options: [
-      { value: 'beginner', label: 'Iniciante', image: '🌱', image_url: 'https://images.unsplash.com/photo-1584467735871-92b8f9cfc3d1?fit=crop&w=400&h=250' },
-      { value: 'returning', label: 'Intermediário', image: '🌿', image_url: 'https://images.unsplash.com/photo-1598966730015-8c9d62a70fc1?fit=crop&w=400&h=250' },
-      { value: 'advanced', label: 'Avançado', image: '🌳', image_url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?fit=crop&w=400&h=250' },
+      { value: 'beginner', label: 'Iniciante (não pratico nada)', image: '🌱' },
+      { value: 'returning', label: 'Intermediário (estou parado)', image: '🌿' },
+      { value: 'advanced', label: 'Avançado (treino com frequência)', image: '🌳' },
     ]
   },
   {
     id: 'days_per_week',
     question: 'Quantos dias por semana você quer treinar?',
     options: [
-      { value: '2', label: '2 dias', image: '2️⃣', image_url: 'https://images.unsplash.com/photo-1546484959-f5d60b6d8193?fit=crop&w=400&h=250' },
-      { value: '3', label: '3 dias', image: '3️⃣', image_url: 'https://images.unsplash.com/photo-1594737625785-cdfb0c80c1ea?fit=crop&w=400&h=250' },
-      { value: '4', label: '4 dias', image: '4️⃣', image_url: 'https://images.unsplash.com/photo-1594737624964-bc2db7f4910d?fit=crop&w=400&h=250' },
-      { value: '5_plus', label: '5 ou mais', image: '5️⃣', image_url: 'https://images.unsplash.com/photo-1517960413843-0aee8e2b3286?fit=crop&w=400&h=250' },
+      { value: '2', label: '2 dias', image: '2️⃣' },
+      { value: '3', label: '3 dias', image: '3️⃣' },
+      { value: '4', label: '4 dias', image: '4️⃣' },
+      { value: '5_plus', label: '5 ou mais', image: '5️⃣' },
     ]
   },
   {
     id: 'time_per_session',
     question: 'Quanto tempo por dia você pode dedicar aos treinos?',
     options: [
-      { value: '15', label: 'Até 15 minutos', image: '🕒', image_url: 'https://images.unsplash.com/photo-1584466977771-7aa1cf20b379?fit=crop&w=400&h=250' },
-      { value: '20_30', label: '20 a 30 minutos', image: '⏱️', image_url: 'https://images.unsplash.com/photo-1599058917212-d750089f9767?fit=crop&w=400&h=250' },
-      { value: '30_45', label: '30 a 45 minutos', image: '⌛', image_url: 'https://images.unsplash.com/photo-1598277313843-76f3c0606ad9?fit=crop&w=400&h=250' },
-      { value: '60+', label: 'Mais de 1 hora', image: '🕐', image_url: 'https://images.unsplash.com/photo-1598906351090-5e8d60cf91c2?fit=crop&w=400&h=250' },
+      { value: '15', label: 'Até 15 minutos', image: '🕒' },
+      { value: '20_30', label: '20 a 30 minutos', image: '⏱️' },
+      { value: '30_45', label: '30 a 45 minutos', image: '⌛' },
+      { value: '60+', label: 'Mais de 1 hora', image: '🕐' },
     ]
   },
   {
     id: 'personality',
     question: 'Como você se descreveria quando o assunto é treino?',
     options: [
-      { value: 'focused', label: 'Focado, só preciso de um plano', image: '🎯', image_url: 'https://images.unsplash.com/photo-1584467735905-cf2829023480?fit=crop&w=400&h=250' },
-      { value: 'needs_motivation', label: 'Preciso de motivação pra começar', image: '💡', image_url: 'https://images.unsplash.com/photo-1605296867429-8e08b7eb3f36?fit=crop&w=400&h=250' },
-      { value: 'procrastinator', label: 'Procrastino, mas quero mudar', image: '⏳', image_url: 'https://images.unsplash.com/photo-1571019613914-85f342c1d1f1?fit=crop&w=400&h=250' },
-      { value: 'busy', label: 'Tenho rotina apertada', image: '📆', image_url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?fit=crop&w=400&h=250' },
+      { value: 'focused', label: 'Focado, só preciso de um plano', image: '🎯' },
+      { value: 'needs_motivation', label: 'Preciso de motivação pra começar', image: '💡' },
+      { value: 'procrastinator', label: 'Procrastino, mas quero mudar', image: '⏳' },
+      { value: 'busy', label: 'Tenho rotina apertada', image: '📆' },
     ]
   },
   {
     id: 'body_focus',
     question: 'Qual área do corpo você mais quer melhorar?',
     options: [
-      { value: 'abs', label: 'Abdômen', image: '🧍‍♂️', image_url: 'https://images.unsplash.com/photo-1605296867435-89ecb6f8e83c?fit=crop&w=400&h=250' },
-      { value: 'legs_glutes', label: 'Pernas e glúteos', image: '🦵', image_url: 'https://images.unsplash.com/photo-1605875292253-b3d73fe1b726?fit=crop&w=400&h=250' },
-      { value: 'upper_body', label: 'Peito e braços', image: '💪', image_url: 'https://images.unsplash.com/photo-1579758629939-037fdd6f1819?fit=crop&w=400&h=250' },
-      { value: 'full_body', label: 'Corpo inteiro', image: '🏋️', image_url: 'https://images.unsplash.com/photo-1594737625785-cdfb0c80c1ea?fit=crop&w=400&h=250' },
+      { value: 'abs', label: 'Abdômen', image: '🧍‍♂️' },
+      { value: 'legs_glutes', label: 'Pernas e glúteos', image: '🦵' },
+      { value: 'upper_body', label: 'Peito e braços', image: '💪' },
+      { value: 'full_body', label: 'Corpo inteiro', image: '🏋️' },
     ]
   },
   {
     id: 'training_history',
     question: 'Você já tentou seguir um plano de treino antes?',
     options: [
-      { value: 'yes_gave_up', label: 'Sim, mas parei no meio', image: '🛑', image_url: 'https://images.unsplash.com/photo-1594737624964-bc2db7f4910d?fit=crop&w=400&h=250' },
-      { value: 'yes_no_results', label: 'Sim, mas não tive resultados', image: '❌', image_url: 'https://images.unsplash.com/photo-1605296867429-8e08b7eb3f36?fit=crop&w=400&h=250' },
-      { value: 'no_first_time', label: 'Não, será minha primeira vez', image: '✨', image_url: 'https://images.unsplash.com/photo-1584467735871-92b8f9cfc3d1?fit=crop&w=400&h=250' },
-      { value: 'yes_still_doing', label: 'Sim, mas quero algo melhor', image: '✅', image_url: 'https://images.unsplash.com/photo-1518611012118-f0c5f24e2c5a?fit=crop&w=400&h=250' },
+      { value: 'yes_gave_up', label: 'Sim, mas parei no meio', image: '🛑' },
+      { value: 'yes_no_results', label: 'Sim, mas não tive resultados', image: '❌' },
+      { value: 'no_first_time', label: 'Não, será minha primeira vez', image: '✨' },
+      { value: 'yes_still_doing', label: 'Sim, mas quero algo melhor', image: '✅' },
     ]
   }
 ];
-
 
 
 const Onboarding = () => {
@@ -181,22 +180,18 @@ const Onboarding = () => {
             
             <div className="grid grid-cols-2 gap-4">
               {currentQuestion.options.map(option => (
-  <button
-    key={option.value}
-    onClick={() => handleOptionSelect(currentQuestion.id, option.value)}
-    className={`relative h-36 w-full rounded-xl overflow-hidden bg-cover bg-center transition-transform duration-200 transform hover:scale-105 ${
-      answers[currentQuestion.id] === option.value 
-        ? 'ring-4 ring-traingo-primary' 
-        : 'ring-1 ring-gray-700'
-    }`}
-    style={{ backgroundImage: `url(${option.image_url})` }}
-  >
-    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-3">
-      <span className="text-3xl">{option.image}</span>
-      <span className="text-sm font-semibold text-center mt-2">{option.label}</span>
-    </div>
-  </button>
-))}
+                <button
+                  key={option.value}
+                  onClick={() => handleOptionSelect(currentQuestion.id, option.value)}
+                  className={`flex flex-col items-center justify-center p-6 rounded-xl transition-all 
+                    ${answers[currentQuestion.id] === option.value 
+                      ? 'bg-traingo-primary text-black' 
+                      : 'bg-traingo-gray hover:bg-gray-800'}`}
+                >
+                  <span className="text-4xl mb-3">{option.image}</span>
+                  <span className="font-medium text-center">{option.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         ) : (
