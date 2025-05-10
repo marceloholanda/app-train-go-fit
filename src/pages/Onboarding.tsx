@@ -54,14 +54,6 @@ const Onboarding = () => {
       // Simulação de cadastro
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Salvar dados do usuário e respostas do quiz
-      const userData = {
-        ...registrationData,
-        profile: answers,
-      };
-
-      localStorage.setItem('traingo-user', JSON.stringify(userData));
-
       // Verificamos que todas as perguntas foram respondidas
       const quizAnswers = answers as QuizAnswers;
       
@@ -72,6 +64,19 @@ const Onboarding = () => {
       // Encontrar o plano de treino mais adequado
       const recommendedPlan = findBestWorkoutPlan(quizAnswers);
       const message = generatePersonalizedMessage(quizAnswers, recommendedPlan);
+      
+      // Salvar o plano de treino no localStorage
+      const userData = {
+        ...registrationData,
+        profile: quizAnswers,
+        workoutPlan: recommendedPlan,
+        workoutProgress: {
+          completedWorkouts: [],
+          lastWeekProgress: 0
+        }
+      };
+
+      localStorage.setItem('traingo-user', JSON.stringify(userData));
       
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);

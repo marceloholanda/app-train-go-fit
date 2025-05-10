@@ -4,49 +4,38 @@ import { useNavigate } from 'react-router-dom';
 import Card from '@/components/Card';
 import { CheckCircle, Clock, BarChart3 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName, updateWorkoutProgress } from '@/utils/workoutUtils';
+import { WorkoutPlan } from '@/types/workout';
+import { Progress } from '@/components/ui/progress';
 
-// Mock data
-const mockWorkouts = [
-  {
-    id: 1,
-    name: 'Treino A - Peitoral e Tríceps',
-    day: 'Segunda',
-    status: 'completed',
-    exercises: 6,
-    icon: '💪'
-  },
-  {
-    id: 2,
-    name: 'Treino B - Costas e Bíceps',
-    day: 'Quarta',
-    status: 'pending',
-    exercises: 6,
-    icon: '🏋️'
-  },
-  {
-    id: 3,
-    name: 'Treino C - Pernas',
-    day: 'Sexta',
-    status: 'pending',
-    exercises: 6,
-    icon: '🦵'
-  },
-];
+interface WorkoutDisplay {
+  id: number;
+  name: string;
+  day: string;
+  status: 'completed' | 'pending';
+  exercises: number;
+  icon: string;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [weekProgress, setWeekProgress] = useState(33); // 1/3 treinos concluídos
+  const [weekProgress, setWeekProgress] = useState(0);
+  const [workouts, setWorkouts] = useState<WorkoutDisplay[]>([]);
 
   useEffect(() => {
-    // Carregar dados do usuário
+    // Carregar dados do usuário e plano de treino
     const loadUserData = () => {
       try {
         const user = localStorage.getItem('traingo-user');
         if (user) {
-          setUserData(JSON.parse(user));
+          const parsedUser = JSON.parse(user);
+          setUserData(parsedUser);
+          
+          // Processar o plano de treino
+          processWorkoutPlan(parsedUser);
         } else {
           navigate('/login');
         }
@@ -64,9 +53,65 @@ const Dashboard = () => {
 
     loadUserData();
   }, [navigate, toast]);
+  
+  // Processa o plano de treino e prepara os dados para exibição
+  const processWorkoutPlan = (user: any) => {
+    if (!user.workoutPlan) {
+      setWorkouts([]);
+      setWeekProgress(0);
+      return;
+    }
+    
+    const plan: WorkoutPlan = user.workoutPlan;
+    const completedWorkouts = user.workoutProgress?.completedWorkouts || [];
+    const weekDays = mapWorkoutDays(plan.days);
+    
+    // Cria os cards de treino para o dashboard
+    const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercises], index) => {
+      const dayNumber = index + 1;
+      return {
+        id: dayNumber,
+        name: generateWorkoutName(dayNumber, exercises),
+        day: weekDays[index] || `Dia ${dayNumber}`,
+        status: completedWorkouts.includes(dayNumber) ? 'completed' : 'pending',
+        exercises: exercises.length,
+        icon: getWorkoutIcon(exercises)
+      };
+    });
+    
+    setWorkouts(workoutItems);
+    
+    // Atualiza o progresso da semana
+    const progress = user.workoutProgress?.lastWeekProgress || 0;
+    setWeekProgress(progress);
+  };
 
   const handleWorkoutClick = (workoutId: number) => {
     navigate(`/exercise/${workoutId}`);
+  };
+
+  const toggleWorkoutCompletion = (e: React.MouseEvent, workoutId: number, currentStatus: string) => {
+    e.stopPropagation();
+    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+    const newCompleted = newStatus === 'completed';
+    
+    // Atualiza o status do treino localmente
+    setWorkouts(prev => prev.map(workout => 
+      workout.id === workoutId 
+        ? { ...workout, status: newStatus as 'completed' | 'pending' } 
+        : workout
+    ));
+    
+    // Atualiza o progresso da semana
+    const newProgress = updateWorkoutProgress(workoutId, newCompleted);
+    setWeekProgress(newProgress);
+    
+    toast({
+      title: newCompleted ? "Treino concluído!" : "Treino desmarcado",
+      description: newCompleted 
+        ? "Continue assim! Seu progresso foi atualizado." 
+        : "O treino foi marcado como pendente."
+    });
   };
 
   if (isLoading) {
@@ -102,7 +147,9 @@ const Dashboard = () => {
             style={{ width: `${weekProgress}%`, transition: 'width 1s ease-in-out' }} 
           />
         </div>
-        <p className="text-gray-400 text-xs mt-2">1 de 3 treinos concluídos</p>
+        <p className="text-gray-400 text-xs mt-2">
+          {userData?.workoutProgress?.completedWorkouts?.length || 0} de {userData?.workoutPlan?.days || 3} treinos concluídos
+        </p>
       </section>
 
       {/* Workouts List */}
@@ -110,33 +157,50 @@ const Dashboard = () => {
         <h2 className="font-bold text-lg mb-4">Seu Plano de Treino</h2>
 
         <div className="space-y-4">
-          {mockWorkouts.map(workout => (
-            <Card 
-              key={workout.id} 
-              onClick={() => handleWorkoutClick(workout.id)}
-              className="animate-fade-in"
-            >
-              <div className="flex items-center">
-                <div className="p-3 bg-traingo-primary/20 rounded-lg mr-4">
-                  <span className="text-2xl">{workout.icon}</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold">{workout.name}</h3>
-                  <div className="flex items-center text-sm text-gray-400">
-                    <Clock size={14} className="mr-1" />
-                    <span>{workout.day}</span>
-                    <span className="mx-2">•</span>
-                    <span>{workout.exercises} exercícios</span>
+          {workouts.length > 0 ? (
+            workouts.map(workout => (
+              <Card 
+                key={workout.id} 
+                onClick={() => handleWorkoutClick(workout.id)}
+                className="animate-fade-in"
+              >
+                <div className="flex items-center">
+                  <div className="p-3 bg-traingo-primary/20 rounded-lg mr-4">
+                    <span className="text-2xl">{workout.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold">{workout.name}</h3>
+                    <div className="flex items-center text-sm text-gray-400">
+                      <Clock size={14} className="mr-1" />
+                      <span>{workout.day}</span>
+                      <span className="mx-2">•</span>
+                      <span>{workout.exercises} exercícios</span>
+                    </div>
+                  </div>
+                  <div 
+                    onClick={(e) => toggleWorkoutCompletion(e, workout.id, workout.status)}
+                    className="cursor-pointer p-2"
+                  >
+                    {workout.status === 'completed' ? (
+                      <CheckCircle className="text-green-500" size={24} />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full border-2 border-gray-700" />
+                    )}
                   </div>
                 </div>
-                {workout.status === 'completed' ? (
-                  <CheckCircle className="text-green-500" size={24} />
-                ) : (
-                  <div className="w-8 h-8 rounded-full border-2 border-gray-700" />
-                )}
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-400">
+              <p>Nenhum plano de treino encontrado.</p>
+              <button 
+                onClick={() => navigate('/onboarding')}
+                className="mt-4 text-traingo-primary hover:underline"
+              >
+                Criar meu plano personalizado
+              </button>
+            </div>
+          )}
         </div>
         
         {/* Upgrade Prompt */}

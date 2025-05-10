@@ -1,237 +1,181 @@
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 import Card from '@/components/Card';
-import Button from '@/components/Button';
-import { ArrowLeft, Check, Play, Plus, Trash2 } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
+import { updateWorkoutProgress } from '@/utils/workoutUtils';
 
-// Mock data para exercícios
-const workouts = {
-  1: {
-    id: 1,
-    name: 'Treino A - Peitoral e Tríceps',
-    exercises: [
-      { 
-        id: 101, 
-        name: 'Supino Reto com Barra', 
-        sets: 4, 
-        reps: '10-12',
-        completed: false,
-        instruction: 'Deite no banco com os pés no chão. Segure a barra com os braços estendidos e as mãos um pouco mais abertas que a largura dos ombros. Abaixe a barra até o meio do peito e empurre de volta para cima.'
-      },
-      { 
-        id: 102, 
-        name: 'Crucifixo com Halteres', 
-        sets: 3, 
-        reps: '12-15',
-        completed: false,
-        instruction: 'Deite no banco segurando um haltere em cada mão com os braços estendidos. Abaixe os halteres em um movimento de arco até sentir o alongamento no peito, então volte à posição inicial.'
-      },
-      { 
-        id: 103, 
-        name: 'Supino Inclinado', 
-        sets: 3, 
-        reps: '10-12',
-        completed: false,
-        instruction: 'Ajuste o banco para 30-45 graus. Segure a barra com as mãos um pouco mais abertas que a largura dos ombros. Abaixe a barra até a parte superior do peito e empurre para cima.'
-      },
-      { 
-        id: 104, 
-        name: 'Tríceps Polia', 
-        sets: 4, 
-        reps: '12-15',
-        completed: false,
-        instruction: 'Com os cotovelos junto ao corpo, segure a corda/barra e estenda os braços, mantendo os cotovelos no lugar. Foco na contração do tríceps.'
-      },
-      { 
-        id: 105, 
-        name: 'Tríceps Francês', 
-        sets: 3, 
-        reps: '12-15',
-        completed: false,
-        instruction: 'Segure um haltere com as duas mãos acima da cabeça. Flexione os cotovelos para abaixar o haltere atrás da cabeça, mantendo os cotovelos apontados para cima.'
-      },
-      { 
-        id: 106, 
-        name: 'Flexão Diamante', 
-        sets: 3, 
-        reps: 'Até falha',
-        completed: false,
-        instruction: 'Posicione as mãos próximas formando um diamante com os polegares e indicadores. Mantenha o corpo reto e desça até quase tocar o peito no chão.'
-      }
-    ]
-  },
-  2: {
-    id: 2,
-    name: 'Treino B - Costas e Bíceps',
-    exercises: [
-      { 
-        id: 201, 
-        name: 'Puxada Alta Frontal', 
-        sets: 4, 
-        reps: '10-12',
-        completed: false,
-        instruction: 'Segure a barra com as palmas para frente e mãos mais abertas que a largura dos ombros. Puxe a barra até a clavícula, contraindo as costas.'
-      },
-      { 
-        id: 202, 
-        name: 'Remada Curvada', 
-        sets: 4, 
-        reps: '10-12',
-        completed: false,
-        instruction: 'Com joelhos levemente flexionados, incline o tronco para frente mantendo as costas retas. Puxe a barra até o abdômen, contraindo as escápulas.'
-      },
-      { 
-        id: 203, 
-        name: 'Remada Unilateral', 
-        sets: 3, 
-        reps: '10-12 (cada lado)',
-        completed: false,
-        instruction: 'Apoie um joelho e uma mão no banco. Com a outra mão, puxe o haltere até o quadril, mantendo o cotovelo junto ao corpo.'
-      },
-      { 
-        id: 204, 
-        name: 'Rosca Direta com Barra', 
-        sets: 3, 
-        reps: '10-12',
-        completed: false,
-        instruction: 'Em pé, segure a barra com as palmas viradas para cima. Flexione os cotovelos para levantar a barra, mantendo os cotovelos junto ao corpo.'
-      },
-      { 
-        id: 205, 
-        name: 'Rosca Martelo', 
-        sets: 3, 
-        reps: '12-15',
-        completed: false,
-        instruction: 'Segure os halteres com as palmas viradas para dentro. Flexione os cotovelos para levantar os halteres, mantendo as palmas viradas para dentro durante todo o movimento.'
-      },
-      { 
-        id: 206, 
-        name: 'Rosca Concentrada', 
-        sets: 3, 
-        reps: '12 (cada braço)',
-        completed: false,
-        instruction: 'Sentado, apoie o cotovelo na parte interna da coxa. Flexione o cotovelo para levantar o haltere, concentrando-se na contração do bíceps.'
-      }
-    ]
-  },
-  3: {
-    id: 3,
-    name: 'Treino C - Pernas',
-    exercises: [
-      { 
-        id: 301, 
-        name: 'Agachamento Livre', 
-        sets: 4, 
-        reps: '10-12',
-        completed: false,
-        instruction: 'Com a barra apoiada nos ombros, flexione os joelhos e quadril como se fosse sentar em uma cadeira, mantendo as costas retas. Desça até as coxas ficarem paralelas ao solo.'
-      },
-      { 
-        id: 302, 
-        name: 'Leg Press', 
-        sets: 4, 
-        reps: '12-15',
-        completed: false,
-        instruction: 'Sente-se na máquina com os pés na plataforma na largura dos ombros. Empurre a plataforma até estender as pernas e controle o retorno.'
-      },
-      { 
-        id: 303, 
-        name: 'Cadeira Extensora', 
-        sets: 3, 
-        reps: '12-15',
-        completed: false,
-        instruction: 'Ajuste o assento para que seus joelhos alinhem com o eixo da máquina. Estenda as pernas até ficarem retas e retorne controladamente.'
-      },
-      { 
-        id: 304, 
-        name: 'Mesa Flexora', 
-        sets: 3, 
-        reps: '12-15',
-        completed: false,
-        instruction: 'Deite na mesa flexora com os calcanhares abaixo dos rolos. Flexione os joelhos puxando os rolos em direção aos glúteos.'
-      },
-      { 
-        id: 305, 
-        name: 'Elevação de Panturrilha em Pé', 
-        sets: 4, 
-        reps: '15-20',
-        completed: false,
-        instruction: 'Em pé com as pontas dos pés em uma elevação, deixe os calcanhares descerem abaixo do nível do apoio e depois eleve-se até ficar na ponta dos pés.'
-      },
-      { 
-        id: 306, 
-        name: 'Abdominais', 
-        sets: 3, 
-        reps: '20',
-        completed: false,
-        instruction: 'Deite de costas com os joelhos dobrados. Coloque as mãos atrás da cabeça ou no peito e eleve os ombros do chão, contraindo os abdominais.'
-      }
-    ]
-  }
-};
+interface Exercise {
+  nome: string;
+  reps: string;
+  completed?: boolean;
+}
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const [workout, setWorkout] = useState<any>(null);
-  const [exercises, setExercises] = useState<any[]>([]);
+  
+  const [workoutDay, setWorkoutDay] = useState<string>('');
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedExercise, setSelectedExercise] = useState<any>(null);
-
+  const [isCompleted, setIsCompleted] = useState(false);
+  
   useEffect(() => {
-    if (!id) return;
-    
-    // Simulando carregamento de dados
-    setTimeout(() => {
-      const workoutData = workouts[Number(id) as keyof typeof workouts];
-      if (workoutData) {
-        setWorkout(workoutData);
-        setExercises(workoutData.exercises);
-      } else {
+    const loadWorkoutData = () => {
+      try {
+        setIsLoading(true);
+        
+        const userData = localStorage.getItem('traingo-user');
+        if (!userData || !id) {
+          navigate('/dashboard');
+          return;
+        }
+        
+        const user = JSON.parse(userData);
+        const workoutPlan = user.workoutPlan;
+        
+        if (!workoutPlan) {
+          toast({
+            title: "Plano não encontrado",
+            description: "Não foi possível encontrar seu plano de treino.",
+            variant: "destructive",
+          });
+          navigate('/dashboard');
+          return;
+        }
+        
+        // Encontrar o dia de treino baseado no ID
+        const dayNumber = parseInt(id);
+        const dayKey = `dia${dayNumber}`;
+        const dayExercises = workoutPlan.plan[dayKey];
+        
+        if (!dayExercises) {
+          toast({
+            title: "Treino não encontrado",
+            description: "Este treino não existe no seu plano atual.",
+            variant: "destructive",
+          });
+          navigate('/dashboard');
+          return;
+        }
+        
+        // Verificar se o treino está concluído
+        const completedWorkouts = user.workoutProgress?.completedWorkouts || [];
+        const completed = completedWorkouts.includes(dayNumber);
+        setIsCompleted(completed);
+        
+        // Preparar dados para exibição
+        setWorkoutDay(`Dia ${dayNumber}`);
+        
+        // Carregar status de conclusão individual dos exercícios (se salvo)
+        const savedExercises = user[`exercises_day${dayNumber}`] || dayExercises.map((ex: Exercise) => ({ 
+          ...ex, 
+          completed: false 
+        }));
+        
+        setExercises(savedExercises);
+      } catch (error) {
+        console.error('Erro ao carregar treino:', error);
         toast({
-          title: "Treino não encontrado",
-          description: "O treino que você procura não existe.",
+          title: "Erro ao carregar treino",
+          description: "Ocorreu um erro ao carregar os detalhes do treino.",
           variant: "destructive",
         });
         navigate('/dashboard');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 1000);
+    };
+    
+    loadWorkoutData();
   }, [id, navigate, toast]);
-
-  const handleToggleExerciseCompletion = (exerciseId: number) => {
-    setExercises(prev => 
-      prev.map(ex => 
-        ex.id === exerciseId 
-          ? { ...ex, completed: !ex.completed } 
-          : ex
-      )
+  
+  const handleExerciseToggle = (index: number) => {
+    const updatedExercises = exercises.map((exercise, i) => 
+      i === index ? { ...exercise, completed: !exercise.completed } : exercise
     );
-
+    
+    setExercises(updatedExercises);
+    
+    // Salvar estado dos exercícios
+    try {
+      const userData = localStorage.getItem('traingo-user');
+      if (userData && id) {
+        const user = JSON.parse(userData);
+        user[`exercises_day${id}`] = updatedExercises;
+        localStorage.setItem('traingo-user', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Erro ao salvar estado dos exercícios:', error);
+    }
+    
+    // Verificar se todos exercícios estão concluídos
+    const allCompleted = updatedExercises.every(ex => ex.completed);
+    if (allCompleted && !isCompleted) {
+      markWorkoutAsCompleted();
+    } else if (!allCompleted && isCompleted) {
+      markWorkoutAsPending();
+    }
+  };
+  
+  const markWorkoutAsCompleted = () => {
+    if (!id) return;
+    
+    setIsCompleted(true);
+    const progress = updateWorkoutProgress(parseInt(id), true);
+    
     toast({
-      title: "Exercício atualizado",
-      description: "Seu progresso foi salvo.",
+      title: "Treino concluído!",
+      description: "Parabéns! Seu progresso foi atualizado.",
     });
   };
-
-  const handleShowExerciseDetails = (exercise: any) => {
-    setSelectedExercise(exercise);
+  
+  const markWorkoutAsPending = () => {
+    if (!id) return;
+    
+    setIsCompleted(false);
+    const progress = updateWorkoutProgress(parseInt(id), false);
   };
-
-  const handleCloseDetails = () => {
-    setSelectedExercise(null);
+  
+  const handleToggleWorkout = () => {
+    if (!id) return;
+    
+    const newStatus = !isCompleted;
+    setIsCompleted(newStatus);
+    
+    // Atualizar status de todos os exercícios
+    const updatedExercises = exercises.map(exercise => ({ 
+      ...exercise, 
+      completed: newStatus 
+    }));
+    
+    setExercises(updatedExercises);
+    
+    // Salvar estado dos exercícios
+    try {
+      const userData = localStorage.getItem('traingo-user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        user[`exercises_day${id}`] = updatedExercises;
+        localStorage.setItem('traingo-user', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Erro ao salvar estado dos exercícios:', error);
+    }
+    
+    // Atualizar progresso
+    const progress = updateWorkoutProgress(parseInt(id), newStatus);
+    
+    toast({
+      title: newStatus ? "Treino concluído!" : "Treino desmarcado",
+      description: newStatus 
+        ? "Parabéns! Seu progresso foi atualizado."
+        : "O treino foi marcado como pendente.",
+    });
   };
-
-  const calculateCompletionPercentage = () => {
-    if (!exercises.length) return 0;
-    const completedCount = exercises.filter(ex => ex.completed).length;
-    return Math.round((completedCount / exercises.length) * 100);
-  };
-
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -239,142 +183,65 @@ const ExerciseDetail = () => {
       </div>
     );
   }
-
+  
   return (
     <div className="min-h-screen pb-16">
       {/* Header */}
       <header className="bg-traingo-gray p-6">
-        <button 
-          onClick={() => navigate('/dashboard')} 
-          className="flex items-center mb-4 text-gray-400 hover:text-white"
-        >
-          <ArrowLeft size={18} className="mr-1" /> Voltar
-        </button>
-        
-        <h1 className="text-2xl font-bold mb-2">{workout?.name}</h1>
-        
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-400">
-            {exercises.length} exercícios
-          </span>
-          
-          <div className="flex items-center">
-            <div className="h-2 w-20 bg-gray-800 rounded-full overflow-hidden mr-2">
-              <div 
-                className="h-full bg-traingo-primary rounded-full" 
-                style={{ width: `${calculateCompletionPercentage()}%` }} 
-              />
-            </div>
-            <span className="text-sm text-gray-400">
-              {calculateCompletionPercentage()}%
-            </span>
-          </div>
+        <div className="flex items-center mb-4">
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="mr-2"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="text-xl font-bold">{workoutDay}</h1>
         </div>
       </header>
-
-      {/* Exercise List */}
+      
+      {/* Exercises List */}
       <section className="p-6">
-        <h2 className="font-bold text-lg mb-4">Exercícios</h2>
-
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-bold text-lg">Exercícios</h2>
+          <button 
+            onClick={handleToggleWorkout}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              isCompleted 
+                ? 'bg-green-500/20 text-green-400' 
+                : 'bg-traingo-primary text-black'
+            }`}
+          >
+            {isCompleted ? 'Concluído' : 'Marcar todos'}
+          </button>
+        </div>
+        
         <div className="space-y-4">
           {exercises.map((exercise, index) => (
             <Card 
-              key={exercise.id} 
-              className={`transition-all ${exercise.completed ? 'opacity-75' : ''}`}
+              key={index} 
+              variant="outline" 
+              className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
             >
-              <div className="flex items-center">
-                <div className="w-8 h-8 flex items-center justify-center bg-traingo-gray rounded-full mr-4 text-lg font-bold">
-                  {index + 1}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{exercise.nome}</h3>
+                  <p className="text-gray-400 text-sm">{exercise.reps}</p>
                 </div>
-                
-                <div className="flex-1">
-                  <h3 className="font-bold">{exercise.name}</h3>
-                  <p className="text-sm text-gray-400">
-                    {exercise.sets} séries x {exercise.reps}
-                  </p>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button 
-                    className="p-2 rounded-full hover:bg-gray-800"
-                    onClick={() => handleShowExerciseDetails(exercise)}
-                  >
-                    <Play size={18} className="text-traingo-primary" />
-                  </button>
-                  
-                  <button 
-                    className={`p-2 rounded-full ${exercise.completed ? 'bg-green-500/20 text-green-500' : 'hover:bg-gray-800'}`}
-                    onClick={() => handleToggleExerciseCompletion(exercise.id)}
-                  >
-                    <Check size={18} />
-                  </button>
-                </div>
+                <button 
+                  onClick={() => handleExerciseToggle(index)}
+                  className="p-2"
+                >
+                  {exercise.completed ? (
+                    <CheckCircle className="text-green-500" size={24} />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full border-2 border-gray-700" />
+                  )}
+                </button>
               </div>
             </Card>
           ))}
         </div>
-
-        {/* Add Exercise Button (for Premium only) */}
-        <div className="mt-6">
-          <Button 
-            variant="ghost"
-            leftIcon={<Plus size={16} />}
-            onClick={() => {
-              toast({
-                title: "Recurso Premium",
-                description: "Faça o upgrade para adicionar exercícios personalizados.",
-              });
-              navigate('/upgrade');
-            }}
-            className="border border-dashed border-gray-700 w-full justify-center py-4"
-          >
-            Adicionar Exercício
-          </Button>
-        </div>
       </section>
-
-      {/* Exercise Detail Modal */}
-      {selectedExercise && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-traingo-gray rounded-2xl w-full max-w-md overflow-hidden">
-            <div className="aspect-video bg-black flex items-center justify-center">
-              <div className="text-6xl">{selectedExercise.id % 3 === 0 ? '🏋️' : selectedExercise.id % 2 === 0 ? '💪' : '🦵'}</div>
-            </div>
-            
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-1">{selectedExercise.name}</h3>
-              <p className="text-traingo-primary font-bold mb-4">
-                {selectedExercise.sets} séries x {selectedExercise.reps}
-              </p>
-              
-              <h4 className="font-bold mb-2">Como fazer:</h4>
-              <p className="text-gray-300 mb-6">
-                {selectedExercise.instruction}
-              </p>
-              
-              <div className="flex space-x-3">
-                <Button 
-                  variant="ghost" 
-                  className="flex-1"
-                  onClick={handleCloseDetails}
-                >
-                  Fechar
-                </Button>
-                <Button 
-                  className="flex-1"
-                  onClick={() => {
-                    handleToggleExerciseCompletion(selectedExercise.id);
-                    handleCloseDetails();
-                  }}
-                  leftIcon={<Check size={18} />}
-                >
-                  {selectedExercise.completed ? 'Não concluído' : 'Concluído'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
