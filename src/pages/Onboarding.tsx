@@ -5,7 +5,9 @@ import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-
+import WorkoutPlanDisplay from '@/components/WorkoutPlanDisplay';
+import { QuizAnswers, findBestWorkoutPlan, generatePersonalizedMessage } from '@/utils/workoutRecommendation';
+import { WorkoutPlan } from '@/data/workoutPlans';
 
 // Define quiz questions
 const quizQuestions = [
@@ -102,6 +104,9 @@ const Onboarding = () => {
     password: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
+  const [personalizedMessage, setPersonalizedMessage] = useState('');
+  const [showResults, setShowResults] = useState(false);
 
   const handleOptionSelect = (questionId: string, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -134,12 +139,20 @@ const Onboarding = () => {
 
       localStorage.setItem('traingo-user', JSON.stringify(userData));
 
+      // Encontrar o plano de treino mais adequado
+      const quizAnswers = answers as QuizAnswers;
+      const recommendedPlan = findBestWorkoutPlan(quizAnswers);
+      const message = generatePersonalizedMessage(quizAnswers, recommendedPlan);
+      
+      setWorkoutPlan(recommendedPlan);
+      setPersonalizedMessage(message);
+      
       toast({
         title: "Cadastro concluído!",
         description: "Seu plano de treino foi criado com sucesso.",
       });
 
-      navigate('/dashboard');
+      setShowResults(true);
     } catch (error) {
       toast({
         title: "Erro no cadastro",
@@ -151,39 +164,69 @@ const Onboarding = () => {
     }
   };
 
+  const goToDashboard = () => {
+    navigate('/dashboard');
+  }
+
   const isLastQuestion = currentStep === quizQuestions.length;
   const currentQuestion = quizQuestions[currentStep];
+
+  if (showResults && workoutPlan) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <header className="p-4 flex justify-between items-center">
+          <Logo size="small" />
+        </header>
+        
+        <div className="flex-1 flex flex-col justify-center px-4 py-8 max-w-4xl mx-auto w-full">
+          <WorkoutPlanDisplay 
+            plan={workoutPlan}
+            personalizedMessage={personalizedMessage}
+          />
+          
+          <div className="mt-10 text-center">
+            <Button 
+              onClick={goToDashboard}
+              rightIcon={<ArrowRight />}
+              fullWidth
+            >
+              Ir para o Dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <header className="p-4 flex justify-between items-center">
-  <Logo size="small" />
-  <div className="flex space-x-2 items-center">
-    {currentStep > 0 && !isLastQuestion && (
-      <button
-        onClick={() => setCurrentStep(prev => prev - 1)}
-        className="p-2 rounded-full hover:bg-gray-800"
-      >
-        <ArrowLeft size={20} />
-      </button>
-    )}
-  </div>
-</header>
+        <Logo size="small" />
+        <div className="flex space-x-2 items-center">
+          {currentStep > 0 && !isLastQuestion && (
+            <button
+              onClick={() => setCurrentStep(prev => prev - 1)}
+              className="p-2 rounded-full hover:bg-gray-800"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
+        </div>
+      </header>
 
-{/* Progress bar */}
-<div className="w-full px-4 mt-2">
-  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-    <div
-      className="bg-traingo-primary h-2 transition-all duration-300"
-      style={{ width: `${(currentStep / quizQuestions.length) * 100}%` }}
-    />
-  </div>
-  <div className="text-sm text-gray-400 text-center mt-2">
-    Etapa {Math.min(currentStep + 1, quizQuestions.length)} de {quizQuestions.length} (
-    {Math.round((currentStep / quizQuestions.length) * 100)}%)
-  </div>
-</div>
-
+      {/* Progress bar */}
+      <div className="w-full px-4 mt-2">
+        <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+          <div
+            className="bg-traingo-primary h-2 transition-all duration-300"
+            style={{ width: `${(currentStep / quizQuestions.length) * 100}%` }}
+          />
+        </div>
+        <div className="text-sm text-gray-400 text-center mt-2">
+          Etapa {Math.min(currentStep + 1, quizQuestions.length)} de {quizQuestions.length} (
+          {Math.round((currentStep / quizQuestions.length) * 100)}%)
+        </div>
+      </div>
 
       <div className="flex-1 flex flex-col justify-center px-4 py-8">
         {!isLastQuestion ? (
