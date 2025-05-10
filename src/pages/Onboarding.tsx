@@ -13,7 +13,7 @@ const quizQuestions = [
     id: 'objective',
     question: 'Qual é o seu principal objetivo com os treinos?',
     options: [
-      { value: 'lose_fat', label: 'Perder gordura corporal', image: '🔥', image_url: 'https://images.unsplash.com/photo-1571019613914-85f342c1d1f1?fit=crop&w=400&h=250' },
+      { value: 'lose_fat', label: 'Perder gordura corporal', image_url: 'https://images.unsplash.com/photo-1571019613914-85f342c1d1f1?fit=crop&w=400&h=250' },
       { value: 'gain_muscle', label: 'Ganhar massa muscular', image: '💪', image_url: 'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?fit=crop&w=400&h=250' },
       { value: 'health_energy', label: 'Melhorar disposição e saúde', image: '⚡', image_url: 'https://images.unsplash.com/photo-1605296867429-8e08b7eb3f36?fit=crop&w=400&h=250' },
       { value: 'create_habit', label: 'Criar uma rotina consistente', image: '🧠', image_url: 'https://images.unsplash.com/photo-1518611012118-f0c5f24e2c5a?fit=crop&w=400&h=250' },
