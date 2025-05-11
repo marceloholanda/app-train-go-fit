@@ -37,7 +37,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     >
       {/* GIF para todos os usuários */}
       {exercise.gif_url && (
-        <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
+        <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md">
           <img 
             src={exercise.gif_url} 
             alt={`GIF do exercício ${exercise.nome}`}
@@ -50,6 +50,13 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
         <div>
           <h3 className="font-medium">{exercise.nome}</h3>
           <p className="text-gray-400 text-sm">{exercise.reps}</p>
+          
+          {/* Aviso de vídeo premium apenas para usuários free */}
+          {!isPremium && (
+            <p className="text-xs text-yellow-400 mt-2 italic">
+              Vídeo de demonstração disponível apenas no plano PRO.
+            </p>
+          )}
         </div>
         <div className="flex items-center space-x-2">
           {/* Botão de Vídeo - Premium */}

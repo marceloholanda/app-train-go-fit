@@ -3,6 +3,7 @@ import { WorkoutPlan } from '@/types/workout';
 import { QuizAnswers } from './types';
 import { mapEnvironment } from './environmentMapping';
 import { adaptWorkoutPlanToEnvironment } from './planAdapter';
+import { isPremiumUser } from '@/utils/userUtils';
 
 // Import workout plans
 import { muscleBeginnerGym } from '@/data/workoutPlans/muscleBeginnerGym';
@@ -171,68 +172,107 @@ export const adaptPlanToDaysPerWeek = (
   };
   
   // Determine muscle group split based on environment and days per week
+  let rawPlan: Record<string, any> = {};
+  
   if (environment === 'gym') {
     switch(daysPerWeek) {
       case 1:
-        adaptedPlan.plan = createGymSplitOneDayPlan(objective);
+        rawPlan = createGymSplitOneDayPlan(objective);
         break;
       case 2:
-        adaptedPlan.plan = createGymSplitTwoDaysPlan(objective);
+        rawPlan = createGymSplitTwoDaysPlan(objective);
         break;
       case 3:
-        adaptedPlan.plan = createGymSplitThreeDaysPlan(objective);
+        rawPlan = createGymSplitThreeDaysPlan(objective);
         break;
       case 4:
-        adaptedPlan.plan = createGymSplitFourDaysPlan(objective);
+        rawPlan = createGymSplitFourDaysPlan(objective);
         break;
       case 5:
       case 6:
       case 7:
-        adaptedPlan.plan = createGymSplitFivePlusDaysPlan(objective, daysPerWeek);
+        rawPlan = createGymSplitFivePlusDaysPlan(objective, daysPerWeek);
         break;
       default:
-        adaptedPlan.plan = createGymSplitThreeDaysPlan(objective);
+        rawPlan = createGymSplitThreeDaysPlan(objective);
     }
   } else if (environment === 'home') {
     switch(daysPerWeek) {
       case 1:
-        adaptedPlan.plan = createHomeSplitOneDayPlan(objective);
+        rawPlan = createHomeSplitOneDayPlan(objective);
         break;
       case 2:
-        adaptedPlan.plan = createHomeSplitTwoDaysPlan(objective);
+        rawPlan = createHomeSplitTwoDaysPlan(objective);
         break;
       case 3:
-        adaptedPlan.plan = createHomeSplitThreeDaysPlan(objective);
+        rawPlan = createHomeSplitThreeDaysPlan(objective);
         break;
       case 4:
       case 5:
       case 6:
       case 7:
-        adaptedPlan.plan = createHomeSplitFourPlusDaysPlan(objective, daysPerWeek);
+        rawPlan = createHomeSplitFourPlusDaysPlan(objective, daysPerWeek);
         break;
       default:
-        adaptedPlan.plan = createHomeSplitThreeDaysPlan(objective);
+        rawPlan = createHomeSplitThreeDaysPlan(objective);
     }
   } else { // outdoor
     switch(daysPerWeek) {
       case 1:
-        adaptedPlan.plan = createOutdoorSplitOneDayPlan(objective);
+        rawPlan = createOutdoorSplitOneDayPlan(objective);
         break;
       case 2:
-        adaptedPlan.plan = createOutdoorSplitTwoDaysPlan(objective);
+        rawPlan = createOutdoorSplitTwoDaysPlan(objective);
         break;
       case 3:
       case 4:
       case 5:
       case 6:
       case 7:
-        adaptedPlan.plan = createOutdoorSplitThreePlusDaysPlan(objective, daysPerWeek);
+        rawPlan = createOutdoorSplitThreePlusDaysPlan(objective, daysPerWeek);
         break;
       default:
-        adaptedPlan.plan = createOutdoorSplitTwoDaysPlan(objective);
+        rawPlan = createOutdoorSplitTwoDaysPlan(objective);
     }
   }
   
+  // Aplicar limitações com base no plano do usuário
+  const isPremium = isPremiumUser();
+  const processedPlan: Record<string, any> = {};
+  
+  // Determinar limite de exercícios com base no plano e nível
+  let exerciseLimit = 4; // Padrão para usuários Free
+  
+  if (isPremium) {
+    // Definir limite com base no nível para usuários premium
+    switch(level) {
+      case 'beginner':
+        exerciseLimit = 6;
+        break;
+      case 'intermediate':
+        exerciseLimit = 7;
+        break;
+      case 'advanced':
+        exerciseLimit = 8;
+        break;
+      default:
+        exerciseLimit = 6;
+    }
+  }
+  
+  // Aplicar o limite a cada dia do plano
+  Object.keys(rawPlan).forEach(day => {
+    // Adicionar URLs de GIFs para os exercícios
+    const exercisesWithGifs = rawPlan[day].map((ex: any) => ({
+      ...ex,
+      gif_url: `https://source.unsplash.com/random/400x300/?${encodeURIComponent(ex.nome.replace(' ', '-'))}&fitness`
+    }));
+    
+    // Não limitar durante a geração inicial, deixar para o front-end aplicar
+    processedPlan[day] = exercisesWithGifs;
+  });
+  
+  adaptedPlan.plan = processedPlan;
   return adaptedPlan;
 };
 

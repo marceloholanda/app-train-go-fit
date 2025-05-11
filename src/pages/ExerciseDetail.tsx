@@ -31,8 +31,38 @@ const ExerciseDetail = () => {
     isCompleted,
     setExercises,
     handleExerciseToggle,
-    handleToggleWorkout
+    handleToggleWorkout,
+    userLevel
   } = useWorkoutData(id);
+  
+  // Limitar o número de exercícios com base no plano e nível
+  const [visibleExercises, setVisibleExercises] = useState<Exercise[]>([]);
+  
+  useEffect(() => {
+    if (exercises.length) {
+      let limit = 4; // Limite padrão para plano Free
+      
+      if (isPremium) {
+        // Limites para usuários premium com base no nível
+        switch(userLevel) {
+          case 'beginner':
+            limit = 6;
+            break;
+          case 'intermediate':
+            limit = 7;
+            break;
+          case 'advanced':
+            limit = 8;
+            break;
+          default:
+            limit = 6;
+        }
+      }
+      
+      // Aplicar limitação
+      setVisibleExercises(exercises.slice(0, limit));
+    }
+  }, [exercises, isPremium, userLevel]);
 
   // Revalidate premium status when component mounts
   useEffect(() => {
@@ -145,7 +175,7 @@ const ExerciseDetail = () => {
         </div>
         
         <div className="space-y-4">
-          {exercises.map((exercise, index) => (
+          {visibleExercises.map((exercise, index) => (
             <ExerciseCard
               key={index}
               exercise={exercise}
@@ -157,6 +187,16 @@ const ExerciseDetail = () => {
             />
           ))}
         </div>
+
+        {/* Mensagem quando há exercícios limitados para usuários free */}
+        {!isPremium && exercises.length > visibleExercises.length && (
+          <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-700/30 rounded-lg">
+            <p className="text-sm text-yellow-400 text-center">
+              🔒 O plano gratuito exibe apenas {visibleExercises.length} exercícios. 
+              Faça upgrade para o plano PRO para acessar todos os {exercises.length} exercícios.
+            </p>
+          </div>
+        )}
         
         {/* Add Exercise Button - Premium Only */}
         {isPremium && (
@@ -182,8 +222,8 @@ const ExerciseDetail = () => {
           <ExerciseVideoModal
             isOpen={isVideoModalOpen}
             onClose={() => setIsVideoModalOpen(false)}
-            exerciseName={exercises[selectedExerciseIndex]?.nome || ""}
-            videoUrl={exercises[selectedExerciseIndex]?.video_url || ""}
+            exerciseName={visibleExercises[selectedExerciseIndex]?.nome || ""}
+            videoUrl={visibleExercises[selectedExerciseIndex]?.video_url || ""}
             isPremium={isPremium}
           />
 
@@ -191,8 +231,8 @@ const ExerciseDetail = () => {
             isOpen={isReplaceModalOpen}
             onClose={() => setIsReplaceModalOpen(false)}
             isPremium={isPremium}
-            currentExercise={exercises[selectedExerciseIndex]}
-            alternativeExercises={exercises[selectedExerciseIndex]?.substituicoes || []}
+            currentExercise={visibleExercises[selectedExerciseIndex]}
+            alternativeExercises={visibleExercises[selectedExerciseIndex]?.substituicoes || []}
             onReplaceExercise={handleReplaceExercise}
           />
         </>
