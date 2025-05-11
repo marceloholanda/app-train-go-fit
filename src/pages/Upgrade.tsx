@@ -22,7 +22,7 @@ const Upgrade = () => {
       const user = localStorage.getItem('traingo-user');
       if (user) {
         const userData = JSON.parse(user);
-        userData.isPremium = true;
+        userData.plan = 'premium'; // Mudança de isPremium para plan='premium' para compatibilidade com isPremiumUser()
         localStorage.setItem('traingo-user', JSON.stringify(userData));
       }
 
@@ -31,7 +31,7 @@ const Upgrade = () => {
         description: "Bem-vindo ao plano PRO do TrainGO.",
       });
 
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true }); // Força navegação completa para recarregar o estado
     } catch (error) {
       toast({
         title: "Erro no pagamento",

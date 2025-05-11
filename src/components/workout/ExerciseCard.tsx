@@ -10,8 +10,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import ExerciseVideoModal from './ExerciseVideoModal';
-import ExerciseReplaceModal from './ExerciseReplaceModal';
 import { isPremiumUser } from '@/utils/userUtils';
 
 interface ExerciseCardProps {
@@ -87,7 +85,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                   onClick={() => onOpenReplaceModal(index)}
                   className="h-8 w-8 rounded-full"
                 >
-                  <Replace size={16} />
+                  {isPremium ? <Replace size={16} /> : <Lock size={16} className="text-gray-400" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>

@@ -13,7 +13,7 @@ import { useWorkoutData } from '@/hooks/useWorkoutData';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const isPremium = isPremiumUser();
+  const [isPremium, setIsPremium] = useState(isPremiumUser());
   
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
@@ -30,12 +30,29 @@ const ExerciseDetail = () => {
     handleToggleWorkout
   } = useWorkoutData(id);
 
+  // Revalidate premium status when component mounts
   useEffect(() => {
-    // Mostrar o modal de boas-vindas se o usuário é premium e não viu a mensagem
-    if (isPremium && !hasSeenPremiumWelcome()) {
-      setShowPremiumWelcome(true);
-    }
-  }, [isPremium]);
+    const checkPremiumStatus = () => {
+      const premiumStatus = isPremiumUser();
+      setIsPremium(premiumStatus);
+      
+      // Mostrar o modal de boas-vindas se o usuário é premium e não viu a mensagem
+      if (premiumStatus && !hasSeenPremiumWelcome()) {
+        setShowPremiumWelcome(true);
+      }
+    };
+    
+    // Verificar status inicial
+    checkPremiumStatus();
+    
+    // Configurar evento de storage para detectar mudanças no localStorage
+    const handleStorageChange = () => {
+      checkPremiumStatus();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleClosePremiumWelcome = () => {
     setShowPremiumWelcome(false);
