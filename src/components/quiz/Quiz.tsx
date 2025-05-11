@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import QuizQuestion from './QuizQuestion';
 import { ArrowLeft } from 'lucide-react';
 import { QuizAnswers } from '@/utils/workoutRecommendation';

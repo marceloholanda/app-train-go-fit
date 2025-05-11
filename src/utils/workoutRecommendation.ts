@@ -10,6 +10,8 @@ export interface QuizAnswers {
   age: string;
   weight: string;
   height: string;
+  motivation_type: string;
+  training_barrier: string;
 }
 
 // Função para encontrar o plano de treino mais adequado com base nas respostas
@@ -30,7 +32,7 @@ export const findBestWorkoutPlan = (answers: QuizAnswers) => {
 
 // Gerar mensagem personalizada para o usuário
 export const generatePersonalizedMessage = (answers: QuizAnswers, plan: any) => {
-  const { objective, level, days_per_week } = answers;
+  const { objective, level, days_per_week, motivation_type, training_barrier } = answers;
   
   let message = '';
   
@@ -52,7 +54,31 @@ export const generatePersonalizedMessage = (answers: QuizAnswers, plan: any) => 
     message += 'para praticantes avançados, ';
   }
   
-  message += `com treinos ${days_per_week} vezes por semana. Siga este plano consistentemente para alcançar seus objetivos!`;
+  message += `com treinos ${days_per_week} vezes por semana. `;
+  
+  // Adiciona mensagem personalizada baseada na motivação do usuário
+  if (motivation_type === 'fast_results') {
+    message += 'Seu plano foi otimizado para resultados visíveis em curto prazo. ';
+  } else if (motivation_type === 'discipline') {
+    message += 'Seu plano foi estruturado para criar uma rotina consistente. ';
+  } else if (motivation_type === 'fun') {
+    message += 'Incluímos exercícios variados para tornar seus treinos mais divertidos. ';
+  } else if (motivation_type === 'challenge') {
+    message += 'Preparamos desafios progressivos para manter você estimulado. ';
+  }
+  
+  // Adiciona mensagem baseada na barreira de treino do usuário
+  if (training_barrier === 'time') {
+    message += 'Os treinos são compactos e eficientes para se adequar à sua agenda ocupada. ';
+  } else if (training_barrier === 'motivation') {
+    message += 'Recomendamos definir metas de curto prazo para manter sua motivação alta. ';
+  } else if (training_barrier === 'discipline') {
+    message += 'Sugerimos criar alertas para seus horários de treino. ';
+  } else if (training_barrier === 'pain') {
+    message += 'Incluímos exercícios de baixo impacto e alternativas para maior conforto. ';
+  }
+  
+  message += 'Siga este plano consistentemente para alcançar seus objetivos!';
   
   return message;
 };

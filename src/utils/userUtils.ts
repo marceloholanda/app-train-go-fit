@@ -1,4 +1,3 @@
-
 export const isPremiumUser = (): boolean => {
   try {
     const userPlan = localStorage.getItem("traingo-plano") || "";
@@ -83,5 +82,27 @@ export const ageRangeToNumber = (range: string): number => {
     case '45_59': return 52;
     case '60_plus': return 65;
     default: return 30;
+  }
+};
+
+// Get numeric representations of motivation type
+export const getMotivationTypeLabel = (motivationType: string): string => {
+  switch(motivationType) {
+    case 'fast_results': return "Resultados rápidos";
+    case 'discipline': return "Rotina constante";
+    case 'fun': return "Diversão ao treinar";
+    case 'challenge': return "Desafios físicos";
+    default: return "Não definido";
+  }
+};
+
+// Get numeric representations of training barriers
+export const getTrainingBarrierLabel = (barrier: string): string => {
+  switch(barrier) {
+    case 'time': return "Falta de tempo";
+    case 'motivation': return "Falta de motivação";
+    case 'discipline': return "Falta de disciplina";
+    case 'pain': return "Desconforto físico";
+    default: return "Não definido";
   }
 };

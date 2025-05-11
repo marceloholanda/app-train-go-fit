@@ -13,6 +13,35 @@ export const quizQuestions: QuizQuestionType[] = [
     ]
   },
   {
+    id: 'environment',
+    question: 'Onde você pretende treinar?',
+    options: [
+      { value: 'gym', label: 'Academia', image: '🏋️' },
+      { value: 'home_with_equipment', label: 'Casa com equipamentos', image: '🏠' },
+      { value: 'home_no_equipment', label: 'Casa sem equipamentos', image: '🧘' },
+      { value: 'outdoor', label: 'Ao ar livre', image: '🏞️' }
+    ]
+  },
+  {
+    id: 'level',
+    question: 'Como você se define em relação aos exercícios?',
+    options: [
+      { value: 'beginner', label: 'Iniciante', image: '🌱' },
+      { value: 'intermediate', label: 'Intermediário', image: '🌿' },
+      { value: 'advanced', label: 'Avançado', image: '🌳' }
+    ]
+  },
+  {
+    id: 'days_per_week',
+    question: 'Quantos dias por semana você planeja treinar?',
+    options: [
+      { value: '2', label: '2 dias', image: '✌️' },
+      { value: '3', label: '3 dias', image: '👌' },
+      { value: '4', label: '4 dias', image: '🖖' },
+      { value: '5+', label: '5 ou mais dias', image: '🖐️' }
+    ]
+  },
+  {
     id: 'age',
     question: 'Qual sua idade?',
     options: [
@@ -45,32 +74,23 @@ export const quizQuestions: QuizQuestionType[] = [
     ]
   },
   {
-    id: 'level',
-    question: 'Como você se define em relação aos exercícios?',
+    id: 'motivation_type',
+    question: 'Qual dessas frases mais te representa?',
     options: [
-      { value: 'beginner', label: 'Iniciante', image: '🌱' },
-      { value: 'intermediate', label: 'Intermediário', image: '🌿' },
-      { value: 'advanced', label: 'Avançado', image: '🌳' }
+      { value: 'fast_results', label: 'Quero ver resultados rápidos', image: '🚀' },
+      { value: 'discipline', label: 'Prefiro seguir uma rotina constante', image: '📅' },
+      { value: 'fun', label: 'Quero me divertir enquanto treino', image: '😄' },
+      { value: 'challenge', label: 'Gosto de desafios físicos', image: '🔥' }
     ]
   },
   {
-    id: 'days_per_week',
-    question: 'Quantos dias por semana você planeja treinar?',
+    id: 'training_barrier',
+    question: 'O que mais te atrapalha em manter uma rotina de treino?',
     options: [
-      { value: '2', label: '2 dias', image: '✌️' },
-      { value: '3', label: '3 dias', image: '👌' },
-      { value: '4', label: '4 dias', image: '🖖' },
-      { value: '5+', label: '5 ou mais dias', image: '🖐️' }
-    ]
-  },
-  {
-    id: 'environment',
-    question: 'Onde você pretende treinar?',
-    options: [
-      { value: 'gym', label: 'Academia', image: '🏋️' },
-      { value: 'home_with_equipment', label: 'Casa com equipamentos', image: '🏠' },
-      { value: 'home_no_equipment', label: 'Casa sem equipamentos', image: '🧘' },
-      { value: 'outdoor', label: 'Ao ar livre', image: '🏞️' }
+      { value: 'time', label: 'Falta de tempo', image: '⏰' },
+      { value: 'motivation', label: 'Falta de motivação', image: '😴' },
+      { value: 'discipline', label: 'Falta de disciplina', image: '🔁' },
+      { value: 'pain', label: 'Desconforto físico', image: '😣' }
     ]
   }
 ];
