@@ -12,7 +12,7 @@ export const getWorkoutStreaks = (): { current: number; longest: number } => {
     
     // Obtém todas as datas de treino únicas e as ordena
     const uniqueDatesSet = new Set(user.workoutHistory.map((workout: {date: string}) => workout.date));
-    const uniqueDates = Array.from(uniqueDatesSet).sort();
+    const uniqueDates = Array.from(uniqueDatesSet).sort() as string[];
     
     if (uniqueDates.length === 0) return { current: 0, longest: 0 };
     
@@ -160,4 +160,3 @@ const getWorkoutDaysOfWeek = (daysPerWeek: number): number[] => {
       return [1, 3, 5]; // Padrão: 3 dias (segunda, quarta, sexta)
   }
 };
-
