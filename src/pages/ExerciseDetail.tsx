@@ -1,26 +1,35 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Play, Replace } from 'lucide-react';
 import Card from '@/components/Card';
 import { useToast } from '@/hooks/use-toast';
 import { updateWorkoutProgress } from '@/utils/workoutUtils';
-
-interface Exercise {
-  nome: string;
-  reps: string;
-  completed?: boolean;
-}
+import { isPremiumUser } from '@/utils/userUtils';
+import { Exercise } from '@/types/workout';
+import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
+import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isPremium = isPremiumUser();
   
   const [workoutDay, setWorkoutDay] = useState<string>('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
+  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(-1);
   
   useEffect(() => {
     const loadWorkoutData = () => {
@@ -175,6 +184,47 @@ const ExerciseDetail = () => {
         : "O treino foi marcado como pendente.",
     });
   };
+
+  const handleOpenVideoModal = (exerciseIndex: number) => {
+    if (isPremium && exercises[exerciseIndex]?.video_url) {
+      setSelectedExerciseIndex(exerciseIndex);
+      setIsVideoModalOpen(true);
+    }
+  };
+
+  const handleOpenReplaceModal = (exerciseIndex: number) => {
+    setSelectedExerciseIndex(exerciseIndex);
+    setIsReplaceModalOpen(true);
+  };
+
+  const handleReplaceExercise = (newExercise: Exercise) => {
+    if (selectedExerciseIndex === -1) return;
+
+    const updatedExercises = [...exercises];
+    updatedExercises[selectedExerciseIndex] = {
+      ...newExercise,
+      completed: updatedExercises[selectedExerciseIndex].completed
+    };
+    
+    setExercises(updatedExercises);
+    
+    // Salvar estado dos exercícios
+    try {
+      const userData = localStorage.getItem('traingo-user');
+      if (userData && id) {
+        const user = JSON.parse(userData);
+        user[`exercises_day${id}`] = updatedExercises;
+        localStorage.setItem('traingo-user', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Erro ao salvar exercício substituído:', error);
+    }
+
+    toast({
+      title: "Exercício substituído",
+      description: "O exercício foi atualizado com sucesso.",
+    });
+  };
   
   if (isLoading) {
     return (
@@ -222,26 +272,104 @@ const ExerciseDetail = () => {
               variant="outline" 
               className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
             >
+              {/* GIF para todos os usuários */}
+              {exercise.gif_url && (
+                <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
+                  <img 
+                    src={exercise.gif_url} 
+                    alt={exercise.nome}
+                    className="w-full h-full object-contain" 
+                  />
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">{exercise.nome}</h3>
                   <p className="text-gray-400 text-sm">{exercise.reps}</p>
                 </div>
-                <button 
-                  onClick={() => handleExerciseToggle(index)}
-                  className="p-2"
-                >
-                  {exercise.completed ? (
-                    <CheckCircle className="text-green-500" size={24} />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full border-2 border-gray-700" />
-                  )}
-                </button>
+                <div className="flex items-center space-x-2">
+                  {/* Botão de Vídeo - Premium */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={!isPremium && !exercise.video_url}
+                          onClick={() => handleOpenVideoModal(index)}
+                          className="h-8 w-8 rounded-full"
+                        >
+                          {isPremium ? (
+                            <Play size={16} />
+                          ) : (
+                            <span className="text-gray-400">🔒</span>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isPremium ? "Ver vídeo" : "Disponível no plano Premium"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {/* Botão Substituir Exercício */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenReplaceModal(index)}
+                          className="h-8 w-8 rounded-full"
+                        >
+                          <Replace size={16} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isPremium ? "Substituir exercício" : "Opção Premium: Substituir"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {/* Botão de conclusão do exercício */}
+                  <button 
+                    onClick={() => handleExerciseToggle(index)}
+                    className="p-2"
+                  >
+                    {exercise.completed ? (
+                      <CheckCircle className="text-green-500" size={24} />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full border-2 border-gray-700" />
+                    )}
+                  </button>
+                </div>
               </div>
             </Card>
           ))}
         </div>
       </section>
+
+      {/* Modals */}
+      {selectedExerciseIndex !== -1 && (
+        <>
+          <ExerciseVideoModal
+            isOpen={isVideoModalOpen}
+            onClose={() => setIsVideoModalOpen(false)}
+            exerciseName={exercises[selectedExerciseIndex]?.nome || ""}
+            videoUrl={exercises[selectedExerciseIndex]?.video_url || ""}
+          />
+
+          <ExerciseReplaceModal
+            isOpen={isReplaceModalOpen}
+            onClose={() => setIsReplaceModalOpen(false)}
+            isPremium={isPremium}
+            currentExercise={exercises[selectedExerciseIndex]}
+            alternativeExercises={exercises[selectedExerciseIndex]?.substituicoes || []}
+            onReplaceExercise={handleReplaceExercise}
+          />
+        </>
+      )}
     </div>
   );
 };

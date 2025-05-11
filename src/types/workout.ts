@@ -2,6 +2,9 @@
 export interface Exercise {
   nome: string;
   reps: string;
+  gif_url?: string;
+  video_url?: string;
+  substituicoes?: Exercise[];
 }
 
 export interface WorkoutPlan {
