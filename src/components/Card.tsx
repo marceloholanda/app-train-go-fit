@@ -16,10 +16,10 @@ export const Card: React.FC<CardProps> = ({
   variant = 'default'
 }) => {
   const variantClasses = {
-    default: 'bg-white text-black',
+    default: 'bg-traingo-gray text-white',
     outline: 'bg-transparent border border-gray-700',
     filled: 'bg-traingo-primary/10',
-    exercise: 'bg-white text-black border border-gray-200'
+    exercise: 'bg-traingo-gray text-white border border-gray-700'
   };
 
   return (
