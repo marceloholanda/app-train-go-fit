@@ -2,9 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
-import { Edit2, Award, ChevronRight } from 'lucide-react';
+import { Edit2, Award, ChevronRight, Calendar, CheckCircle } from 'lucide-react';
 import Card from '@/components/Card';
 import { useToast } from "@/hooks/use-toast";
+import { getWorkoutDatesForMonth, getWorkoutsThisWeek, getAchievements } from '@/utils/workoutUtils';
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 // Mapeia os valores do quiz para textos legíveis
 const objectiveMap: Record<string, string> = {
@@ -34,6 +38,13 @@ const environmentMap: Record<string, string> = {
   outdoor: 'Ar livre'
 };
 
+const achievementIcons: Record<string, React.ReactNode> = {
+  bronze: '🥉',
+  silver: '🥈',
+  gold: '🥇',
+  platinum: '🔥'
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,6 +55,10 @@ const Profile = () => {
     name: '',
     objective: ''
   });
+  const [date, setDate] = useState<Date>(new Date());
+  const [workoutDates, setWorkoutDates] = useState<string[]>([]);
+  const [weekProgress, setWeekProgress] = useState({ completed: 0, total: 0 });
+  const [achievements, setAchievements] = useState<{id: string, name: string, description: string, unlocked: boolean}[]>([]);
 
   useEffect(() => {
     // Carregar dados do usuário
@@ -57,6 +72,17 @@ const Profile = () => {
             name: parsedUser.name || '',
             objective: parsedUser.profile?.objective || ''
           });
+          
+          // Carregar dados do calendário
+          refreshCalendarData(new Date());
+          
+          // Carregar dados de progresso semanal
+          const weekStats = getWorkoutsThisWeek();
+          setWeekProgress(weekStats);
+          
+          // Carregar conquistas
+          const achievementsData = getAchievements();
+          setAchievements(achievementsData);
         } else {
           navigate('/login');
         }
@@ -74,6 +100,18 @@ const Profile = () => {
 
     loadUserData();
   }, [navigate, toast]);
+
+  const refreshCalendarData = (selectedDate: Date) => {
+    const month = selectedDate.getMonth();
+    const year = selectedDate.getFullYear();
+    const dates = getWorkoutDatesForMonth(month, year);
+    setWorkoutDates(dates);
+  };
+
+  const handleMonthChange = (newDate: Date) => {
+    setDate(newDate);
+    refreshCalendarData(newDate);
+  };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -194,7 +232,7 @@ const Profile = () => {
             </Button>
           </div>
 
-          <Card className="mb-4">
+          <Card className="mb-6">
             <div className="space-y-3">
               <div>
                 <h3 className="text-sm text-gray-400 mb-1">Objetivo Principal</h3>
@@ -218,22 +256,72 @@ const Profile = () => {
             </div>
           </Card>
 
-          {/* Achievements section placeholder */}
+          {/* Workout Calendar Section */}
+          <div className="mt-8 mb-6">
+            <div className="flex items-center mb-4">
+              <Calendar className="text-traingo-primary mr-2" size={20} />
+              <h2 className="font-bold text-lg">Histórico de Treinos</h2>
+            </div>
+
+            <Card className="mb-4">
+              <div className="text-center mb-3">
+                <p className="text-sm text-gray-400">
+                  Você treinou <span className="text-traingo-primary font-bold">{weekProgress.completed}</span> de {weekProgress.total} dias esta semana
+                </p>
+              </div>
+              
+              <div className="flex justify-center">
+                <CalendarComponent
+                  mode="single"
+                  selected={date}
+                  onMonthChange={handleMonthChange}
+                  className="p-3 pointer-events-auto"
+                  modifiers={{
+                    workout: workoutDates.map(date => new Date(date))
+                  }}
+                  modifiersClassNames={{
+                    workout: "bg-traingo-primary text-black"
+                  }}
+                />
+              </div>
+            </Card>
+          </div>
+
+          {/* Achievements section */}
           <div className="mt-8">
             <div className="flex items-center mb-4">
               <Award className="text-traingo-primary mr-2" size={20} />
               <h2 className="font-bold text-lg">Conquistas</h2>
             </div>
             
-            <Card variant="outline" className="text-center py-8">
-              <p className="text-gray-400 mb-4">Complete treinos para desbloquear conquistas</p>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-              >
-                Ver meus treinos
-              </Button>
+            <Card className="mb-4">
+              <div className="grid grid-cols-2 gap-4">
+                {achievements.map((achievement) => (
+                  <div
+                    key={achievement.id}
+                    className={cn(
+                      "flex flex-col items-center p-4 rounded-lg border transition-colors",
+                      achievement.unlocked 
+                        ? "border-traingo-primary/30 bg-traingo-primary/10" 
+                        : "border-gray-800 bg-gray-900/50 opacity-50"
+                    )}
+                  >
+                    <div className="mb-2 text-3xl">{achievementIcons[achievement.id]}</div>
+                    <Badge 
+                      className={cn(
+                        "mb-2",
+                        achievement.unlocked 
+                          ? "bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30" 
+                          : "bg-gray-800"
+                      )}
+                    >
+                      {achievement.unlocked ? "Desbloqueado" : "Bloqueado"}
+                    </Badge>
+                    <h3 className="text-base font-bold mb-1">{achievement.name}</h3>
+                    <p className="text-xs text-center text-gray-400">{achievement.description}</p>
+                  </div>
+                ))}
+              </div>
             </Card>
           </div>
 
