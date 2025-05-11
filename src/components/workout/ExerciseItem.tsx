@@ -74,8 +74,8 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  disabled={!isPremium && !exercise.video_url}
-                  onClick={() => isPremium && setIsVideoModalOpen(true)}
+                  disabled={!isPremium || !exercise.video_url}
+                  onClick={() => isPremium && exercise.video_url ? setIsVideoModalOpen(true) : undefined}
                   className="h-8 w-8 rounded-full"
                 >
                   {isPremium ? (
@@ -91,7 +91,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
             </Tooltip>
           </TooltipProvider>
 
-          {/* Botão Substituir Exercício - Visual para todos, ação para Premium */}
+          {/* Botão Substituir Exercício */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CheckCircle, Play, Replace } from 'lucide-react';
+import { CheckCircle, Play, Replace, Lock } from 'lucide-react';
 import { Exercise } from '@/types/workout';
 import Card from '@/components/Card';
 import {
@@ -59,13 +59,13 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                   variant="ghost"
                   size="icon"
                   disabled={!isPremium || !exercise.video_url}
-                  onClick={() => onOpenVideoModal(index)}
+                  onClick={() => isPremium && exercise.video_url ? onOpenVideoModal(index) : undefined}
                   className="h-8 w-8 rounded-full"
                 >
                   {isPremium ? (
                     <Play size={16} />
                   ) : (
-                    <span className="text-gray-400">🔒</span>
+                    <Lock size={16} className="text-gray-400" />
                   )}
                 </Button>
               </TooltipTrigger>
