@@ -1,4 +1,3 @@
-
 import { QuizQuestionType } from './Quiz';
 
 export const quizQuestions: QuizQuestionType[] = [
@@ -9,7 +8,7 @@ export const quizQuestions: QuizQuestionType[] = [
       { value: 'lose_weight', label: 'Perder Peso', image: '🔥' },
       { value: 'gain_muscle', label: 'Ganhar Músculo', image: '💪' },
       { value: 'maintain', label: 'Manter a Forma', image: '⚖️' },
-      { value: 'home_training', label: 'Treinar em Casa', image: '🏠' }
+      { value: 'health_energy', label: 'Melhorar disposição e saúde', image: '⚡' }
     ]
   },
   {

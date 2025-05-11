@@ -108,7 +108,8 @@ export const findBestWorkoutPlan = (answers: QuizAnswers): WorkoutPlan => {
         return adaptWorkoutPlanToEnvironment(healthAdvancedOutdoor, 'home');
       }
     }
-  } else if (objective === 'create_habit' || objective === 'home_training') {
+  } else if (objective === 'health_energy') {
+    // Novo objetivo: melhorar disposição e saúde - usando os planos de criação de hábito que eram usados para home_training
     if (level === 'beginner') {
       if (mappedEnvironment === 'home') {
         return habitBeginnerHome;
@@ -255,8 +256,8 @@ export const generatePersonalizedMessage = (answers: QuizAnswers, plan: any) => 
     message += 'Criamos um plano focado em perda de peso ';
   } else if (objective === 'maintain') {
     message += 'Criamos um plano para manter sua forma física ';
-  } else {
-    message += 'Criamos um plano para você treinar em casa ';
+  } else if (objective === 'health_energy') {
+    message += 'Criamos um plano para melhorar sua disposição e energia ';
   }
   
   if (level === 'beginner') {
