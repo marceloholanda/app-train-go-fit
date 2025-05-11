@@ -8,6 +8,8 @@ import WorkoutCalendar from '@/components/profile/WorkoutCalendar';
 import AchievementsList from '@/components/profile/AchievementsList';
 import UserLevel from '@/components/profile/UserLevel';
 import UpgradeBanner from '@/components/profile/UpgradeBanner';
+import MonthlyEvaluation from '@/components/profile/MonthlyEvaluation';
+import LevelOnboardingBanner from '@/components/profile/LevelOnboardingBanner';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -55,6 +57,10 @@ const Profile = () => {
   return (
     <div className="min-h-screen pb-16">
       <ProfileHeader userData={userData} setUserData={setUserData} />
+
+      {/* Avaliação Mensal e Banner de Onboarding */}
+      <MonthlyEvaluation />
+      <LevelOnboardingBanner />
 
       {!isEditing && (
         <div className="p-6">

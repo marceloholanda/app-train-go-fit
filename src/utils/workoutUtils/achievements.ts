@@ -1,4 +1,3 @@
-
 /**
  * Calcula e retorna as conquistas desbloqueadas
  */
@@ -115,3 +114,107 @@ const getUnlockDate = (history: {date: string}[], threshold: number) => {
   return undefined;
 };
 
+/**
+ * Salva o histórico de níveis desbloqueados pelo usuário
+ */
+export const saveUnlockedLevel = (level: string) => {
+  try {
+    // Obter histórico de níveis atual
+    let unlockedLevels = [];
+    const savedLevels = localStorage.getItem('traingo-niveis-desbloqueados');
+    
+    if (savedLevels) {
+      unlockedLevels = JSON.parse(savedLevels);
+    }
+    
+    // Verificar se esse nível já foi registrado
+    const levelExists = unlockedLevels.some((item: {nivel: string}) => item.nivel === level);
+    
+    // Se o nível for novo, adiciona ao histórico com a data atual
+    if (!levelExists) {
+      const today = new Date().toISOString().split('T')[0];
+      unlockedLevels.push({
+        nivel: level,
+        date: today
+      });
+      
+      // Salvar histórico atualizado
+      localStorage.setItem('traingo-niveis-desbloqueados', JSON.stringify(unlockedLevels));
+      
+      // Salvar nível atual
+      localStorage.setItem('traingo-nivel-atual', level);
+      
+      return {
+        isNewLevel: true,
+        level
+      };
+    }
+    
+    // Salvar nível atual mesmo que não seja novo
+    localStorage.setItem('traingo-nivel-atual', level);
+    
+    return {
+      isNewLevel: false,
+      level
+    };
+  } catch (error) {
+    console.error('Erro ao salvar nível desbloqueado:', error);
+    return {
+      isNewLevel: false,
+      level
+    };
+  }
+};
+
+/**
+ * Obter histórico de níveis desbloqueados
+ */
+export const getUnlockedLevels = () => {
+  try {
+    const savedLevels = localStorage.getItem('traingo-niveis-desbloqueados');
+    
+    if (savedLevels) {
+      return JSON.parse(savedLevels);
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Erro ao recuperar níveis desbloqueados:', error);
+    return [];
+  }
+};
+
+/**
+ * Verifica se é o primeiro acesso do mês
+ */
+export const isFirstAccessOfMonth = () => {
+  const currentMonth = new Date().getMonth();
+  const lastAccessMonth = localStorage.getItem('traingo-last-access-month');
+  
+  // Armazena o mês atual como último acesso
+  localStorage.setItem('traingo-last-access-month', currentMonth.toString());
+  
+  // Se não houver registro ou se for um mês diferente, é o primeiro acesso
+  if (!lastAccessMonth || parseInt(lastAccessMonth) !== currentMonth) {
+    return true;
+  }
+  
+  return false;
+};
+
+/**
+ * Verifica se o banner de onboarding de nível deve ser exibido
+ */
+export const shouldShowLevelOnboarding = () => {
+  const currentMonth = new Date().getMonth();
+  const lastOnboardingMonth = localStorage.getItem('traingo-level-onboarding-month');
+  
+  // Se não houver registro ou se for um mês diferente, exibe o onboarding
+  if (!lastOnboardingMonth || parseInt(lastOnboardingMonth) !== currentMonth) {
+    // Armazena o mês atual como último mês que exibiu o onboarding
+    localStorage.setItem('traingo-level-onboarding-month', currentMonth.toString());
+    return true;
+  }
+  
+  return false;
+};

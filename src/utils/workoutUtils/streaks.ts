@@ -80,6 +80,7 @@ export const getWorkoutStreaks = (): { current: number; longest: number } => {
 
 /**
  * Calcula o nível do usuário com base na quantidade de dias treinados
+ * e salva o nível caso seja novo
  */
 export const getUserLevel = (): { level: string; nextLevel: string; progress: number } => {
   try {
@@ -120,6 +121,14 @@ export const getUserLevel = (): { level: string; nextLevel: string; progress: nu
       currentThreshold = 30;
       nextThreshold = 50;    // Valor arbitrário para continuar a progressão
     }
+    
+    // Salvar o nível atual no histórico se for novo
+    import('../workoutUtils').then(module => {
+      const { saveUnlockedLevel } = module;
+      saveUnlockedLevel(level);
+    }).catch(error => {
+      console.error('Erro ao importar saveUnlockedLevel:', error);
+    });
     
     // Calcula o progresso percentual para o próximo nível
     const levelRange = nextThreshold - currentThreshold;

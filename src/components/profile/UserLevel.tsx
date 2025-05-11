@@ -1,10 +1,13 @@
 
 import React from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, Clock } from 'lucide-react';
 import Card from '@/components/Card';
 import { Progress } from '@/components/ui/progress';
 import { getUserLevel } from '@/utils/workoutUtils';
 import { cn } from '@/lib/utils';
+import { getUnlockedLevels } from '@/utils/workoutUtils';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface UserLevelProps {
   userData: any;
@@ -12,6 +15,7 @@ interface UserLevelProps {
 
 const UserLevel = ({ userData }: UserLevelProps) => {
   const { level, nextLevel, progress } = getUserLevel();
+  const unlockedLevels = getUnlockedLevels();
 
   // Define cores e ícones para cada nível
   const getLevelColor = (level: string) => {
@@ -31,6 +35,26 @@ const UserLevel = ({ userData }: UserLevelProps) => {
       case "Avançado": return "🔥";
       case "Atleta": return "🏆";
       default: return "🍀";
+    }
+  };
+  
+  const getLevelMedal = (level: string) => {
+    switch (level) {
+      case "Iniciante": return "🥉";
+      case "Intermediário": return "🥈";
+      case "Avançado": return "🥇";
+      case "Atleta": return "🏅";
+      default: return "🥉";
+    }
+  };
+  
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    } catch (e) {
+      return dateString;
     }
   };
 
@@ -66,9 +90,35 @@ const UserLevel = ({ userData }: UserLevelProps) => {
           <Progress value={progress} className="h-2" />
         </div>
         
-        <p className="text-center text-xs text-gray-400 mt-4">
+        <p className="text-center text-xs text-gray-400 mt-4 mb-6">
           Continue treinando para subir de nível e desbloquear novas conquistas!
         </p>
+        
+        {/* Nova seção: Evolução de Nível */}
+        {unlockedLevels.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-gray-800">
+            <div className="flex items-center mb-4">
+              <Clock className="text-traingo-primary mr-2" size={16} />
+              <h3 className="font-semibold text-sm">Evolução de Nível</h3>
+            </div>
+            
+            <div className="space-y-3">
+              {unlockedLevels.map((item: {nivel: string, date: string}, index: number) => (
+                <div key={index} className="flex items-center">
+                  <span className="mr-2">{getLevelMedal(item.nivel)}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
+                    <span className={cn("text-sm font-medium", getLevelColor(item.nivel))}>
+                      {item.nivel}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      desbloqueado em {formatDate(item.date)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
