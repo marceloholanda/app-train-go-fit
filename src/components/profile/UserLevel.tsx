@@ -5,7 +5,7 @@ import Card from '@/components/Card';
 import { Progress } from '@/components/ui/progress';
 import { getUserLevel } from '@/utils/workoutUtils';
 import { cn } from '@/lib/utils';
-import { getUnlockedLevels } from '@/utils/workoutUtils';
+import { getUnlockedLevels } from '@/utils/workoutUtils/levelTracking';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

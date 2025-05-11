@@ -3,4 +3,10 @@
 export * from './streakCalculation';
 export * from './userLevel';
 export * from './scheduleTracking';
-export * from './levelTracking';
+// Importar diretamente do arquivo levelTracking para evitar conflitos de namespace
+export {
+  saveUnlockedLevel,
+  getUnlockedLevels,
+  shouldShowLevelOnboarding,
+  isFirstAccessOfMonth
+} from './levelTracking';

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { isFirstAccessOfMonth, getUnlockedLevels } from '@/utils/workoutUtils';
+import { isFirstAccessOfMonth, getUnlockedLevels } from '@/utils/workoutUtils/levelTracking';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
