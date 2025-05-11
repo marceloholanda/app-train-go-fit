@@ -28,10 +28,8 @@ const ExerciseDetail = () => {
   } = useWorkoutData(id);
 
   const handleOpenVideoModal = (exerciseIndex: number) => {
-    if (isPremium && exercises[exerciseIndex]?.video_url) {
-      setSelectedExerciseIndex(exerciseIndex);
-      setIsVideoModalOpen(true);
-    }
+    setSelectedExerciseIndex(exerciseIndex);
+    setIsVideoModalOpen(true);
   };
 
   const handleOpenReplaceModal = (exerciseIndex: number) => {
@@ -114,6 +112,7 @@ const ExerciseDetail = () => {
             onClose={() => setIsVideoModalOpen(false)}
             exerciseName={exercises[selectedExerciseIndex]?.nome || ""}
             videoUrl={exercises[selectedExerciseIndex]?.video_url || ""}
+            isPremium={isPremium}
           />
 
           <ExerciseReplaceModal

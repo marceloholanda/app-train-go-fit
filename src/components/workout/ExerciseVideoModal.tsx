@@ -5,23 +5,60 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose
+  DialogClose,
+  DialogDescription,
+  DialogFooter
 } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface ExerciseVideoModalProps {
   isOpen: boolean;
   onClose: () => void;
   exerciseName: string;
   videoUrl: string;
+  isPremium?: boolean;
 }
 
 const ExerciseVideoModal: React.FC<ExerciseVideoModalProps> = ({
   isOpen,
   onClose,
   exerciseName,
-  videoUrl
+  videoUrl,
+  isPremium = true
 }) => {
+  const navigate = useNavigate();
+  
+  // Modal para usuários free
+  if (!isPremium) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Recurso Premium</DialogTitle>
+            <DialogDescription>
+              Este recurso está disponível apenas para usuários Premium. 
+              Faça o upgrade para acessar vídeos demonstrativos dos exercícios.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-start">
+            <DialogClose asChild>
+              <Button variant="secondary">Fechar</Button>
+            </DialogClose>
+            <Button 
+              variant="default" 
+              onClick={() => navigate('/upgrade')}
+            >
+              Fazer upgrade
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+  
+  // Modal para usuários premium
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">

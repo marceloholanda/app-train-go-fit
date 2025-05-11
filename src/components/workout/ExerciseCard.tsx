@@ -10,6 +10,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import ExerciseVideoModal from './ExerciseVideoModal';
+import ExerciseReplaceModal from './ExerciseReplaceModal';
+import { isPremiumUser } from '@/utils/userUtils';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -39,7 +42,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
         <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
           <img 
             src={exercise.gif_url} 
-            alt={exercise.nome}
+            alt={`GIF do exercício ${exercise.nome}`}
             className="w-full h-full object-contain" 
           />
         </div>
@@ -58,8 +61,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  disabled={!isPremium || !exercise.video_url}
-                  onClick={() => isPremium && exercise.video_url ? onOpenVideoModal(index) : undefined}
+                  onClick={() => onOpenVideoModal(index)}
                   className="h-8 w-8 rounded-full"
                 >
                   {isPremium ? (
@@ -70,7 +72,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {isPremium ? "Ver vídeo" : "Disponível no plano Premium"}
+                {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

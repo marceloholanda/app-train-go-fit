@@ -44,7 +44,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
         <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
           <img 
             src={exercise.gif_url} 
-            alt={exercise.nome}
+            alt={`GIF do exercício ${exercise.nome}`}
             className="w-full h-full object-contain" 
           />
         </div>
@@ -74,8 +74,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  disabled={!isPremium || !exercise.video_url}
-                  onClick={() => isPremium && exercise.video_url ? setIsVideoModalOpen(true) : undefined}
+                  onClick={() => setIsVideoModalOpen(true)}
                   className="h-8 w-8 rounded-full"
                 >
                   {isPremium ? (
@@ -86,7 +85,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {isPremium ? "Ver vídeo" : "Disponível no plano Premium"}
+                {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -118,6 +117,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
         onClose={() => setIsVideoModalOpen(false)}
         exerciseName={exercise.nome}
         videoUrl={exercise.video_url || ""}
+        isPremium={isPremium}
       />
 
       {/* Modal de Substituição */}
