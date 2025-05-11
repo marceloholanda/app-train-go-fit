@@ -10,6 +10,9 @@ import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
 import FreePlanUpgradeCard from '@/components/premium/FreePlanUpgradeCard';
 import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
 import { useWorkoutData } from '@/hooks/useWorkoutData';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import ExerciseAddModal from '@/components/workout/ExerciseAddModal';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +20,7 @@ const ExerciseDetail = () => {
   
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
+  const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(-1);
   const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
   
@@ -92,6 +96,25 @@ const ExerciseDetail = () => {
       console.error('Erro ao salvar exercício substituído:', error);
     }
   };
+
+  const handleAddExercises = (newExercises: Exercise[]) => {
+    if (!newExercises.length) return;
+    
+    const updatedExercises = [...exercises, ...newExercises.map(ex => ({ ...ex, completed: false }))];
+    setExercises(updatedExercises);
+    
+    // Salvar estado dos exercícios
+    try {
+      const userData = localStorage.getItem('traingo-user');
+      if (userData && id) {
+        const user = JSON.parse(userData);
+        user[`exercises_day${id}`] = updatedExercises;
+        localStorage.setItem('traingo-user', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar exercícios:', error);
+    }
+  };
   
   if (isLoading) {
     return (
@@ -135,6 +158,20 @@ const ExerciseDetail = () => {
           ))}
         </div>
         
+        {/* Add Exercise Button - Premium Only */}
+        {isPremium && (
+          <div className="mt-6">
+            <Button
+              onClick={() => setIsAddExerciseModalOpen(true)}
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 py-6"
+            >
+              <Plus size={20} />
+              Adicionar novo exercício
+            </Button>
+          </div>
+        )}
+        
         {/* Upgrade card para usuários free */}
         {!isPremium && <FreePlanUpgradeCard />}
       </section>
@@ -160,6 +197,14 @@ const ExerciseDetail = () => {
           />
         </>
       )}
+      
+      {/* Add Exercise Modal */}
+      <ExerciseAddModal
+        isOpen={isAddExerciseModalOpen}
+        onClose={() => setIsAddExerciseModalOpen(false)}
+        isPremium={isPremium}
+        onAddExercises={handleAddExercises}
+      />
       
       {/* Modal de boas-vindas ao premium */}
       <PremiumWelcomeModal
