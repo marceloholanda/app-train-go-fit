@@ -2,28 +2,18 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Exercise } from '@/types/workout';
-import { isPremiumUser, hasSeenPremiumWelcome, markPremiumWelcomeSeen } from '@/utils/userUtils';
-import ExerciseDetailHeader from '@/components/workout/ExerciseDetailHeader';
-import ExerciseCard from '@/components/workout/ExerciseCard';
-import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
-import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
+import { isPremiumUser } from '@/utils/userUtils';
 import FreePlanUpgradeCard from '@/components/premium/FreePlanUpgradeCard';
-import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
 import { useWorkoutData } from '@/hooks/useWorkoutData';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import ExerciseAddModal from '@/components/workout/ExerciseAddModal';
+import { useExerciseModals } from '@/hooks/useExerciseModals';
+import ExerciseHeader from '@/components/workout/ExerciseHeader';
+import ExerciseList from '@/components/workout/ExerciseList';
+import ExerciseModals from '@/components/workout/ExerciseModals';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [isPremium, setIsPremium] = useState(isPremiumUser());
   
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
-  const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
-  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(-1);
-  const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
-  
+  // Custom hooks for workout data and modals
   const {
     workoutDay,
     exercises,
@@ -35,15 +25,31 @@ const ExerciseDetail = () => {
     userLevel
   } = useWorkoutData(id);
   
-  // Limitar o número de exercícios com base no plano e nível
+  const {
+    isPremium,
+    isVideoModalOpen,
+    setIsVideoModalOpen,
+    isReplaceModalOpen,
+    setIsReplaceModalOpen,
+    isAddExerciseModalOpen,
+    setIsAddExerciseModalOpen,
+    selectedExerciseIndex,
+    showPremiumWelcome,
+    handleOpenVideoModal,
+    handleOpenReplaceModal,
+    handleClosePremiumWelcome,
+    checkPremiumStatus
+  } = useExerciseModals();
+  
+  // Limit the number of exercises based on plan and level
   const [visibleExercises, setVisibleExercises] = useState<Exercise[]>([]);
   
   useEffect(() => {
     if (exercises.length) {
-      let limit = 4; // Limite padrão para plano Free
+      let limit = 4; // Default limit for Free plan
       
       if (isPremium) {
-        // Limites para usuários premium com base no nível
+        // Limits for premium users based on level
         switch(userLevel) {
           case 'beginner':
             limit = 6;
@@ -59,27 +65,17 @@ const ExerciseDetail = () => {
         }
       }
       
-      // Aplicar limitação
+      // Apply limitation
       setVisibleExercises(exercises.slice(0, limit));
     }
   }, [exercises, isPremium, userLevel]);
 
   // Revalidate premium status when component mounts
   useEffect(() => {
-    const checkPremiumStatus = () => {
-      const premiumStatus = isPremiumUser();
-      setIsPremium(premiumStatus);
-      
-      // Mostrar o modal de boas-vindas se o usuário é premium e não viu a mensagem
-      if (premiumStatus && !hasSeenPremiumWelcome()) {
-        setShowPremiumWelcome(true);
-      }
-    };
-    
-    // Verificar status inicial
+    // Check initial status
     checkPremiumStatus();
     
-    // Configurar evento de storage para detectar mudanças no localStorage
+    // Set up event listener for storage changes
     const handleStorageChange = () => {
       checkPremiumStatus();
     };
@@ -87,21 +83,6 @@ const ExerciseDetail = () => {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
-
-  const handleClosePremiumWelcome = () => {
-    setShowPremiumWelcome(false);
-    markPremiumWelcomeSeen();
-  };
-
-  const handleOpenVideoModal = (exerciseIndex: number) => {
-    setSelectedExerciseIndex(exerciseIndex);
-    setIsVideoModalOpen(true);
-  };
-
-  const handleOpenReplaceModal = (exerciseIndex: number) => {
-    setSelectedExerciseIndex(exerciseIndex);
-    setIsReplaceModalOpen(true);
-  };
 
   const handleReplaceExercise = (newExercise: Exercise) => {
     if (selectedExerciseIndex === -1) return;
@@ -114,7 +95,7 @@ const ExerciseDetail = () => {
     
     setExercises(updatedExercises);
     
-    // Salvar estado dos exercícios
+    // Save exercises state
     try {
       const userData = localStorage.getItem('traingo-user');
       if (userData && id) {
@@ -133,7 +114,7 @@ const ExerciseDetail = () => {
     const updatedExercises = [...exercises, ...newExercises.map(ex => ({ ...ex, completed: false }))];
     setExercises(updatedExercises);
     
-    // Salvar estado dos exercícios
+    // Save exercises state
     try {
       const userData = localStorage.getItem('traingo-user');
       if (userData && id) {
@@ -156,100 +137,44 @@ const ExerciseDetail = () => {
   
   return (
     <div className="min-h-screen pb-16">
-      <ExerciseDetailHeader workoutDay={workoutDay} />
+      {/* Header with workout day and toggle button */}
+      <ExerciseHeader
+        workoutDay={workoutDay}
+        isCompleted={isCompleted}
+        handleToggleWorkout={handleToggleWorkout}
+      />
       
-      {/* Exercises List */}
+      {/* Exercise List Section */}
       <section className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="font-bold text-lg">Exercícios</h2>
-          <button 
-            onClick={handleToggleWorkout}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              isCompleted 
-                ? 'bg-green-500/20 text-green-400' 
-                : 'bg-traingo-primary text-black'
-            }`}
-          >
-            {isCompleted ? 'Concluído' : 'Marcar todos'}
-          </button>
-        </div>
+        <ExerciseList
+          visibleExercises={visibleExercises}
+          isPremium={isPremium}
+          totalExercises={exercises.length}
+          handleExerciseToggle={handleExerciseToggle}
+          handleOpenVideoModal={handleOpenVideoModal}
+          handleOpenReplaceModal={handleOpenReplaceModal}
+          handleAddExerciseModal={() => setIsAddExerciseModalOpen(true)}
+        />
         
-        <div className="space-y-4">
-          {visibleExercises.map((exercise, index) => (
-            <ExerciseCard
-              key={index}
-              exercise={exercise}
-              index={index}
-              isPremium={isPremium}
-              onToggleComplete={handleExerciseToggle}
-              onOpenVideoModal={handleOpenVideoModal}
-              onOpenReplaceModal={handleOpenReplaceModal}
-            />
-          ))}
-        </div>
-
-        {/* Mensagem quando há exercícios limitados para usuários free */}
-        {!isPremium && exercises.length > visibleExercises.length && (
-          <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-700/30 rounded-lg">
-            <p className="text-sm text-yellow-400 text-center">
-              🔒 O plano gratuito exibe apenas {visibleExercises.length} exercícios. 
-              Faça upgrade para o plano PRO para acessar todos os {exercises.length} exercícios.
-            </p>
-          </div>
-        )}
-        
-        {/* Add Exercise Button - Premium Only */}
-        {isPremium && (
-          <div className="mt-6">
-            <Button
-              onClick={() => setIsAddExerciseModalOpen(true)}
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2 py-6"
-            >
-              <Plus size={20} />
-              Adicionar novo exercício
-            </Button>
-          </div>
-        )}
-        
-        {/* Upgrade card para usuários free */}
+        {/* Upgrade card for free users */}
         {!isPremium && <FreePlanUpgradeCard />}
       </section>
 
       {/* Modals */}
-      {selectedExerciseIndex !== -1 && (
-        <>
-          <ExerciseVideoModal
-            isOpen={isVideoModalOpen}
-            onClose={() => setIsVideoModalOpen(false)}
-            exerciseName={visibleExercises[selectedExerciseIndex]?.nome || ""}
-            videoUrl={visibleExercises[selectedExerciseIndex]?.video_url || ""}
-            isPremium={isPremium}
-          />
-
-          <ExerciseReplaceModal
-            isOpen={isReplaceModalOpen}
-            onClose={() => setIsReplaceModalOpen(false)}
-            isPremium={isPremium}
-            currentExercise={visibleExercises[selectedExerciseIndex]}
-            alternativeExercises={visibleExercises[selectedExerciseIndex]?.substituicoes || []}
-            onReplaceExercise={handleReplaceExercise}
-          />
-        </>
-      )}
-      
-      {/* Add Exercise Modal */}
-      <ExerciseAddModal
-        isOpen={isAddExerciseModalOpen}
-        onClose={() => setIsAddExerciseModalOpen(false)}
+      <ExerciseModals
+        selectedExerciseIndex={selectedExerciseIndex}
+        visibleExercises={visibleExercises}
         isPremium={isPremium}
+        isVideoModalOpen={isVideoModalOpen}
+        isReplaceModalOpen={isReplaceModalOpen}
+        isAddExerciseModalOpen={isAddExerciseModalOpen}
+        showPremiumWelcome={showPremiumWelcome}
+        onCloseVideoModal={() => setIsVideoModalOpen(false)}
+        onCloseReplaceModal={() => setIsReplaceModalOpen(false)}
+        onCloseAddExerciseModal={() => setIsAddExerciseModalOpen(false)}
+        onClosePremiumWelcome={handleClosePremiumWelcome}
+        onReplaceExercise={handleReplaceExercise}
         onAddExercises={handleAddExercises}
-      />
-      
-      {/* Modal de boas-vindas ao premium */}
-      <PremiumWelcomeModal
-        isOpen={showPremiumWelcome}
-        onClose={handleClosePremiumWelcome}
       />
     </div>
   );
