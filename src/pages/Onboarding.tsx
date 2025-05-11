@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import WorkoutPlanDisplay from '@/components/WorkoutPlanDisplay';
 import { QuizAnswers, findBestWorkoutPlan, generatePersonalizedMessage } from '@/utils/workoutRecommendation';
 import { WorkoutPlan } from '@/data/workoutPlans';
+import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
 
 // Componentes refatorados
 import Quiz from '@/components/quiz/Quiz';
@@ -65,10 +66,20 @@ const Onboarding = () => {
       const recommendedPlan = findBestWorkoutPlan(quizAnswers);
       const message = generatePersonalizedMessage(quizAnswers, recommendedPlan);
       
+      // Convert weight and height ranges to approximate numbers for IMC calculation
+      const weight_exact = weightRangeToNumber(quizAnswers.weight);
+      const height_exact = heightRangeToNumber(quizAnswers.height);
+      const age_exact = ageRangeToNumber(quizAnswers.age);
+      
       // Salvar o plano de treino no localStorage
       const userData = {
         ...registrationData,
-        profile: quizAnswers,
+        profile: {
+          ...quizAnswers,
+          weight_exact,
+          height_exact,
+          age_exact
+        },
         workoutPlan: recommendedPlan,
         workoutProgress: {
           completedWorkouts: [],

@@ -31,3 +31,57 @@ export const saveUserData = (data: any) => {
     return false;
   }
 };
+
+export const calculateIMC = (weight: number, height: number): number => {
+  // Height should be in meters
+  if (height <= 0 || weight <= 0) {
+    return 0;
+  }
+  
+  // Convert height to meters if it seems to be in centimeters
+  const heightInMeters = height > 3 ? height / 100 : height;
+  
+  return weight / (heightInMeters * heightInMeters);
+};
+
+export const getIMCClassification = (imc: number): string => {
+  if (imc < 18.5) return "Magreza";
+  if (imc < 25) return "Normal";
+  if (imc < 30) return "Sobrepeso";
+  if (imc < 35) return "Obesidade I";
+  if (imc < 40) return "Obesidade II";
+  return "Obesidade III";
+};
+
+// Convert range values to approximate numeric values
+export const weightRangeToNumber = (range: string): number => {
+  switch(range) {
+    case 'under_60': return 55;
+    case '60_75': return 67.5;
+    case '75_90': return 82.5;
+    case '90_110': return 100;
+    case 'above_110': return 115;
+    default: return 70;
+  }
+};
+
+export const heightRangeToNumber = (range: string): number => {
+  switch(range) {
+    case 'under_160': return 1.55;
+    case '160_175': return 1.67;
+    case '175_185': return 1.80;
+    case 'above_185': return 1.90;
+    default: return 1.70;
+  }
+};
+
+export const ageRangeToNumber = (range: string): number => {
+  switch(range) {
+    case 'under_18': return 16;
+    case '18_29': return 24;
+    case '30_44': return 37;
+    case '45_59': return 52;
+    case '60_plus': return 65;
+    default: return 30;
+  }
+};

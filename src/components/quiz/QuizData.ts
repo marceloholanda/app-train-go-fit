@@ -1,85 +1,76 @@
 
 import { QuizQuestionType } from './Quiz';
 
-// Define quiz questions
 export const quizQuestions: QuizQuestionType[] = [
   {
     id: 'objective',
-    question: 'Qual é o seu principal objetivo com os treinos?',
+    question: 'Qual é seu principal objetivo com os treinos?',
     options: [
-      { value: 'lose_fat', label: 'Perder gordura corporal', image: '🔥' },
-      { value: 'gain_muscle', label: 'Ganhar massa muscular', image: '💪' },
-      { value: 'health_energy', label: 'Melhorar disposição e saúde', image: '⚡' },
-      { value: 'create_habit', label: 'Criar uma rotina consistente', image: '🧠' },
+      { value: 'lose_weight', label: 'Perder Peso', image: '🔥' },
+      { value: 'gain_muscle', label: 'Ganhar Músculo', image: '💪' },
+      { value: 'maintain', label: 'Manter a Forma', image: '⚖️' },
+      { value: 'home_training', label: 'Treinar em Casa', image: '🏠' }
     ]
   },
   {
-    id: 'environment',
-    question: 'Onde você prefere treinar?',
+    id: 'age',
+    question: 'Qual sua idade?',
     options: [
-      { value: 'gym', label: 'Na academia', image: '🏋️' },
-      { value: 'home', label: 'Em casa', image: '🏠' },
-      { value: 'outdoor', label: 'Ao ar livre', image: '🌳' },
-      { value: 'anywhere', label: 'Onde for mais prático', image: '📍' },
+      { value: 'under_18', label: 'Tenho menos de 18', image: '👦' },
+      { value: '18_29', label: 'Tenho entre 18 e 29', image: '🧑' },
+      { value: '30_44', label: 'Tenho entre 30 e 44', image: '👨' },
+      { value: '45_59', label: 'Tenho entre 45 e 59', image: '👨‍🦳' },
+      { value: '60_plus', label: 'Tenho 60+', image: '👴' }
+    ]
+  },
+  {
+    id: 'weight',
+    question: 'Qual seu peso?',
+    options: [
+      { value: 'under_60', label: 'Abaixo de 60kg', image: '⚖️' },
+      { value: '60_75', label: 'Entre 60kg e 75kg', image: '⚖️' },
+      { value: '75_90', label: 'Entre 75kg e 90kg', image: '⚖️' },
+      { value: '90_110', label: 'Entre 90kg e 110kg', image: '⚖️' },
+      { value: 'above_110', label: 'Acima de 110kg', image: '⚖️' }
+    ]
+  },
+  {
+    id: 'height',
+    question: 'Qual sua altura?',
+    options: [
+      { value: 'under_160', label: 'Abaixo de 1,60m', image: '📏' },
+      { value: '160_175', label: 'Entre 1,60m e 1,75m', image: '📏' },
+      { value: '175_185', label: 'Entre 1,75m e 1,85m', image: '📏' },
+      { value: 'above_185', label: 'Acima de 1,85m', image: '📏' }
     ]
   },
   {
     id: 'level',
-    question: 'Qual é o seu nível atual de atividade física?',
+    question: 'Como você se define em relação aos exercícios?',
     options: [
-      { value: 'beginner', label: 'Iniciante (não pratico nada)', image: '🌱' },
-      { value: 'returning', label: 'Intermediário (estou parado)', image: '🌿' },
-      { value: 'advanced', label: 'Avançado (treino com frequência)', image: '🌳' },
+      { value: 'beginner', label: 'Iniciante', image: '🌱' },
+      { value: 'intermediate', label: 'Intermediário', image: '🌿' },
+      { value: 'advanced', label: 'Avançado', image: '🌳' }
     ]
   },
   {
     id: 'days_per_week',
-    question: 'Quantos dias por semana você quer treinar?',
+    question: 'Quantos dias por semana você planeja treinar?',
     options: [
-      { value: '2', label: '2 dias', image: '2️⃣' },
-      { value: '3', label: '3 dias', image: '3️⃣' },
-      { value: '4', label: '4 dias', image: '4️⃣' },
-      { value: '5_plus', label: '5 ou mais', image: '5️⃣' },
+      { value: '2', label: '2 dias', image: '✌️' },
+      { value: '3', label: '3 dias', image: '👌' },
+      { value: '4', label: '4 dias', image: '🖖' },
+      { value: '5+', label: '5 ou mais dias', image: '🖐️' }
     ]
   },
   {
-    id: 'time_per_session',
-    question: 'Quanto tempo por dia você pode dedicar aos treinos?',
+    id: 'environment',
+    question: 'Onde você pretende treinar?',
     options: [
-      { value: '15', label: 'Até 15 minutos', image: '🕒' },
-      { value: '20_30', label: '20 a 30 minutos', image: '⏱️' },
-      { value: '30_45', label: '30 a 45 minutos', image: '⌛' },
-      { value: '60+', label: 'Mais de 1 hora', image: '🕐' },
-    ]
-  },
-  {
-    id: 'personality',
-    question: 'Como você se descreveria quando o assunto é treino?',
-    options: [
-      { value: 'focused', label: 'Focado, só preciso de um plano', image: '🎯' },
-      { value: 'needs_motivation', label: 'Preciso de motivação pra começar', image: '💡' },
-      { value: 'procrastinator', label: 'Procrastino, mas quero mudar', image: '⏳' },
-      { value: 'busy', label: 'Tenho rotina apertada', image: '📆' },
-    ]
-  },
-  {
-    id: 'body_focus',
-    question: 'Qual área do corpo você mais quer melhorar?',
-    options: [
-      { value: 'abs', label: 'Abdômen', image: '🧍‍♂️' },
-      { value: 'legs_glutes', label: 'Pernas e glúteos', image: '🦵' },
-      { value: 'upper_body', label: 'Peito e braços', image: '💪' },
-      { value: 'full_body', label: 'Corpo inteiro', image: '🏋️' },
-    ]
-  },
-  {
-    id: 'training_history',
-    question: 'Você já tentou seguir um plano de treino antes?',
-    options: [
-      { value: 'yes_gave_up', label: 'Sim, mas parei no meio', image: '🛑' },
-      { value: 'yes_no_results', label: 'Sim, mas não tive resultados', image: '❌' },
-      { value: 'no_first_time', label: 'Não, será minha primeira vez', image: '✨' },
-      { value: 'yes_still_doing', label: 'Sim, mas quero algo melhor', image: '✅' },
+      { value: 'gym', label: 'Academia', image: '🏋️' },
+      { value: 'home_with_equipment', label: 'Casa com equipamentos', image: '🏠' },
+      { value: 'home_no_equipment', label: 'Casa sem equipamentos', image: '🧘' },
+      { value: 'outdoor', label: 'Ao ar livre', image: '🏞️' }
     ]
   }
 ];
