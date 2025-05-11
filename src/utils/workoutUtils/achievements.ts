@@ -33,16 +33,16 @@ export const getAchievements = (): {id: string, name: string, description: strin
       {
         id: 'gold',
         name: 'Consistência Total',
-        description: 'Complete 12 dias de treino',
-        threshold: 12,
-        unlocked: totalDays >= 12
+        description: 'Complete 15 dias de treino',
+        threshold: 15,
+        unlocked: totalDays >= 15
       },
       {
         id: 'platinum',
         name: 'Foco Implacável',
-        description: 'Complete 20 dias de treino',
-        threshold: 20,
-        unlocked: totalDays >= 20
+        description: 'Complete 30 dias de treino',
+        threshold: 30,
+        unlocked: totalDays >= 30
       }
     ];
     
