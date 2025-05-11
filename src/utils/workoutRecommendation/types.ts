@@ -10,5 +10,5 @@ export interface QuizAnswers {
   height: string;
   motivation_type: string;
   training_barrier: string;
+  plan?: string;
 }
-

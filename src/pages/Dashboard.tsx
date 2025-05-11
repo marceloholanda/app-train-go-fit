@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '@/components/Card';
@@ -7,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName, updateWorkoutProgress } from '@/utils/workoutUtils';
 import { WorkoutPlan } from '@/types/workout';
 import { Progress } from '@/components/ui/progress';
+import { isPremiumUser } from '@/utils/userUtils';
+import { Badge } from '@/components/ui/badge';
 
 interface WorkoutDisplay {
   id: number;
@@ -15,6 +16,7 @@ interface WorkoutDisplay {
   status: 'completed' | 'pending';
   exercises: number;
   icon: string;
+  isPremium?: boolean;
 }
 
 const Dashboard = () => {
@@ -24,6 +26,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [weekProgress, setWeekProgress] = useState(0);
   const [workouts, setWorkouts] = useState<WorkoutDisplay[]>([]);
+  const isPremium = isPremiumUser();
 
   useEffect(() => {
     // Carregar dados do usuário e plano de treino
@@ -162,8 +165,16 @@ const Dashboard = () => {
               <Card 
                 key={workout.id} 
                 onClick={() => handleWorkoutClick(workout.id)}
-                className="animate-fade-in"
+                className="animate-fade-in relative"
               >
+                {workout.isPremium && isPremium && (
+                  <Badge 
+                    variant="default" 
+                    className="absolute top-2 right-2 bg-traingo-primary text-xs text-black"
+                  >
+                    PRO
+                  </Badge>
+                )}
                 <div className="flex items-center">
                   <div className="p-3 bg-traingo-primary/20 rounded-lg mr-4">
                     <span className="text-2xl">{workout.icon}</span>
@@ -203,8 +214,8 @@ const Dashboard = () => {
           )}
         </div>
         
-        {/* Upgrade Prompt */}
-        {userData && !userData.isPremium && (
+        {/* Upgrade Prompt - only show for non-premium users */}
+        {userData && !isPremium && (
           <div 
             className="mt-8 bg-gradient-to-r from-traingo-primary/30 to-traingo-primary/10 rounded-xl p-5 relative overflow-hidden cursor-pointer"
             onClick={() => navigate('/upgrade')}
@@ -217,6 +228,21 @@ const Dashboard = () => {
               Acesse o plano PRO e tenha um treino D exclusivo + exercícios adicionais.
             </p>
             <div className="text-traingo-primary font-bold text-sm">Saiba mais →</div>
+          </div>
+        )}
+        
+        {/* Pro Status Banner - only show for premium users */}
+        {userData && isPremium && (
+          <div className="mt-8 bg-gradient-to-r from-traingo-primary/30 to-traingo-primary/10 rounded-xl p-5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 opacity-10">
+              <span className="text-6xl">✨</span>
+            </div>
+            <h3 className="font-bold text-lg mb-2 flex items-center">
+              <span className="text-traingo-primary mr-2">PRO</span> Plano Premium Ativo
+            </h3>
+            <p className="text-gray-300 text-sm">
+              Você tem acesso a todos os recursos premium do TrainGO.
+            </p>
           </div>
         )}
       </section>
