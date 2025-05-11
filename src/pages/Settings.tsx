@@ -3,14 +3,20 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
-import { ChevronRight, Bell, Globe, Key, Trash2, LogOut, AlertTriangle } from 'lucide-react';
+import { ChevronRight, Bell, Globe, Key, Trash2, LogOut, AlertTriangle, Diamond } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { isPremiumUser, resetPremiumWelcomeStatus } from '@/utils/userUtils';
+import SubscriptionManagementModal from '@/components/premium/SubscriptionManagementModal';
+import { Badge } from '@/components/ui/badge';
 
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [notifications, setNotifications] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  
+  const isPremium = isPremiumUser();
 
   const handleToggleNotifications = () => {
     setNotifications(prev => !prev);
@@ -44,6 +50,7 @@ const Settings = () => {
     
     // Quando confirmado, apagamos a conta
     localStorage.removeItem('traingo-user');
+    resetPremiumWelcomeStatus(); // Reset premium welcome status
     toast({
       title: "Conta excluída",
       description: "Todos os seus dados foram removidos.",
@@ -53,11 +60,16 @@ const Settings = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('traingo-user');
+    resetPremiumWelcomeStatus(); // Reset premium welcome status
     toast({
       title: "Logout realizado",
       description: "Você saiu da sua conta.",
     });
     navigate('/');
+  };
+  
+  const openSubscriptionModal = () => {
+    setShowSubscriptionModal(true);
   };
 
   return (
@@ -121,20 +133,41 @@ const Settings = () => {
           </div>
         </section>
 
-        {/* Upgrade */}
+        {/* Subscription */}
         <section>
           <h2 className="font-bold text-lg mb-4">Assinatura</h2>
           
-          <Card 
-            className="bg-gradient-to-r from-traingo-primary/20 to-traingo-primary/5 flex items-center justify-between"
-            onClick={() => navigate('/upgrade')}
-          >
-            <div>
-              <span className="font-bold">Faça upgrade para o plano PRO</span>
-              <p className="text-sm text-gray-300">Desbloqueie recursos exclusivos</p>
-            </div>
-            <ChevronRight size={18} className="text-traingo-primary" />
-          </Card>
+          {isPremium ? (
+            <Card 
+              className="bg-gradient-to-r from-traingo-primary/20 to-traingo-primary/5 flex items-center justify-between"
+              onClick={openSubscriptionModal}
+            >
+              <div className="flex items-center">
+                <div className="bg-traingo-primary/30 p-2 rounded-full mr-3">
+                  <Diamond className="text-traingo-primary" size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">Plano PRO</span>
+                    <Badge variant="premium" className="text-xs">Ativo</Badge>
+                  </div>
+                  <p className="text-sm text-gray-300">Gerenciar assinatura</p>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-traingo-primary" />
+            </Card>
+          ) : (
+            <Card 
+              className="bg-gradient-to-r from-traingo-primary/20 to-traingo-primary/5 flex items-center justify-between"
+              onClick={() => navigate('/upgrade')}
+            >
+              <div>
+                <span className="font-bold">Faça upgrade para o plano PRO</span>
+                <p className="text-sm text-gray-300">Desbloqueie recursos exclusivos</p>
+              </div>
+              <ChevronRight size={18} className="text-traingo-primary" />
+            </Card>
+          )}
         </section>
 
         {/* Privacy */}
@@ -215,6 +248,12 @@ const Settings = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Modal de gerenciamento de assinatura */}
+      <SubscriptionManagementModal 
+        isOpen={showSubscriptionModal} 
+        onClose={() => setShowSubscriptionModal(false)} 
+      />
     </div>
   );
 };

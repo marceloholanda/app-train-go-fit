@@ -1,12 +1,14 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Exercise } from '@/types/workout';
-import { isPremiumUser } from '@/utils/userUtils';
+import { isPremiumUser, hasSeenPremiumWelcome, markPremiumWelcomeSeen } from '@/utils/userUtils';
 import ExerciseDetailHeader from '@/components/workout/ExerciseDetailHeader';
 import ExerciseCard from '@/components/workout/ExerciseCard';
 import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
 import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
+import FreePlanUpgradeCard from '@/components/premium/FreePlanUpgradeCard';
+import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
 import { useWorkoutData } from '@/hooks/useWorkoutData';
 
 const ExerciseDetail = () => {
@@ -16,6 +18,7 @@ const ExerciseDetail = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(-1);
+  const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
   
   const {
     workoutDay,
@@ -26,6 +29,18 @@ const ExerciseDetail = () => {
     handleExerciseToggle,
     handleToggleWorkout
   } = useWorkoutData(id);
+
+  useEffect(() => {
+    // Mostrar o modal de boas-vindas se o usuário é premium e não viu a mensagem
+    if (isPremium && !hasSeenPremiumWelcome()) {
+      setShowPremiumWelcome(true);
+    }
+  }, [isPremium]);
+
+  const handleClosePremiumWelcome = () => {
+    setShowPremiumWelcome(false);
+    markPremiumWelcomeSeen();
+  };
 
   const handleOpenVideoModal = (exerciseIndex: number) => {
     setSelectedExerciseIndex(exerciseIndex);
@@ -102,6 +117,9 @@ const ExerciseDetail = () => {
             />
           ))}
         </div>
+        
+        {/* Upgrade card para usuários free */}
+        {!isPremium && <FreePlanUpgradeCard />}
       </section>
 
       {/* Modals */}
@@ -125,6 +143,12 @@ const ExerciseDetail = () => {
           />
         </>
       )}
+      
+      {/* Modal de boas-vindas ao premium */}
+      <PremiumWelcomeModal
+        isOpen={showPremiumWelcome}
+        onClose={handleClosePremiumWelcome}
+      />
     </div>
   );
 };

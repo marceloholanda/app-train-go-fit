@@ -1,4 +1,3 @@
-
 /**
  * Verifica se o usuário tem plano premium
  */
@@ -107,5 +106,40 @@ export const heightRangeToNumber = (heightRange: string): number => {
       return 1.90;
     default:
       return 1.70; // valor padrão
+  }
+};
+
+/**
+ * Verifica se o usuário já viu a mensagem de boas-vindas premium
+ */
+export const hasSeenPremiumWelcome = (): boolean => {
+  try {
+    return localStorage.getItem('traingo-premium-welcome-seen') === 'true';
+  } catch (error) {
+    console.error('Erro ao verificar status de boas-vindas premium:', error);
+    return false;
+  }
+};
+
+/**
+ * Marca que o usuário já viu a mensagem de boas-vindas premium
+ */
+export const markPremiumWelcomeSeen = (): void => {
+  try {
+    localStorage.setItem('traingo-premium-welcome-seen', 'true');
+  } catch (error) {
+    console.error('Erro ao marcar boas-vindas premium como visto:', error);
+  }
+};
+
+/**
+ * Reseta o status de visualização da mensagem de boas-vindas premium
+ * Útil para testes ou após logout
+ */
+export const resetPremiumWelcomeStatus = (): void => {
+  try {
+    localStorage.removeItem('traingo-premium-welcome-seen');
+  } catch (error) {
+    console.error('Erro ao resetar status de boas-vindas premium:', error);
   }
 };
