@@ -11,3 +11,4 @@ export interface QuizAnswers {
   motivation_type: string;
   training_barrier: string;
 }
+
