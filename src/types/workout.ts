@@ -5,6 +5,7 @@ export interface Exercise {
   gif_url?: string;
   video_url?: string;
   substituicoes?: Exercise[];
+  completed?: boolean;
 }
 
 export interface WorkoutPlan {
