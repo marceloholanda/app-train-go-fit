@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -5,6 +6,7 @@ import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileInfo from '@/components/profile/ProfileInfo';
 import WorkoutCalendar from '@/components/profile/WorkoutCalendar';
 import AchievementsList from '@/components/profile/AchievementsList';
+import UserLevel from '@/components/profile/UserLevel';
 import UpgradeBanner from '@/components/profile/UpgradeBanner';
 
 const Profile = () => {
@@ -57,6 +59,7 @@ const Profile = () => {
       {!isEditing && (
         <div className="p-6">
           <ProfileInfo userData={userData} setIsEditing={setIsEditing} />
+          <UserLevel userData={userData} />
           <WorkoutCalendar userData={userData} />
           <AchievementsList userData={userData} />
           <UpgradeBanner isPremium={isPremium} />

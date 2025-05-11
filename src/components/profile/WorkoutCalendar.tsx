@@ -6,6 +6,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { getWorkoutDatesForMonth, getWorkoutsThisWeek } from '@/utils/workoutUtils';
 import { getWorkoutStreaks, getExpectedWorkoutDays } from '@/utils/workoutUtils';
 import { useToast } from '@/hooks/use-toast';
+import { ptBR } from 'date-fns/locale';
 
 interface WorkoutCalendarProps {
   userData: any;
@@ -87,6 +88,8 @@ const WorkoutCalendar = ({ userData }: WorkoutCalendarProps) => {
               workout: "bg-traingo-primary text-black",
               missed: "bg-gray-500/30 text-gray-400 line-through"
             }}
+            locale={ptBR}
+            weekStartsOn={0} // 0 = domingo
           />
         </div>
         
