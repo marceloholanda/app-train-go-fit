@@ -10,3 +10,4 @@ export * from './planAdaptation';
 export * from './splitCreators/gymSplits';
 export * from './splitCreators/homeSplits';
 export * from './splitCreators/outdoorSplits';
+export * from './exerciseImages';

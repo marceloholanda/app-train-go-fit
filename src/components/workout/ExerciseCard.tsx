@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
+import { getExerciseImageUrl } from '@/utils/workoutRecommendation';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -29,22 +30,23 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   onOpenVideoModal, 
   onOpenReplaceModal 
 }) => {
+  // Obter URL da imagem específica ou usar fallback
+  const imageUrl = exercise.gif_url || getExerciseImageUrl(exercise.nome);
+
   return (
     <Card 
       key={index} 
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
     >
-      {/* GIF para todos os usuários */}
-      {exercise.gif_url && (
-        <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md">
-          <img 
-            src={exercise.gif_url} 
-            alt={`GIF do exercício ${exercise.nome}`}
-            className="w-full h-full object-contain" 
-          />
-        </div>
-      )}
+      {/* Imagem do exercício - agora usando a função getExerciseImageUrl */}
+      <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md">
+        <img 
+          src={imageUrl} 
+          alt={`Imagem do exercício ${exercise.nome}`}
+          className="w-full h-full object-contain" 
+        />
+      </div>
 
       <div className="flex items-center justify-between">
         <div>
