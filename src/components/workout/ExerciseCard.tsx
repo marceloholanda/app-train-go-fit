@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
-import { getExerciseImageUrl } from '@/utils/workoutRecommendation';
+import { getExerciseImageUrl, getExerciseVideoUrl } from '@/utils/workoutRecommendation';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -32,6 +32,9 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 }) => {
   // Obter URL da imagem específica ou usar fallback
   const imageUrl = exercise.gif_url || getExerciseImageUrl(exercise.nome);
+  
+  // Verificar se o exercício tem vídeo disponível
+  const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
 
   return (
     <Card 
@@ -39,7 +42,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
     >
-      {/* Imagem do exercício - agora usando a função getExerciseImageUrl */}
+      {/* Imagem do exercício - usando a função getExerciseImageUrl */}
       <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md">
         <img 
           src={imageUrl} 
@@ -53,36 +56,38 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           <h3 className="font-medium">{exercise.nome}</h3>
           <p className="text-gray-400 text-sm">{exercise.reps}</p>
           
-          {/* Aviso de vídeo premium apenas para usuários free */}
-          {!isPremium && (
+          {/* Aviso de vídeo premium apenas para usuários free e se houver vídeo disponível */}
+          {!isPremium && hasVideo && (
             <p className="text-xs text-yellow-400 mt-2 italic">
               Vídeo de demonstração disponível apenas no plano PRO.
             </p>
           )}
         </div>
         <div className="flex items-center space-x-2">
-          {/* Botão de Vídeo - Premium */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onOpenVideoModal(index)}
-                  className="h-8 w-8 rounded-full"
-                >
-                  {isPremium ? (
-                    <Play size={16} />
-                  ) : (
-                    <Lock size={16} className="text-gray-400" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {/* Botão de Vídeo - Premium e apenas se houver vídeo */}
+          {hasVideo && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onOpenVideoModal(index)}
+                    className="h-8 w-8 rounded-full"
+                  >
+                    {isPremium ? (
+                      <Play size={16} className="text-traingo-primary" />
+                    ) : (
+                      <Lock size={16} className="text-gray-400" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
 
           {/* Botão Substituir Exercício */}
           <TooltipProvider>

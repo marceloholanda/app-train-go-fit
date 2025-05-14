@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
 import ExerciseVideoModal from './ExerciseVideoModal';
 import ExerciseReplaceModal from './ExerciseReplaceModal';
-import { getExerciseImageUrl } from '@/utils/workoutRecommendation';
+import { getExerciseImageUrl, getExerciseVideoUrl } from '@/utils/workoutRecommendation';
 import {
   Tooltip,
   TooltipContent,
@@ -34,6 +34,10 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
 
   // Obter URL da imagem específica ou usar fallback
   const imageUrl = exercise.gif_url || getExerciseImageUrl(exercise.nome);
+  
+  // Verificar se o exercício tem vídeo disponível
+  const videoUrl = exercise.video_url || getExerciseVideoUrl(exercise.nome);
+  const hasVideo = Boolean(videoUrl);
 
   const handleReplaceExercise = (newExercise: Exercise) => {
     if (onReplaceExercise) {
@@ -69,28 +73,30 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Botão de Vídeo - Premium */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setIsVideoModalOpen(true)}
-                  className="h-8 w-8 rounded-full"
-                >
-                  {isPremium ? (
-                    <Play size={16} />
-                  ) : (
-                    <Lock size={16} className="text-gray-400" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {/* Botão de Vídeo - Premium e apenas se houver vídeo */}
+          {hasVideo && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setIsVideoModalOpen(true)}
+                    className="h-8 w-8 rounded-full"
+                  >
+                    {isPremium ? (
+                      <Play size={16} className="text-traingo-primary" />
+                    ) : (
+                      <Lock size={16} className="text-gray-400" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
 
           {/* Botão Substituir Exercício */}
           <TooltipProvider>
@@ -118,7 +124,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         exerciseName={exercise.nome}
-        videoUrl={exercise.video_url || ""}
+        videoUrl={videoUrl || ""}
         isPremium={isPremium}
       />
 
