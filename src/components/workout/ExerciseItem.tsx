@@ -39,6 +39,11 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
   const videoUrl = exercise.video_url || getExerciseVideoUrl(exercise.nome);
   const hasVideo = Boolean(videoUrl);
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = 'https://source.unsplash.com/random/400x300/?fitness';
+    e.currentTarget.alt = 'Imagem não encontrada';
+  };
+
   const handleReplaceExercise = (newExercise: Exercise) => {
     if (onReplaceExercise) {
       onReplaceExercise(index, newExercise);
@@ -47,13 +52,21 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
 
   return (
     <div className="bg-traingo-gray border border-gray-700 rounded-xl p-4 mb-3">
-      {/* Imagem do exercício - agora usando a função getExerciseImageUrl */}
+      {/* Imagem do exercício com fallback */}
       <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
-        <img 
-          src={imageUrl} 
-          alt={`Imagem do exercício ${exercise.nome}`}
-          className="w-full h-full object-contain" 
-        />
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={`Imagem do exercício ${exercise.nome}`}
+            className="w-full h-full object-contain" 
+            onError={handleImageError}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-black">
+            <p className="text-sm text-gray-400">Imagem não encontrada</p>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between">
@@ -69,6 +82,13 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
               {exercise.nome}
             </label>
             <p className="text-sm text-gray-400">{exercise.reps}</p>
+            
+            {/* Aviso de vídeo premium apenas para usuários free e se houver vídeo disponível */}
+            {!isPremium && hasVideo && (
+              <p className="text-xs text-yellow-400 mt-1 italic">
+                Vídeo disponível no plano PRO
+              </p>
+            )}
           </div>
         </div>
 
