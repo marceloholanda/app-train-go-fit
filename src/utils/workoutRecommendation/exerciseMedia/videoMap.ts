@@ -60,3 +60,4 @@ export const exerciseVideoMap: Record<string, string> = {
   "Handstand push-up na parede": "https://www.youtube.com/watch?v=XckEEwa1BPI",
   "Hollow hold": "https://vimeo.com/509676778"
 };
+

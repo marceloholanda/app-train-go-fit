@@ -61,3 +61,4 @@ export const exerciseVideoMapPart2: Record<string, string> = {
   "Tríceps mergulho": "https://vimeo.com/1050864289",
   "Tríceps no banco": "https://vimeo.com/569185444"
 };
+

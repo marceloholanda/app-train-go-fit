@@ -62,3 +62,4 @@ export const exerciseImageMapPart2: Record<string, string> = {
   "Tríceps corda": `${SUPABASE_PUBLIC_URL}/images/Triceps_corda.png`,
   "Tríceps francês": `${SUPABASE_PUBLIC_URL}/images/Triceps_frances.png`,
 };
+

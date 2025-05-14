@@ -68,3 +68,4 @@ export const exerciseImageMap: Record<string, string> = {
   "HIIT": `${SUPABASE_PUBLIC_URL}/images/HIIT.png`,
   "Hollow hold": `${SUPABASE_PUBLIC_URL}/images/Hollow%20hold.png`
 };
+
