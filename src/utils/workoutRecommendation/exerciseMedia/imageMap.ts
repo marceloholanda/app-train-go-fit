@@ -66,4 +66,5 @@ export const exerciseImageMap: Record<string, string> = {
   "Gato-vaca": `${SUPABASE_PUBLIC_URL}/images/Gato-vaca.png`,
   "Handstand push-up na parede": `${SUPABASE_PUBLIC_URL}/images/Handstand%20push-up%20na%20parede.png`,
   "HIIT": `${SUPABASE_PUBLIC_URL}/images/HIIT.png`,
-  "Hollow hold": `${SUPABASE_PUBLIC_URL}/images/Hollow%20hold.png`,
+  "Hollow hold": `${SUPABASE_PUBLIC_URL}/images/Hollow%20hold.png`
+};
