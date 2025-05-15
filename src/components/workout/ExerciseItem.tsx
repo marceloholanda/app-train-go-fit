@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
 import ExerciseVideoModal from './ExerciseVideoModal';
 import ExerciseReplaceModal from './ExerciseReplaceModal';
-import { getExerciseImageUrl, getExerciseVideoUrl } from '@/utils/workoutRecommendation';
+import { getExerciseImageUrl, getExerciseVideoUrl, FALLBACK_IMAGE_URL } from '@/utils/workoutRecommendation';
 import {
   Tooltip,
   TooltipContent,
@@ -40,7 +40,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
   const hasVideo = Boolean(videoUrl);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = '/fallback-exercise.png';
+    e.currentTarget.src = FALLBACK_IMAGE_URL;
     e.currentTarget.alt = 'Imagem não encontrada';
   };
 

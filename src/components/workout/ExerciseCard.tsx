@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
-import { getExerciseImageUrl, getExerciseVideoUrl } from '@/utils/workoutRecommendation';
+import { getExerciseImageUrl, getExerciseVideoUrl, FALLBACK_IMAGE_URL } from '@/utils/workoutRecommendation';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -37,7 +37,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = '/fallback-exercise.png';
+    e.currentTarget.src = FALLBACK_IMAGE_URL;
     e.currentTarget.alt = 'Imagem não encontrada';
   };
 
