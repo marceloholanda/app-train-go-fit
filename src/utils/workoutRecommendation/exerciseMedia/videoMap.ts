@@ -58,6 +58,4 @@ export const exerciseVideoMap: Record<string, string> = {
   "Flexão na parede": "https://vimeo.com/569185083",
   "Flexões diamante": "https://vimeo.com/560258760",
   "Handstand push-up na parede": "https://www.youtube.com/watch?v=XckEEwa1BPI",
-  "Hollow hold": "https://vimeo.com/509676778"
-};
-
+  "Hollow hold": "https://vimeo.com/509676778",

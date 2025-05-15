@@ -10,4 +10,5 @@ export * from './planAdaptation';
 export * from './splitCreators/gymSplits';
 export * from './splitCreators/homeSplits';
 export * from './splitCreators/outdoorSplits';
-export * from './exerciseMedia'; // Export everything from exerciseMedia
+export * from './exerciseImages'; // Mantendo a exportação do arquivo wrapper para compatibilidade
+

@@ -1,51 +1,55 @@
 
-import { useState, useEffect } from 'react';
-import { isPremiumUser } from '@/utils/userUtils';
+import { useState } from 'react';
+import { Exercise } from '@/types/workout';
+import { isPremiumUser, hasSeenPremiumWelcome, markPremiumWelcomeSeen } from '@/utils/userUtils';
 
 export const useExerciseModals = () => {
   const [isPremium, setIsPremium] = useState(isPremiumUser());
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
-  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState(-1);
+  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(-1);
   const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
-
+  
+  // Check if user is premium and hasn't seen welcome message
   const checkPremiumStatus = () => {
     const premiumStatus = isPremiumUser();
-    const wasUpgraded = !isPremium && premiumStatus;
     setIsPremium(premiumStatus);
     
-    // Mostrar o modal de boas-vindas para usuários que acabaram de fazer upgrade
-    if (wasUpgraded) {
+    // Show welcome modal if premium and hasn't seen message
+    if (premiumStatus && !hasSeenPremiumWelcome()) {
       setShowPremiumWelcome(true);
     }
   };
-
-  const handleOpenVideoModal = (index: number) => {
-    setSelectedExerciseIndex(index);
+  
+  const handleOpenVideoModal = (exerciseIndex: number) => {
+    setSelectedExerciseIndex(exerciseIndex);
     setIsVideoModalOpen(true);
   };
 
-  const handleOpenReplaceModal = (index: number) => {
-    setSelectedExerciseIndex(index);
+  const handleOpenReplaceModal = (exerciseIndex: number) => {
+    setSelectedExerciseIndex(exerciseIndex);
     setIsReplaceModalOpen(true);
   };
 
   const handleClosePremiumWelcome = () => {
     setShowPremiumWelcome(false);
+    markPremiumWelcomeSeen();
   };
-
+  
   return {
     isPremium,
+    setIsPremium,
     isVideoModalOpen,
     setIsVideoModalOpen,
     isReplaceModalOpen,
     setIsReplaceModalOpen,
-    isAddExerciseModalOpen,
+    isAddExerciseModalOpen, 
     setIsAddExerciseModalOpen,
     selectedExerciseIndex,
     setSelectedExerciseIndex,
     showPremiumWelcome,
+    setShowPremiumWelcome,
     handleOpenVideoModal,
     handleOpenReplaceModal,
     handleClosePremiumWelcome,
