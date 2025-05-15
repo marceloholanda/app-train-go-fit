@@ -12,13 +12,18 @@ export const SUPABASE_IMAGE_BASE_URL = "https://ipzrgpmsmasuzlaomuxj.supabase.co
  * @returns Nome normalizado (sem acentos, caracteres especiais, espaços substituídos por underscore)
  */
 function normalizeExerciseName(name: string): string {
-  return name
+  if (!name) return "";
+  
+  const normalized = name
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^\w\s]/gi, "")
     .trim()
     .replace(/\s+/g, "_");
+  
+  console.log(`Nome original: "${name}" → Normalizado: "${normalized}"`);
+  return normalized;
 }
 
 /**
@@ -27,13 +32,34 @@ function normalizeExerciseName(name: string): string {
  * @returns URL da imagem no bucket público do Supabase
  */
 export function getExerciseImageUrl(exerciseName: string): string {
-  if (!exerciseName) return "";
+  if (!exerciseName) {
+    console.warn("Nome do exercício vazio ao gerar URL da imagem");
+    return FALLBACK_IMAGE_URL;
+  }
   
   const normalized = normalizeExerciseName(exerciseName);
-  return `${SUPABASE_IMAGE_BASE_URL}/${normalized}.png`;
+  const imageUrl = `${SUPABASE_IMAGE_BASE_URL}/${normalized}.png`;
+  
+  console.log(`URL gerada para "${exerciseName}": ${imageUrl}`);
+  return imageUrl;
 }
 
 /**
  * Caminho para imagem de fallback caso a imagem do exercício não seja encontrada
  */
 export const FALLBACK_IMAGE_URL = "/fallback-exercise.png";
+
+/**
+ * Verifica se uma URL existe (para uso em debug)
+ * @param url URL da imagem a verificar
+ * @returns Promise que resolve para true se a imagem existe, false caso contrário
+ */
+export async function checkImageExists(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    console.error(`Erro ao verificar existência da imagem: ${url}`, error);
+    return false;
+  }
+}

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Exercise } from '@/types/workout';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Lock, Play, Replace } from 'lucide-react';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
 import ExerciseVideoModal from './ExerciseVideoModal';
 import ExerciseReplaceModal from './ExerciseReplaceModal';
-import { getExerciseImageUrl, getExerciseVideoUrl, FALLBACK_IMAGE_URL } from '@/utils/workoutRecommendation';
+import { getExerciseImageUrl, getExerciseVideoUrl, FALLBACK_IMAGE_URL, checkImageExists } from '@/utils/workoutRecommendation';
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +30,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
 }) => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
+  const [imageStatus, setImageStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const isPremium = isPremiumUser();
 
   // Obter URL da imagem específica
@@ -39,9 +40,29 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
   const videoUrl = exercise.video_url || getExerciseVideoUrl(exercise.nome);
   const hasVideo = Boolean(videoUrl);
 
+  // Debug: verificar disponibilidade da imagem
+  useEffect(() => {
+    const debugImage = async () => {
+      if (imageUrl) {
+        console.log(`Verificando imagem para ${exercise.nome}:`, imageUrl);
+        const exists = await checkImageExists(imageUrl);
+        console.log(`Imagem ${imageUrl} ${exists ? 'existe' : 'NÃO existe'}`);
+      }
+    };
+    
+    debugImage();
+  }, [imageUrl, exercise.nome]);
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error(`Erro ao carregar imagem: ${imageUrl}`);
+    setImageStatus('error');
     e.currentTarget.src = FALLBACK_IMAGE_URL;
     e.currentTarget.alt = 'Imagem não encontrada';
+  };
+
+  const handleImageLoad = () => {
+    console.log(`Imagem carregada com sucesso: ${imageUrl}`);
+    setImageStatus('success');
   };
 
   const handleReplaceExercise = (newExercise: Exercise) => {
@@ -52,20 +73,29 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
 
   return (
     <div className="bg-traingo-gray border border-gray-700 rounded-xl p-4 mb-3">
-      {/* Imagem do exercício com fallback - Agora mais responsiva */}
-      <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
-        {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={`Imagem do exercício ${exercise.nome}`}
-            className="w-full h-full object-contain" 
-            onError={handleImageError}
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-black">
-            <p className="text-sm text-gray-400">Imagem não encontrada</p>
+      {/* Imagem do exercício com fallback - Agora mais responsiva e com loading */}
+      <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden relative">
+        {imageStatus === 'loading' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <div className="w-6 h-6 border-2 border-traingo-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
+        )}
+        
+        <img 
+          src={imageUrl} 
+          alt={`Imagem do exercício ${exercise.nome}`}
+          className={`w-full h-full object-contain ${imageStatus === 'loading' ? 'opacity-0' : 'opacity-100'}`}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+          loading="lazy"
+          data-exercise-name={exercise.nome}
+        />
+      </div>
+
+      {/* Debug: mostrar status da imagem */}
+      <div className="text-xs mb-2">
+        {imageStatus === 'error' && (
+          <p className="text-red-500">⚠️ Imagem não encontrada</p>
         )}
       </div>
 

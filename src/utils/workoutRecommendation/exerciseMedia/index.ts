@@ -9,7 +9,11 @@ import { exerciseImageMapPart2 } from './imageMapPart2';
 import { exerciseVideoMap } from './videoMap';
 import { exerciseVideoMapPart2 } from './videoMapPart2';
 import { SUPABASE_PUBLIC_URL } from './constants';
-import { getExerciseImageUrl as getSupabaseExerciseImageUrl, FALLBACK_IMAGE_URL } from './supabase';
+import { 
+  getExerciseImageUrl as getSupabaseExerciseImageUrl, 
+  FALLBACK_IMAGE_URL,
+  checkImageExists
+} from './supabase';
 
 // Combinando os mapas para uso interno (agora vazios, mantidos por compatibilidade)
 const combinedImageMap = { ...exerciseImageMap, ...exerciseImageMapPart2 };
@@ -21,9 +25,7 @@ const combinedVideoMap = { ...exerciseVideoMap, ...exerciseVideoMapPart2 };
  * @param exerciseName Nome do exercício
  * @returns URL da imagem específica ou URL construída automaticamente
  */
-export const getExerciseImageUrl = (exerciseName: string): string => {
-  return getSupabaseExerciseImageUrl(exerciseName);
-};
+export const getExerciseImageUrl = getSupabaseExerciseImageUrl;
 
 /**
  * Função para obter a URL do vídeo de um exercício
@@ -40,4 +42,4 @@ export const allExerciseVideos = combinedVideoMap;
 
 // Re-exportar constantes úteis
 export { SUPABASE_PUBLIC_URL } from './constants';
-export { FALLBACK_IMAGE_URL, getExerciseImageUrl as getSupabaseExerciseImageUrl } from './supabase';
+export { FALLBACK_IMAGE_URL, checkImageExists } from './supabase';
