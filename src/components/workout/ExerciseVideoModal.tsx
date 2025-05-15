@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Video } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -57,67 +57,24 @@ const ExerciseVideoModal: React.FC<ExerciseVideoModalProps> = ({
       </Dialog>
     );
   }
-
-  // Se o videoUrl não estiver disponível
-  if (!videoUrl) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Vídeo não disponível</DialogTitle>
-            <DialogDescription>
-              O vídeo para este exercício não está disponível no momento.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="secondary" onClick={onClose}>
-              Fechar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
   
-  // Prepara a URL para incorporação (embed) do Vimeo ou YouTube
-  const getEmbedUrl = (url: string): string => {
-    if (url.includes('vimeo.com')) {
-      // Extrai o ID do Vimeo da URL
-      const vimeoId = url.split('/').pop();
-      return `https://player.vimeo.com/video/${vimeoId}`;
-    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      // Extrai o ID do YouTube da URL
-      let youtubeId = '';
-      if (url.includes('youtube.com/watch?v=')) {
-        youtubeId = url.split('v=')[1].split('&')[0];
-      } else if (url.includes('youtu.be/')) {
-        youtubeId = url.split('youtu.be/')[1].split('?')[0];
-      }
-      return `https://www.youtube.com/embed/${youtubeId}`;
-    }
-    
-    // Retorna a URL original se não for Vimeo nem YouTube
-    return url;
-  };
-  
-  const embedUrl = getEmbedUrl(videoUrl);
+  // Usar um URL de vídeo padrão para teste se não houver um
+  const displayUrl = videoUrl || "https://player.vimeo.com/video/467746018";
   
   // Modal para usuários premium com vídeo incorporado
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center">
-            <Video className="mr-2 h-5 w-5 text-traingo-primary" />
-            {exerciseName}
-          </DialogTitle>
-          <DialogDescription>
-            Observe atentamente a execução correta do exercício
-          </DialogDescription>
+          <DialogTitle>Execução do exercício: {exerciseName}</DialogTitle>
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Fechar</span>
+          </DialogClose>
         </DialogHeader>
         <div className="aspect-video w-full bg-black">
           <iframe
-            src={embedUrl}
+            src={displayUrl}
             className="w-full h-full"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

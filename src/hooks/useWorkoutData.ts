@@ -4,7 +4,7 @@ import { Exercise } from '@/types/workout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { updateWorkoutProgress } from '@/utils/workoutUtils';
-import { getExerciseImageUrl, getExerciseVideoUrl } from '@/utils/workoutRecommendation';
+import { getExerciseImageUrl } from '@/utils/workoutRecommendation';
 
 export const useWorkoutData = (id: string | undefined) => {
   const navigate = useNavigate();
@@ -69,25 +69,12 @@ export const useWorkoutData = (id: string | undefined) => {
         setWorkoutDay(`Dia ${dayNumber}`);
         
         // Carregar status de conclusão individual dos exercícios (se salvo)
-        // Adicionar URLs de imagem e vídeo se não estiverem presentes
-        const savedExercises = user[`exercises_day${dayNumber}`] || dayExercises.map((ex: Exercise) => {
-          const exercise = { ...ex, completed: false };
-          
-          // Adicionar URL da imagem se não existir
-          if (!exercise.gif_url) {
-            exercise.gif_url = getExerciseImageUrl(exercise.nome);
-          }
-          
-          // Adicionar URL do vídeo se não existir
-          if (!exercise.video_url) {
-            const videoUrl = getExerciseVideoUrl(exercise.nome);
-            if (videoUrl) {
-              exercise.video_url = videoUrl;
-            }
-          }
-          
-          return exercise;
-        });
+        const savedExercises = user[`exercises_day${dayNumber}`] || dayExercises.map((ex: Exercise) => ({ 
+          ...ex, 
+          completed: false,
+          // Usar a função de mapeamento para obter URL da imagem
+          gif_url: ex.gif_url || getExerciseImageUrl(ex.nome)
+        }));
         
         setExercises(savedExercises);
       } catch (error) {
