@@ -36,32 +36,19 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   // Verificar se o exercício tem vídeo disponível
   const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = 'https://source.unsplash.com/random/400x300/?fitness';
-    e.currentTarget.alt = 'Imagem não encontrada';
-  };
-
   return (
     <Card 
       key={index} 
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
     >
-      {/* Imagem do exercício com fallback */}
-      <div className="w-full h-32 mb-3 bg-traingo-gray rounded-lg overflow-hidden shadow-md">
-        {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={`Imagem do exercício ${exercise.nome}`}
-            className="w-full h-full object-contain" 
-            onError={handleImageError}
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-traingo-gray">
-            <p className="text-sm text-gray-400">Imagem não encontrada</p>
-          </div>
-        )}
+      {/* Imagem do exercício - usando a função getExerciseImageUrl */}
+      <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md">
+        <img 
+          src={imageUrl} 
+          alt={`Imagem do exercício ${exercise.nome}`}
+          className="w-full h-full object-contain" 
+        />
       </div>
 
       <div className="flex items-center justify-between">
