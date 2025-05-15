@@ -32,7 +32,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const isPremium = isPremiumUser();
 
-  // Obter URL da imagem específica ou usar fallback
+  // Obter URL da imagem específica
   const imageUrl = exercise.gif_url || getExerciseImageUrl(exercise.nome);
   
   // Verificar se o exercício tem vídeo disponível
@@ -40,7 +40,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
   const hasVideo = Boolean(videoUrl);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = 'https://source.unsplash.com/random/400x300/?fitness';
+    e.currentTarget.src = '/fallback-exercise.png';
     e.currentTarget.alt = 'Imagem não encontrada';
   };
 
@@ -52,7 +52,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
 
   return (
     <div className="bg-traingo-gray border border-gray-700 rounded-xl p-4 mb-3">
-      {/* Imagem do exercício com fallback */}
+      {/* Imagem do exercício com fallback - Agora mais responsiva */}
       <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
         {imageUrl ? (
           <img 

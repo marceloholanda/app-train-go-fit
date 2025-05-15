@@ -30,14 +30,14 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   onOpenVideoModal, 
   onOpenReplaceModal 
 }) => {
-  // Obter URL da imagem específica ou usar fallback
+  // Obter URL da imagem específica
   const imageUrl = exercise.gif_url || getExerciseImageUrl(exercise.nome);
   
   // Verificar se o exercício tem vídeo disponível
   const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = 'https://source.unsplash.com/random/400x300/?fitness';
+    e.currentTarget.src = '/fallback-exercise.png';
     e.currentTarget.alt = 'Imagem não encontrada';
   };
 
