@@ -1,31 +1,14 @@
 
 /**
  * Ponto de entrada para o módulo de mídia de exercícios
- * Este arquivo combina todos os mapas e expõe funções de utilidade para acesso fácil
+ * Toda a lógica relacionada a imagens foi removida conforme solicitado
  */
 
-import { exerciseImageMap } from './imageMap';
-import { exerciseImageMapPart2 } from './imageMapPart2';
 import { exerciseVideoMap } from './videoMap';
 import { exerciseVideoMapPart2 } from './videoMapPart2';
-import { SUPABASE_PUBLIC_URL } from './constants';
-import { 
-  getExerciseImageUrl as getSupabaseExerciseImageUrl, 
-  FALLBACK_IMAGE_URL,
-  checkImageExists
-} from './supabase';
 
-// Combinando os mapas para uso interno (agora vazios, mantidos por compatibilidade)
-const combinedImageMap = { ...exerciseImageMap, ...exerciseImageMapPart2 };
+// Combinando os mapas de vídeos para uso interno
 const combinedVideoMap = { ...exerciseVideoMap, ...exerciseVideoMapPart2 };
-
-/**
- * Função para obter a URL da imagem de um exercício
- * Agora usa a abordagem do Supabase com bucket público
- * @param exerciseName Nome do exercício
- * @returns URL da imagem específica ou URL construída automaticamente
- */
-export const getExerciseImageUrl = getSupabaseExerciseImageUrl;
 
 /**
  * Função para obter a URL do vídeo de um exercício
@@ -36,10 +19,8 @@ export const getExerciseVideoUrl = (exerciseName: string): string | null => {
   return combinedVideoMap[exerciseName] || null;
 };
 
-// Expor os mapas combinados para acesso direto se necessário
-export const allExerciseImages = combinedImageMap;
+// Expor o mapa combinado para acesso direto se necessário
 export const allExerciseVideos = combinedVideoMap;
 
 // Re-exportar constantes úteis
-export { SUPABASE_PUBLIC_URL } from './constants';
-export { FALLBACK_IMAGE_URL, checkImageExists } from './supabase';
+export { FALLBACK_IMAGE_URL } from './supabase';

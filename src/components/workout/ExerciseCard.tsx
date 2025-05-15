@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { CheckCircle, Play, Replace, Lock } from 'lucide-react';
 import { Exercise } from '@/types/workout';
 import Card from '@/components/Card';
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
-import { getExerciseImageUrl, getExerciseVideoUrl, FALLBACK_IMAGE_URL, checkImageExists } from '@/utils/workoutRecommendation';
+import { getExerciseVideoUrl } from '@/utils/workoutRecommendation';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -30,38 +30,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   onOpenVideoModal, 
   onOpenReplaceModal 
 }) => {
-  const [imageStatus, setImageStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  
-  // Obter URL da imagem específica
-  const imageUrl = exercise.gif_url || getExerciseImageUrl(exercise.nome);
-  
   // Verificar se o exercício tem vídeo disponível
   const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
-
-  // Debug: verificar disponibilidade da imagem
-  useEffect(() => {
-    const debugImage = async () => {
-      if (imageUrl) {
-        console.log(`Verificando imagem para ${exercise.nome}:`, imageUrl);
-        const exists = await checkImageExists(imageUrl);
-        console.log(`Imagem ${imageUrl} ${exists ? 'existe' : 'NÃO existe'}`);
-      }
-    };
-    
-    debugImage();
-  }, [imageUrl, exercise.nome]);
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.error(`Erro ao carregar imagem: ${imageUrl}`);
-    setImageStatus('error');
-    e.currentTarget.src = FALLBACK_IMAGE_URL;
-    e.currentTarget.alt = 'Imagem não encontrada';
-  };
-
-  const handleImageLoad = () => {
-    console.log(`Imagem carregada com sucesso: ${imageUrl}`);
-    setImageStatus('success');
-  };
 
   return (
     <Card 
@@ -69,30 +39,11 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
     >
-      {/* Imagem do exercício com fallback e indicador de loading */}
-      <div className="w-full h-32 mb-3 bg-traingo-gray rounded-lg overflow-hidden shadow-md relative">
-        {imageStatus === 'loading' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-traingo-gray">
-            <div className="w-6 h-6 border-2 border-traingo-primary border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-        
-        <img 
-          src={imageUrl} 
-          alt={`Imagem do exercício ${exercise.nome}`}
-          className={`w-full h-full object-contain ${imageStatus === 'loading' ? 'opacity-0' : 'opacity-100'}`} 
-          onError={handleImageError}
-          onLoad={handleImageLoad}
-          loading="lazy"
-          data-exercise-name={exercise.nome}
-        />
-      </div>
-
-      {/* Debug: mostrar status da imagem */}
-      <div className="text-xs mb-2">
-        {imageStatus === 'error' && (
-          <p className="text-red-500">⚠️ Imagem não encontrada</p>
-        )}
+      {/* Área de apresentação do exercício - sem imagem */}
+      <div className="w-full h-32 mb-3 bg-traingo-gray rounded-lg overflow-hidden shadow-md flex items-center justify-center">
+        <div className="text-center p-4">
+          <p className="text-gray-400">{exercise.grupo_muscular || "Exercício"}</p>
+        </div>
       </div>
 
       <div className="flex items-center justify-between">
