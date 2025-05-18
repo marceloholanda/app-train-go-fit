@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '@/components/Card';
@@ -126,7 +127,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen pb-16">
+    <div className="min-h-screen pb-24">
       {/* Header */}
       <header className="bg-traingo-gray p-6">
         <h1 className="text-2xl font-bold mb-1">

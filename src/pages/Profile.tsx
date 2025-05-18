@@ -55,7 +55,7 @@ const Profile = () => {
   const isPremium = userData?.isPremium || false;
 
   return (
-    <div className="min-h-screen pb-16">
+    <div className="min-h-screen pb-24">
       <ProfileHeader userData={userData} setUserData={setUserData} />
 
       {/* Avaliação Mensal e Banner de Onboarding */}

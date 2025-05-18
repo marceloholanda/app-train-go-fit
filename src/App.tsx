@@ -8,11 +8,10 @@ import Register from './pages/Register';
 import Onboarding from './pages/Onboarding';
 import ExerciseDetail from './pages/ExerciseDetail';
 import Upgrade from './pages/Upgrade';
+import Profile from './pages/Profile';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-// Import our diagnostic and list extractor components
-import ExerciseImageDiagnostic from './components/workout/ExerciseImageDiagnostic';
-import ExerciseListExtractor from './components/admin/ExerciseListExtractor';
+import BottomNav from './components/layout/BottomNav';
 
 const App = () => {
   const { currentUser } = useAuth();
@@ -27,11 +26,11 @@ const App = () => {
         <Route path="/onboarding" element={currentUser ? <Onboarding /> : <Navigate to="/login" />} />
         <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
         <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
-        
-        {/* Admin routes for image diagnostics and exercise extraction */}
-        <Route path="/admin/image-diagnostic" element={<ExerciseImageDiagnostic />} />
-        <Route path="/admin/exercise-list" element={<ExerciseListExtractor />} />
+        <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
       </Routes>
+      
+      {/* Only show bottom navigation when user is logged in */}
+      {currentUser && <BottomNav />}
       
       <Toaster />
     </div>
