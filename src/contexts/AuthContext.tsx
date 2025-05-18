@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,14 +28,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Mock login function (simulação enquanto não usamos Supabase Auth)
   const login = async (email: string, password: string) => {
     try {
-      // For now, just create a mock user object
-      const user = { email, id: 'mock-user-id' };
+      console.log("[TrainGO] Attempting to login:", email);
+      
+      // Check if user exists in localStorage (from onboarding)
+      const existingUserData = localStorage.getItem('traingo-user');
+      
+      if (existingUserData) {
+        const userData = JSON.parse(existingUserData);
+        // If the email matches, use that user data
+        if (userData.email === email) {
+          console.log("[TrainGO] Found existing user data, using it");
+          setCurrentUser(userData);
+          return;
+        }
+      }
+      
+      // Otherwise create a new basic user
+      const user = { 
+        email, 
+        id: 'mock-user-id',
+        name: email.split('@')[0] 
+      };
+      
+      console.log("[TrainGO] Creating new user:", user.name);
       
       // Store in localStorage as a simple auth mechanism
       localStorage.setItem('traingo-user', JSON.stringify(user));
       setCurrentUser(user);
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('[TrainGO] Login error:', error);
       throw error;
     }
   };
@@ -44,10 +64,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Mock logout function
   const logout = async () => {
     try {
+      console.log("[TrainGO] Logging out user");
       localStorage.removeItem('traingo-user');
       setCurrentUser(null);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('[TrainGO] Logout error:', error);
       throw error;
     }
   };
@@ -56,12 +77,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const checkAuthState = () => {
       try {
+        console.log("[TrainGO] Checking auth state...");
         const userData = localStorage.getItem('traingo-user');
         if (userData) {
+          console.log("[TrainGO] Found user data in localStorage");
           setCurrentUser(JSON.parse(userData));
+        } else {
+          console.log("[TrainGO] No user data found in localStorage");
         }
       } catch (error) {
-        console.error('Auth state check error:', error);
+        console.error('[TrainGO] Auth state check error:', error);
       } finally {
         setLoading(false);
       }

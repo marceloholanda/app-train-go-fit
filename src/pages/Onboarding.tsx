@@ -66,6 +66,8 @@ const Onboarding = () => {
       const recommendedPlan = findBestWorkoutPlan(quizAnswers);
       const message = generatePersonalizedMessage(quizAnswers, recommendedPlan);
       
+      console.log("[TrainGO] Recommended workout plan:", recommendedPlan);
+      
       // Convert weight and height ranges to approximate numbers for IMC calculation
       const weight_exact = weightRangeToNumber(quizAnswers.weight);
       const height_exact = heightRangeToNumber(quizAnswers.height);
@@ -74,6 +76,7 @@ const Onboarding = () => {
       // Salvar o plano de treino no localStorage
       const userData = {
         ...registrationData,
+        id: 'mock-user-id', // ID para autenticação
         profile: {
           ...quizAnswers,
           weight_exact,
@@ -99,6 +102,7 @@ const Onboarding = () => {
 
       setShowResults(true);
     } catch (error) {
+      console.error("[TrainGO] Erro no cadastro:", error);
       toast({
         title: "Erro no cadastro",
         description: "Não foi possível concluir o cadastro. Tente novamente.",
@@ -110,6 +114,7 @@ const Onboarding = () => {
   };
 
   const goToDashboard = () => {
+    console.log("[TrainGO] Navegando para o dashboard com plano:", workoutPlan);
     navigate('/dashboard');
   }
 
