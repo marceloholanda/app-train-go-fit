@@ -1,50 +1,48 @@
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate
+} from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Onboarding from './pages/Onboarding';
+import ExerciseDetail from './pages/ExerciseDetail';
+import Upgrade from './pages/Upgrade';
+import { Toaster } from '@/components/ui/toaster';
+import { useToast } from '@/hooks/use-toast';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// Import our diagnostic component
+import ExerciseImageDiagnostic from './components/workout/ExerciseImageDiagnostic';
 
-// Pages
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
-import ExerciseDetail from "./pages/ExerciseDetail";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import Upgrade from "./pages/Upgrade";
-import NotFound from "./pages/NotFound";
-import AuthLayout from "./layouts/AuthLayout";
+const App = () => {
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+  return (
+    <div className="bg-background text-foreground">
+      <Routes>
+        <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
+        <Route path="/register" element={currentUser ? <Navigate to="/dashboard" /> : <Register />} />
+        <Route path="/dashboard" element={currentUser ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/onboarding" element={currentUser ? <Onboarding /> : <Navigate to="/login" />} />
+        <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
+        <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
+        
+        {/* Add diagnostic route */}
+        <Route 
+          path="/admin/image-diagnostic" 
+          element={
+            <ExerciseImageDiagnostic />
+          } 
+        />
+      </Routes>
       <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          
-          {/* Protected routes with tab navigation */}
-          <Route path="/" element={<AuthLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/exercise/:id" element={<ExerciseDetail />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/upgrade" element={<Upgrade />} />
-          </Route>
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </div>
+  );
+}
 
 export default App;
