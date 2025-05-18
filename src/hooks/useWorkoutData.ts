@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Exercise } from '@/types/workout';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +12,7 @@ export const useWorkoutData = (id: string | undefined) => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [userLevel, setUserLevel] = useState<string>('beginner'); // Adicionado o estado para o nível do usuário
+  const [userLevel, setUserLevel] = useState<string>('beginner');
 
   useEffect(() => {
     const loadWorkoutData = () => {
@@ -70,9 +69,7 @@ export const useWorkoutData = (id: string | undefined) => {
         // Carregar status de conclusão individual dos exercícios (se salvo)
         const savedExercises = user[`exercises_day${dayNumber}`] || dayExercises.map((ex: Exercise) => ({ 
           ...ex, 
-          completed: false,
-          // Adicionar URL de GIF padrão se não existir
-          gif_url: ex.gif_url || `https://source.unsplash.com/random/400x300/?${encodeURIComponent(ex.nome.replace(' ', '-'))}&fitness`
+          completed: false
         }));
         
         setExercises(savedExercises);

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
 import ExerciseVideoModal from './ExerciseVideoModal';
 import ExerciseReplaceModal from './ExerciseReplaceModal';
+import { getExerciseImageUrl, handleImageError } from '@/utils/workoutRecommendation/exerciseImages';
 import {
   Tooltip,
   TooltipContent,
@@ -39,16 +40,15 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
 
   return (
     <div className="bg-traingo-gray border border-gray-700 rounded-xl p-4 mb-3">
-      {/* GIF para todos os usuários */}
-      {exercise.gif_url && (
-        <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden">
-          <img 
-            src={exercise.gif_url} 
-            alt={`GIF do exercício ${exercise.nome}`}
-            className="w-full h-full object-contain" 
-          />
-        </div>
-      )}
+      {/* Imagem do exercício - Usando Supabase */}
+      <div className="w-full h-36 mb-3 bg-black/10 rounded-lg overflow-hidden">
+        <img 
+          src={getExerciseImageUrl(exercise.nome)}
+          alt={`Imagem do exercício ${exercise.nome}`}
+          className="w-full h-full object-cover" 
+          onError={handleImageError}
+        />
+      </div>
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

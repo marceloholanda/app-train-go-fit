@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
+import { getExerciseImageUrl, handleImageError } from '@/utils/workoutRecommendation/exerciseImages';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -35,16 +36,15 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
     >
-      {/* GIF para todos os usuários */}
-      {exercise.gif_url && (
-        <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md">
-          <img 
-            src={exercise.gif_url} 
-            alt={`GIF do exercício ${exercise.nome}`}
-            className="w-full h-full object-contain" 
-          />
-        </div>
-      )}
+      {/* Imagem do exercício - Usando Supabase */}
+      <div className="w-full h-36 mb-3 bg-black/10 rounded-lg overflow-hidden shadow-md">
+        <img 
+          src={getExerciseImageUrl(exercise.nome)}
+          alt={`Imagem do exercício ${exercise.nome}`}
+          className="w-full h-full object-cover" 
+          onError={handleImageError}
+        />
+      </div>
 
       <div className="flex items-center justify-between">
         <div>
