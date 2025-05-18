@@ -27,11 +27,14 @@ export const useDashboardData = () => {
           const parsedUser = JSON.parse(user);
           console.log("[TrainGO] User data loaded:", parsedUser.name);
           console.log("[TrainGO] Workout plan:", parsedUser.workoutPlan ? "Found" : "Not found");
+          console.log("[TrainGO] Full user data:", parsedUser); // Log completo para debug
           
           setUserData(parsedUser);
           
           // Processar o plano de treino
           if (parsedUser.workoutPlan) {
+            console.log("[TrainGO] Processing workout plan with ID:", parsedUser.workoutPlan.id);
+            console.log("[TrainGO] Plan structure:", Object.keys(parsedUser.workoutPlan.plan));
             processWorkoutPlan(parsedUser);
           } else {
             console.error("[TrainGO] No workout plan found in user data");

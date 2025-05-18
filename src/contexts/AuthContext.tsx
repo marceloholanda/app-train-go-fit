@@ -1,4 +1,6 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define the Auth context type
@@ -24,6 +26,7 @@ export function useAuth() {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Mock login function (simulação enquanto não usamos Supabase Auth)
   const login = async (email: string, password: string) => {
@@ -67,6 +70,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("[TrainGO] Logging out user");
       localStorage.removeItem('traingo-user');
       setCurrentUser(null);
+      
+      // Redirecionar para a página de login após logout
+      console.log("[TrainGO] Redirecting to login page after logout");
+      navigate('/login');
     } catch (error) {
       console.error('[TrainGO] Logout error:', error);
       throw error;
