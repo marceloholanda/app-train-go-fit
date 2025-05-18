@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Dumbbell, User, Settings } from 'lucide-react';
+import { Home, User, Settings } from 'lucide-react';
 
 const BottomNav = () => {
   const location = useLocation();
@@ -25,18 +25,6 @@ const BottomNav = () => {
         >
           <Home size={20} />
           <span className="text-xs mt-1">Home</span>
-        </NavLink>
-        
-        <NavLink 
-          to="/exercise/1" 
-          className={({ isActive }) => 
-            `flex flex-col items-center justify-center w-full h-full ${
-              isActive || pathname.startsWith('/exercise') ? 'text-traingo-primary' : 'text-gray-400'
-            }`
-          }
-        >
-          <Dumbbell size={20} />
-          <span className="text-xs mt-1">Treinos</span>
         </NavLink>
         
         <NavLink 

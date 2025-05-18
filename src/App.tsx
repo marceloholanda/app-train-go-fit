@@ -9,6 +9,7 @@ import Onboarding from './pages/Onboarding';
 import ExerciseDetail from './pages/ExerciseDetail';
 import Upgrade from './pages/Upgrade';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import BottomNav from './components/layout/BottomNav';
@@ -23,10 +24,12 @@ const App = () => {
         <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/register" element={currentUser ? <Navigate to="/dashboard" /> : <Register />} />
         <Route path="/dashboard" element={currentUser ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
         <Route path="/onboarding" element={currentUser ? <Onboarding /> : <Navigate to="/login" />} />
         <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
         <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
         <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={currentUser ? <Settings /> : <Navigate to="/login" />} />
       </Routes>
       
       {/* Only show bottom navigation when user is logged in */}
