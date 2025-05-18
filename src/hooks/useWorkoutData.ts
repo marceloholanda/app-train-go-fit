@@ -4,7 +4,6 @@ import { Exercise } from '@/types/workout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { updateWorkoutProgress } from '@/utils/workoutUtils';
-import { getExerciseImageUrl } from '@/utils/workoutRecommendation';
 
 export const useWorkoutData = (id: string | undefined) => {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ export const useWorkoutData = (id: string | undefined) => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [userLevel, setUserLevel] = useState<string>('beginner');
+  const [userLevel, setUserLevel] = useState<string>('beginner'); // Adicionado o estado para o nível do usuário
 
   useEffect(() => {
     const loadWorkoutData = () => {
@@ -72,8 +71,8 @@ export const useWorkoutData = (id: string | undefined) => {
         const savedExercises = user[`exercises_day${dayNumber}`] || dayExercises.map((ex: Exercise) => ({ 
           ...ex, 
           completed: false,
-          // Usar a função de mapeamento para obter URL da imagem
-          gif_url: ex.gif_url || getExerciseImageUrl(ex.nome)
+          // Adicionar URL de GIF padrão se não existir
+          gif_url: ex.gif_url || `https://source.unsplash.com/random/400x300/?${encodeURIComponent(ex.nome.replace(' ', '-'))}&fitness`
         }));
         
         setExercises(savedExercises);
