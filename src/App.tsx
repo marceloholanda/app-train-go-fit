@@ -1,11 +1,7 @@
 
 import React from 'react';
-import {
-  Route,
-  Routes,
-  Navigate
-} from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -14,9 +10,9 @@ import ExerciseDetail from './pages/ExerciseDetail';
 import Upgrade from './pages/Upgrade';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-
-// Import our diagnostic component
+// Import our diagnostic and list extractor components
 import ExerciseImageDiagnostic from './components/workout/ExerciseImageDiagnostic';
+import ExerciseListExtractor from './components/admin/ExerciseListExtractor';
 
 const App = () => {
   const { currentUser } = useAuth();
@@ -32,17 +28,14 @@ const App = () => {
         <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
         <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
         
-        {/* Add diagnostic route */}
-        <Route 
-          path="/admin/image-diagnostic" 
-          element={
-            <ExerciseImageDiagnostic />
-          } 
-        />
+        {/* Admin routes for image diagnostics and exercise extraction */}
+        <Route path="/admin/image-diagnostic" element={<ExerciseImageDiagnostic />} />
+        <Route path="/admin/exercise-list" element={<ExerciseListExtractor />} />
       </Routes>
+      
       <Toaster />
     </div>
   );
-}
+};
 
 export default App;
