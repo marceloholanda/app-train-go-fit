@@ -83,11 +83,13 @@ export const useDashboardData = () => {
     // Cria os cards de treino para o dashboard
     const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercises], index) => {
       const dayNumber = index + 1;
-      const workoutItem = {
+      const workoutStatus: 'completed' | 'pending' = completedWorkouts.includes(dayNumber) ? 'completed' : 'pending';
+      
+      const workoutItem: WorkoutDisplay = {
         id: dayNumber,
         name: generateWorkoutName(dayNumber, exercises),
         day: weekDays[index] || `Dia ${dayNumber}`,
-        status: completedWorkouts.includes(dayNumber) ? 'completed' : 'pending',
+        status: workoutStatus,
         exercises: exercises.length,
         icon: getWorkoutIcon(exercises)
       };
