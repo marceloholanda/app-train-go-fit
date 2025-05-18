@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
@@ -31,6 +30,16 @@ const Onboarding = () => {
   const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
   const [personalizedMessage, setPersonalizedMessage] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const dashboardButtonRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Quando os resultados são mostrados, rolar para garantir que o botão esteja visível
+    if (showResults && dashboardButtonRef.current) {
+      setTimeout(() => {
+        dashboardButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 500);
+    }
+  }, [showResults]);
 
   const handleOptionSelect = (questionId: keyof QuizAnswers, value: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -139,7 +148,7 @@ const Onboarding = () => {
             personalizedMessage={personalizedMessage}
           />
           
-          <div className="mt-10 text-center">
+          <div className="mt-10 mb-28 pb-4 text-center" ref={dashboardButtonRef}>
             <Button 
               onClick={goToDashboard}
               rightIcon={<ArrowRight />}
