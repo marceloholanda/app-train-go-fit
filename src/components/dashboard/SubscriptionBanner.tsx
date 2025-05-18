@@ -33,7 +33,7 @@ const SubscriptionBanner: React.FC = () => {
       </div>
       <h3 className="font-bold text-lg mb-2">Desbloqueie Mais Treinos</h3>
       <p className="text-gray-300 text-sm mb-3">
-        Acesse o plano PRO e tenha um treino D exclusivo + exercícios adicionais.
+        Acesse o plano PRO e tenha um treino exclusivo + exercícios adicionais.
       </p>
       <div className="text-traingo-primary font-bold text-sm">Saiba mais →</div>
     </div>
