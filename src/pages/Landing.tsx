@@ -5,17 +5,18 @@ import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import PrimaryButton from '@/components/PrimaryButton';
 import { ChevronRight, Dumbbell, Zap, Users } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   
   // Check if user is already authenticated
   useEffect(() => {
-    const user = localStorage.getItem('traingo-user');
-    if (user) {
+    if (currentUser) {
       navigate('/dashboard');
     }
-  }, [navigate]);
+  }, [currentUser, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col">

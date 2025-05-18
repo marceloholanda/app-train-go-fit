@@ -10,6 +10,7 @@ import ExerciseDetail from './pages/ExerciseDetail';
 import Upgrade from './pages/Upgrade';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import Landing from './pages/Landing';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import BottomNav from './components/layout/BottomNav';
@@ -21,18 +22,21 @@ const App = () => {
   return (
     <div className="bg-background text-foreground">
       <Routes>
+        {/* Páginas públicas */}
+        <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Landing />} />
         <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
-        <Route path="/register" element={currentUser ? <Navigate to="/dashboard" /> : <Register />} />
+        <Route path="/register" element={currentUser ? <Navigate to="/onboarding" /> : <Register />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        
+        {/* Páginas protegidas */}
         <Route path="/dashboard" element={currentUser ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
-        <Route path="/onboarding" element={currentUser ? <Onboarding /> : <Navigate to="/login" />} />
         <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
         <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
         <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/settings" element={currentUser ? <Settings /> : <Navigate to="/login" />} />
       </Routes>
       
-      {/* Only show bottom navigation when user is logged in */}
+      {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
       {currentUser && <BottomNav />}
       
       <Toaster />

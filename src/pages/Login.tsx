@@ -4,10 +4,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -25,14 +27,7 @@ const Login = () => {
     
     try {
       // Simulação de login
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Armazenando informações do usuário (em um app real, seria um token JWT)
-      localStorage.setItem('traingo-user', JSON.stringify({
-        id: '1',
-        email: formData.email,
-        name: 'Usuário',
-      }));
+      await login(formData.email, formData.password);
       
       toast({
         title: "Login bem-sucedido!",

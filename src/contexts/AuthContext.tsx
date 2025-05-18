@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the Auth context type
 interface AuthContextType {
@@ -25,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock login function
+  // Mock login function (simulação enquanto não usamos Supabase Auth)
   const login = async (email: string, password: string) => {
     try {
       // For now, just create a mock user object
