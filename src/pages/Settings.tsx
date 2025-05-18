@@ -8,10 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import { isPremiumUser, resetPremiumWelcomeStatus } from '@/utils/userUtils';
 import SubscriptionManagementModal from '@/components/premium/SubscriptionManagementModal';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
@@ -58,14 +60,28 @@ const Settings = () => {
     navigate('/');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('traingo-user');
-    resetPremiumWelcomeStatus(); // Reset premium welcome status
-    toast({
-      title: "Logout realizado",
-      description: "Você saiu da sua conta.",
-    });
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      // Usar o método de logout do contexto de autenticação
+      await logout();
+      
+      // Remover qualquer dado adicional que não seja limpo pelo logout
+      resetPremiumWelcomeStatus();
+      
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu da sua conta.",
+      });
+      
+      // Não precisamos redirecionar aqui já que o AuthContext agora faz isso automaticamente
+    } catch (error) {
+      console.error('[TrainGO] Error during logout:', error);
+      toast({
+        title: "Erro ao sair",
+        description: "Não foi possível finalizar o logout. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
   
   const openSubscriptionModal = () => {
