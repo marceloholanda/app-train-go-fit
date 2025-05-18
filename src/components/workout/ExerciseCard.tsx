@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
-import { getExerciseImageUrl } from '@/utils/workoutRecommendation';
+import { getExerciseImageUrl, handleImageError, FALLBACK_IMAGE_URL } from '@/utils/workoutRecommendation';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -39,12 +39,13 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
     >
-      {/* Imagem do exercício - agora usando a função getExerciseImageUrl */}
-      <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md">
+      {/* Imagem do exercício - usando a função getExerciseImageUrl */}
+      <div className="w-full h-32 mb-3 bg-black rounded-lg overflow-hidden shadow-md" data-exercise-name={exercise.nome}>
         <img 
           src={imageUrl} 
           alt={`Imagem do exercício ${exercise.nome}`}
           className="w-full h-full object-contain" 
+          onError={handleImageError}
         />
       </div>
 

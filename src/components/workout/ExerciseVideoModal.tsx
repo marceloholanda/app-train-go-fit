@@ -12,6 +12,7 @@ import {
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { getExerciseImageUrl, handleImageError, FALLBACK_IMAGE_URL } from '@/utils/workoutRecommendation';
 
 interface ExerciseVideoModalProps {
   isOpen: boolean;

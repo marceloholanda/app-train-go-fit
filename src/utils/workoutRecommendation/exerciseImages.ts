@@ -1,26 +1,58 @@
 
 /**
- * Mapeamento de exercícios para URLs de imagens específicas
- * Este arquivo centraliza as associações entre exercícios e suas imagens correspondentes
+ * Utilitários para gerenciar as imagens dos exercícios
+ * Este arquivo centraliza a lógica de normalização e geração de URLs para imagens de exercícios
  */
 
-// Mapeamento de nomes de exercícios para URLs de imagens
-export const exerciseImageMap: Record<string, string> = {
-  "Abdominal bicicleta": "https://ipzrgpmsmasuzlaomuxj.supabase.co/storage/v1/object/sign/images/Abdominal_bicicleta.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InN0b3JhZ2UtdXJsLXNpZ25pbmcta2V5X2U2MGFmMDBhLTg5OGEtNDFjZC1iODJmLWY5ZWU0MzA3OWMzNiJ9.eyJ1cmwiOiJpbWFnZXMvQWJkb21pbmFsX2JpY2ljbGV0YS5wbmciLCJpYXQiOjE3NDcxMDExMjEsImV4cCI6MTc2OTI5NTgxMTIxfQ.G_oXIGomaWs9oSD890DKRt-QLtmluUEnaLNrWgWA888",
-  // Aqui você pode adicionar mais mapeamentos no futuro para outros exercícios
+// URL base para o bucket Supabase
+const SUPABASE_IMAGE_BASE_URL = "https://ipzrgpmsmasuzlaomuxj.supabase.co/storage/v1/object/public/images2";
+
+// URL de fallback para quando a imagem não for encontrada
+export const FALLBACK_IMAGE_URL = "/fallback-exercise.png";
+
+/**
+ * Normaliza o nome do exercício para uso em URLs
+ * - Converte para minúsculas
+ * - Remove acentos
+ * - Remove caracteres especiais
+ * - Substitui espaços por underlines
+ * 
+ * @param name Nome do exercício
+ * @returns Nome normalizado
+ */
+export function normalizeExerciseName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+    .replace(/[^\w\s]/gi, "")        // Remove caracteres especiais
+    .trim()
+    .replace(/\s+/g, "_");           // Substitui espaços por underlines
+}
+
+/**
+ * Gera a URL da imagem para um exercício específico
+ * 
+ * @param exerciseName Nome do exercício
+ * @returns URL da imagem
+ */
+export const getExerciseImageUrl = (exerciseName: string): string => {
+  if (!exerciseName) {
+    return FALLBACK_IMAGE_URL;
+  }
+
+  const normalizedName = normalizeExerciseName(exerciseName);
+  return `${SUPABASE_IMAGE_BASE_URL}/${normalizedName}.png`;
 };
 
 /**
- * Função para obter a URL da imagem de um exercício
- * @param exerciseName Nome do exercício
- * @returns URL da imagem específica ou URL de fallback
+ * Função para manipular erros de carregamento de imagens
+ * @param event Evento de erro
  */
-export const getExerciseImageUrl = (exerciseName: string): string => {
-  // Verifica se existe uma imagem específica para o exercício
-  if (exerciseImageMap[exerciseName]) {
-    return exerciseImageMap[exerciseName];
+export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const img = event.currentTarget;
+  if (img.src !== FALLBACK_IMAGE_URL) {
+    img.src = FALLBACK_IMAGE_URL;
+    img.classList.add("fallback-image");
   }
-  
-  // Fallback para URL genérica baseada no nome do exercício
-  return `https://source.unsplash.com/random/400x300/?${encodeURIComponent(exerciseName.replace(' ', '-'))}&fitness`;
 };
