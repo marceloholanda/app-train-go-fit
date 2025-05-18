@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
@@ -18,6 +18,17 @@ import BottomNav from './components/layout/BottomNav';
 const App = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Verificar se acabamos de completar o onboarding
+  useEffect(() => {
+    const completedOnboarding = localStorage.getItem('onboarding-completed');
+    if (completedOnboarding === 'true' && currentUser) {
+      console.log("[TrainGO] Auto-redirecting to dashboard after onboarding");
+      localStorage.removeItem('onboarding-completed');
+      navigate('/dashboard');
+    }
+  }, [currentUser, navigate]);
 
   return (
     <div className="bg-background text-foreground">

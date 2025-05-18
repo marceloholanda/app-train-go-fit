@@ -9,6 +9,7 @@ import WorkoutPlanDisplay from '@/components/WorkoutPlanDisplay';
 import { QuizAnswers, findBestWorkoutPlan, generatePersonalizedMessage } from '@/utils/workoutRecommendation';
 import { WorkoutPlan } from '@/data/workoutPlans';
 import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Componentes refatorados
 import Quiz from '@/components/quiz/Quiz';
@@ -18,6 +19,7 @@ import { quizQuestions } from '@/components/quiz/QuizData';
 const Onboarding = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<QuizAnswers>>({});
   const [registrationData, setRegistrationData] = useState({
@@ -91,6 +93,10 @@ const Onboarding = () => {
       };
 
       localStorage.setItem('traingo-user', JSON.stringify(userData));
+      
+      // Fazer login automático após cadastro
+      console.log("[TrainGO] Autologin after registration with:", registrationData.email);
+      await login(registrationData.email, registrationData.password);
       
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);
