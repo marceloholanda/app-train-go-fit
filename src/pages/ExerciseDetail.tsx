@@ -9,6 +9,7 @@ import { useExerciseModals } from '@/hooks/useExerciseModals';
 import ExerciseHeader from '@/components/workout/ExerciseHeader';
 import ExerciseList from '@/components/workout/ExerciseList';
 import ExerciseModals from '@/components/workout/ExerciseModals';
+import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +44,26 @@ const ExerciseDetail = () => {
   
   // Limit the number of exercises based on plan and level
   const [visibleExercises, setVisibleExercises] = useState<Exercise[]>([]);
+  
+  // Adiciona URLs de vídeo do Vimeo aos exercícios
+  useEffect(() => {
+    if (exercises.length) {
+      const updatedExercises = exercises.map(exercise => {
+        // Se já tem video_url, mantém
+        if (exercise.video_url) return exercise;
+        
+        // Busca URL no mapeamento
+        const videoUrl = getExerciseVideoUrl(exercise.nome);
+        if (videoUrl) {
+          return { ...exercise, video_url: videoUrl };
+        }
+        
+        return exercise;
+      });
+      
+      setExercises(updatedExercises);
+    }
+  }, []);
   
   useEffect(() => {
     if (exercises.length) {
@@ -87,6 +108,14 @@ const ExerciseDetail = () => {
   const handleReplaceExercise = (newExercise: Exercise) => {
     if (selectedExerciseIndex === -1) return;
 
+    // Preservar o URL do vídeo do mapeamento se não for fornecido
+    if (!newExercise.video_url) {
+      const videoUrl = getExerciseVideoUrl(newExercise.nome);
+      if (videoUrl) {
+        newExercise.video_url = videoUrl;
+      }
+    }
+
     const updatedExercises = [...exercises];
     updatedExercises[selectedExerciseIndex] = {
       ...newExercise,
@@ -111,7 +140,17 @@ const ExerciseDetail = () => {
   const handleAddExercises = (newExercises: Exercise[]) => {
     if (!newExercises.length) return;
     
-    const updatedExercises = [...exercises, ...newExercises.map(ex => ({ ...ex, completed: false }))];
+    // Adicionar URLs de vídeo dos exercícios adicionados
+    const exercisesWithVideos = newExercises.map(ex => {
+      const videoUrl = getExerciseVideoUrl(ex.nome);
+      return {
+        ...ex,
+        completed: false,
+        video_url: videoUrl || ex.video_url
+      };
+    });
+    
+    const updatedExercises = [...exercises, ...exercisesWithVideos];
     setExercises(updatedExercises);
     
     // Save exercises state

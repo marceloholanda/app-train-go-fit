@@ -12,6 +12,7 @@ import {
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { formatVideoUrlForEmbed } from '@/utils/workoutUtils/videoMapping';
 
 interface ExerciseVideoModalProps {
   isOpen: boolean;
@@ -58,8 +59,28 @@ const ExerciseVideoModal: React.FC<ExerciseVideoModalProps> = ({
     );
   }
   
-  // Usar um URL de vídeo padrão para teste se não houver um
-  const displayUrl = videoUrl || "https://player.vimeo.com/video/467746018";
+  // Formatar o URL para embed corretamente
+  const displayUrl = videoUrl ? formatVideoUrlForEmbed(videoUrl) : '';
+  
+  // Se não houver URL, mostrar mensagem
+  if (!displayUrl) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Vídeo indisponível</DialogTitle>
+            <DialogDescription>
+              O vídeo demonstrativo para o exercício "{exerciseName}" ainda não está disponível.
+            </DialogDescription>
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
+            </DialogClose>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
   
   // Modal para usuários premium com vídeo incorporado
   return (

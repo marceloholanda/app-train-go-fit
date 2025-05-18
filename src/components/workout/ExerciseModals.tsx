@@ -5,6 +5,7 @@ import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
 import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
 import ExerciseAddModal from '@/components/workout/ExerciseAddModal';
 import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
+import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
 
 interface ExerciseModalsProps {
   selectedExerciseIndex: number;
@@ -37,6 +38,17 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
   onReplaceExercise,
   onAddExercises
 }) => {
+  // Função para obter o URL do vídeo (da propriedade do exercício ou do mapeamento)
+  const getVideoUrl = (exercise: Exercise | undefined): string => {
+    if (!exercise) return '';
+    
+    // Usar o URL do vídeo do exercício, se disponível
+    if (exercise.video_url) return exercise.video_url;
+    
+    // Caso contrário, procurar no mapeamento
+    return getExerciseVideoUrl(exercise.nome) || '';
+  };
+
   return (
     <>
       {/* Exercise Modals */}
@@ -46,7 +58,7 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             isOpen={isVideoModalOpen}
             onClose={onCloseVideoModal}
             exerciseName={visibleExercises[selectedExerciseIndex]?.nome || ""}
-            videoUrl={visibleExercises[selectedExerciseIndex]?.video_url || ""}
+            videoUrl={getVideoUrl(visibleExercises[selectedExerciseIndex])}
             isPremium={isPremium}
           />
 

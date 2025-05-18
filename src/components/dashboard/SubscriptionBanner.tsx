@@ -17,7 +17,7 @@ const SubscriptionBanner: React.FC = () => {
           <span className="text-traingo-primary mr-2">PRO</span> Plano Premium Ativo
         </h3>
         <p className="text-gray-300 text-sm">
-          Você tem acesso a todos os recursos premium do TrainGO.
+          Você tem acesso a todos os recursos premium do TrainGO, incluindo vídeos demonstrativos de exercícios.
         </p>
       </div>
     );
@@ -33,7 +33,7 @@ const SubscriptionBanner: React.FC = () => {
       </div>
       <h3 className="font-bold text-lg mb-2">Desbloqueie Mais Treinos</h3>
       <p className="text-gray-300 text-sm mb-3">
-        Acesse o plano PRO e tenha um treino exclusivo + exercícios adicionais.
+        Acesse o plano PRO e tenha vídeos demonstrativos de todos os exercícios + treinos exclusivos.
       </p>
       <div className="text-traingo-primary font-bold text-sm">Saiba mais →</div>
     </div>

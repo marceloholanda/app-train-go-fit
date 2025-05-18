@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { isPremiumUser } from '@/utils/userUtils';
 import { getExerciseImageUrl, handleImageError } from '@/utils/workoutRecommendation/exerciseImages';
+import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -30,6 +31,9 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   onOpenVideoModal, 
   onOpenReplaceModal 
 }) => {
+  // Verificar se há vídeo disponível para este exercício
+  const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
+  
   return (
     <Card 
       key={index} 
@@ -51,8 +55,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           <h3 className="font-medium">{exercise.nome}</h3>
           <p className="text-gray-400 text-sm">{exercise.reps}</p>
           
-          {/* Aviso de vídeo premium apenas para usuários free */}
-          {!isPremium && (
+          {/* Aviso de vídeo premium apenas para usuários free quando há vídeo disponível */}
+          {!isPremium && hasVideo && (
             <p className="text-xs text-yellow-400 mt-2 italic">
               Vídeo de demonstração disponível apenas no plano PRO.
             </p>
@@ -68,16 +72,22 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                   size="icon"
                   onClick={() => onOpenVideoModal(index)}
                   className="h-8 w-8 rounded-full"
+                  disabled={!hasVideo}
                 >
                   {isPremium ? (
-                    <Play size={16} />
+                    <Play size={16} className={!hasVideo ? "text-gray-400" : ""} />
                   ) : (
                     <Lock size={16} className="text-gray-400" />
                   )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
+                {!hasVideo 
+                  ? "Vídeo não disponível" 
+                  : isPremium 
+                    ? "Ver vídeo do exercício" 
+                    : "Disponível apenas no plano Premium"
+                }
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Exercise } from '@/types/workout';
 import { isPremiumUser, hasSeenPremiumWelcome, markPremiumWelcomeSeen } from '@/utils/userUtils';
+import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
 
 export const useExerciseModals = () => {
   const [isPremium, setIsPremium] = useState(isPremiumUser());
@@ -37,6 +38,14 @@ export const useExerciseModals = () => {
     markPremiumWelcomeSeen();
   };
   
+  // Helper para obter o URL do vídeo de um exercício
+  const getVideoUrl = (exercise: Exercise): string => {
+    if (exercise.video_url) return exercise.video_url;
+    
+    const videoUrl = getExerciseVideoUrl(exercise.nome);
+    return videoUrl || '';
+  };
+  
   return {
     isPremium,
     setIsPremium,
@@ -53,6 +62,7 @@ export const useExerciseModals = () => {
     handleOpenVideoModal,
     handleOpenReplaceModal,
     handleClosePremiumWelcome,
-    checkPremiumStatus
+    checkPremiumStatus,
+    getVideoUrl
   };
 };
