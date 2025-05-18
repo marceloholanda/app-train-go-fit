@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronRight, Bell, Globe, Key } from 'lucide-react';
 import Card from '@/components/Card';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from "@/hooks/use-toast";
 
 interface AccountSettingsProps {
@@ -42,14 +43,11 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
             </div>
             <span>Notificações</span>
           </div>
-          <button 
-            className={`w-12 h-6 rounded-full relative transition-colors ${notifications ? 'bg-traingo-primary' : 'bg-gray-700'}`}
-            onClick={onToggleNotifications}
-          >
-            <span 
-              className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${notifications ? 'left-7' : 'left-1'}`}
-            />
-          </button>
+          <Switch 
+            checked={notifications}
+            onCheckedChange={onToggleNotifications}
+            className="data-[state=checked]:bg-traingo-primary"
+          />
         </Card>
         
         <Card 

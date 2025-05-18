@@ -2,7 +2,8 @@
 import React from 'react';
 import { AlertTriangle, Trash2, ChevronRight } from 'lucide-react';
 import Card from '@/components/Card';
-import Button from '@/components/Button';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface DangerZoneSectionProps {
   showDeleteConfirm: boolean;
@@ -20,14 +21,14 @@ const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
       <h2 className="font-bold text-lg mb-4 text-red-500">Zona de perigo</h2>
       
       {showDeleteConfirm ? (
-        <Card className="border border-red-500/50 bg-red-500/10 p-4">
+        <Alert className="border border-red-500/50 bg-red-500/10">
           <div className="flex items-center mb-4">
             <AlertTriangle className="text-red-500 mr-2" size={20} />
             <h3 className="font-bold text-red-500">Confirmar exclusão</h3>
           </div>
-          <p className="text-gray-300 mb-4">
+          <AlertDescription className="text-gray-300 mb-4">
             Esta ação não pode ser desfeita. Todos os seus dados serão removidos permanentemente.
-          </p>
+          </AlertDescription>
           <div className="flex space-x-3">
             <Button 
               variant="ghost" 
@@ -43,7 +44,7 @@ const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
               Sim, excluir
             </Button>
           </div>
-        </Card>
+        </Alert>
       ) : (
         <Card 
           onClick={onDeleteAccount}

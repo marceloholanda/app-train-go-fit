@@ -4,6 +4,7 @@ import { ChevronRight, Diamond } from 'lucide-react';
 import Card from '@/components/Card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
 
 interface SubscriptionSectionProps {
   isPremium: boolean;

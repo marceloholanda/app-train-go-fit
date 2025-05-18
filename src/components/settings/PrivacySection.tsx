@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import Card from '@/components/Card';
+import { Separator } from '@/components/ui/separator';
 
 const PrivacySection: React.FC = () => {
   return (
