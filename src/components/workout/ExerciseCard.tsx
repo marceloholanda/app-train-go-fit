@@ -36,15 +36,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   // Verificar se há vídeo disponível para este exercício
   const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
   
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Evitar abertura do modal se o clique for nos botões de ação
-    if (
-      e.target instanceof Element && 
-      (e.target.closest('button') || e.target.closest('[role="button"]'))
-    ) {
-      return;
-    }
-    
+  const handleCardClick = () => {
     onOpenImageModal(index);
   };
   
