@@ -21,6 +21,7 @@ interface ExerciseCardProps {
   onToggleComplete: (index: number) => void;
   onOpenVideoModal: (index: number) => void;
   onOpenReplaceModal: (index: number) => void;
+  onOpenImageModal: (index: number) => void;
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ 
@@ -29,16 +30,30 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   isPremium, 
   onToggleComplete, 
   onOpenVideoModal, 
-  onOpenReplaceModal 
+  onOpenReplaceModal,
+  onOpenImageModal
 }) => {
   // Verificar se há vídeo disponível para este exercício
   const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
+  
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Evitar abertura do modal se o clique for nos botões de ação
+    if (
+      e.target instanceof Element && 
+      (e.target.closest('button') || e.target.closest('[role="button"]'))
+    ) {
+      return;
+    }
+    
+    onOpenImageModal(index);
+  };
   
   return (
     <Card 
       key={index} 
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
+      onClick={handleCardClick}
     >
       {/* Imagem do exercício - Usando Supabase */}
       <div className="w-full h-36 mb-3 bg-black/10 rounded-lg overflow-hidden shadow-md">
@@ -113,7 +128,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
           {/* Botão de conclusão do exercício */}
           <button 
-            onClick={() => onToggleComplete(index)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleComplete(index);
+            }}
             className="p-2"
           >
             {exercise.completed ? (
