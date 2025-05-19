@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { isPremiumUser } from '@/utils/userUtils';
 
 export const useExerciseModals = () => {
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState(-1);
@@ -8,6 +9,12 @@ export const useExerciseModals = () => {
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
+  const [isPremium, setIsPremium] = useState(isPremiumUser());
+
+  const checkPremiumStatus = () => {
+    const userIsPremium = isPremiumUser();
+    setIsPremium(userIsPremium);
+  };
 
   const handleOpenVideoModal = (index: number) => {
     setSelectedExerciseIndex(index);
@@ -59,6 +66,12 @@ export const useExerciseModals = () => {
     isAddExerciseModalOpen,
     isImageModalOpen,
     showPremiumWelcome,
+    isPremium,
+    setIsVideoModalOpen,
+    setIsReplaceModalOpen,
+    setIsAddExerciseModalOpen,
+    setIsImageModalOpen,
+    checkPremiumStatus,
     handleOpenVideoModal,
     handleOpenReplaceModal,
     handleOpenImageModal,
