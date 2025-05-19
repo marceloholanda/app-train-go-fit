@@ -25,7 +25,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   return (
     <div className="max-w-md mx-auto w-full animate-fade-in">
       <h2 className="text-3xl font-bold mb-6 text-center">Criar sua conta</h2>
-      <p className="text-center text-xl text-gray-400 mb-8">
+      <p className="text-center text-xl text-white-400 mb-8">
         Seu perfil está quase pronto! Complete seu cadastro para ver seu plano personalizado.
       </p>
       
