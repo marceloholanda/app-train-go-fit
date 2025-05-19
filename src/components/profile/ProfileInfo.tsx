@@ -37,6 +37,7 @@ const ProfileInfo = ({ userData, setIsEditing }: ProfileInfoProps) => {
   };
   
   const handleSaveProfile = (updatedUserData: any) => {
+    // Update the local state with the updated user data
     setIsEditFormOpen(false);
   };
 
