@@ -62,15 +62,13 @@ const Profile = () => {
       <MonthlyEvaluation />
       <LevelOnboardingBanner />
 
-      {!isEditing && (
-        <div className="p-6">
-          <ProfileInfo userData={userData} setIsEditing={setIsEditing} />
-          <UserLevel userData={userData} />
-          <WorkoutCalendar userData={userData} />
-          <AchievementsList userData={userData} />
-          <UpgradeBanner isPremium={isPremium} />
-        </div>
-      )}
+      <div className="p-6">
+        <ProfileInfo userData={userData} setIsEditing={setIsEditing} />
+        <UserLevel userData={userData} />
+        <WorkoutCalendar userData={userData} />
+        <AchievementsList userData={userData} />
+        <UpgradeBanner isPremium={isPremium} />
+      </div>
     </div>
   );
 };
