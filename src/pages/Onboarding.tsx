@@ -1,206 +1,63 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Logo from '@/components/Logo';
-import Button from '@/components/Button';
-import { ArrowRight } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
-import WorkoutPlanDisplay from '@/components/WorkoutPlanDisplay';
-import { QuizAnswers, findBestWorkoutPlan, generatePersonalizedMessage } from '@/utils/workoutRecommendation';
-import { WorkoutPlan } from '@/data/workoutPlans';
-import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
-import { useAuth } from '@/contexts/AuthContext';
 
-// Componentes refatorados
+import { useOnboardingState } from '@/hooks/useOnboardingState';
+import OnboardingLayout from '@/components/onboarding/OnboardingLayout';
+import WorkoutPlanResult from '@/components/onboarding/WorkoutPlanResult';
 import Quiz from '@/components/quiz/Quiz';
 import RegistrationForm from '@/components/quiz/RegistrationForm';
 import { quizQuestions } from '@/components/quiz/QuizData';
 
 const Onboarding = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { login } = useAuth();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Partial<QuizAnswers>>({});
-  const [registrationData, setRegistrationData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
-  const [personalizedMessage, setPersonalizedMessage] = useState('');
-  const [showResults, setShowResults] = useState(false);
-  const dashboardButtonRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Quando os resultados são mostrados, rolar para garantir que o botão esteja visível
-    if (showResults && dashboardButtonRef.current) {
-      setTimeout(() => {
-        dashboardButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 500);
-    }
-  }, [showResults]);
-
-  const handleOptionSelect = (questionId: keyof QuizAnswers, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    // Automatic advance to next question unless it's the last one
-    if (currentStep < quizQuestions.length - 1) {
-      setTimeout(() => {
-        setCurrentStep(prev => prev + 1);
-      }, 500);
-    } else {
-      setCurrentStep(quizQuestions.length); // Go to registration form
-    }
-  };
-
-  const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setRegistrationData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      // Simulação de cadastro
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Verificamos que todas as perguntas foram respondidas
-      const quizAnswers = answers as QuizAnswers;
-      
-      if (Object.keys(quizAnswers).length !== quizQuestions.length) {
-        throw new Error("Por favor, responda todas as perguntas do quiz");
-      }
-
-      // Encontrar o plano de treino mais adequado
-      const recommendedPlan = findBestWorkoutPlan(quizAnswers);
-      const message = generatePersonalizedMessage(quizAnswers, recommendedPlan);
-      
-      console.log("[TrainGO] Recommended workout plan:", recommendedPlan);
-      
-      // Convert weight and height ranges to approximate numbers for IMC calculation
-      const weight_exact = weightRangeToNumber(quizAnswers.weight);
-      const height_exact = heightRangeToNumber(quizAnswers.height);
-      const age_exact = ageRangeToNumber(quizAnswers.age);
-      
-      // Salvar o plano de treino no localStorage
-      const userData = {
-        ...registrationData,
-        id: 'mock-user-id', // ID para autenticação
-        profile: {
-          ...quizAnswers,
-          weight_exact,
-          height_exact,
-          age_exact
-        },
-        workoutPlan: recommendedPlan,
-        workoutProgress: {
-          completedWorkouts: [],
-          lastWeekProgress: 0
-        }
-      };
-
-      localStorage.setItem('traingo-user', JSON.stringify(userData));
-      
-      // Fazer login automático após cadastro
-      console.log("[TrainGO] Autologin after registration with:", registrationData.email);
-      await login(registrationData.email, registrationData.password);
-      
-      setWorkoutPlan(recommendedPlan);
-      setPersonalizedMessage(message);
-      
-      toast({
-        title: "Cadastro concluído!",
-        description: "Seu plano de treino foi criado com sucesso.",
-      });
-
-      setShowResults(true);
-    } catch (error) {
-      console.error("[TrainGO] Erro no cadastro:", error);
-      toast({
-        title: "Erro no cadastro",
-        description: "Não foi possível concluir o cadastro. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const goToDashboard = () => {
-    console.log("[TrainGO] Navegando para o dashboard com plano:", workoutPlan);
-    navigate('/dashboard');
-  }
+  const {
+    currentStep,
+    answers,
+    registrationData,
+    isSubmitting,
+    workoutPlan,
+    personalizedMessage,
+    showResults,
+    handleOptionSelect,
+    handleRegistrationChange,
+    handlePreviousStep,
+    handleSubmit
+  } = useOnboardingState();
 
   const isLastQuestion = currentStep === quizQuestions.length;
 
+  // Show results screen when the workout plan is generated
   if (showResults && workoutPlan) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <header className="p-4 flex justify-between items-center">
-          <Logo size="small" />
-        </header>
-        
-        <div className="flex-1 flex flex-col justify-center px-4 py-8 max-w-4xl mx-auto w-full">
-          <WorkoutPlanDisplay 
-            plan={workoutPlan}
-            personalizedMessage={personalizedMessage}
-          />
-          
-          <div className="mt-10 mb-28 pb-4 text-center" ref={dashboardButtonRef}>
-            <Button 
-              onClick={goToDashboard}
-              rightIcon={<ArrowRight />}
-              fullWidth
-            >
-              Ir para o Dashboard
-            </Button>
-          </div>
-        </div>
-      </div>
+      <OnboardingLayout>
+        <WorkoutPlanResult 
+          workoutPlan={workoutPlan}
+          personalizedMessage={personalizedMessage}
+        />
+      </OnboardingLayout>
     );
   }
 
+  // Show quiz or registration form based on current step
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="p-4 flex justify-between items-center">
-        <Logo size="small" />
-      </header>
-
-      {/* Progress bar */}
-      <div className="w-full px-4 mt-2">
-        <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-traingo-primary h-2 transition-all duration-300"
-            style={{ width: `${(currentStep / quizQuestions.length) * 100}%` }}
-          />
-        </div>
-        <div className="text-sm text-gray-400 text-center mt-2">
-          Etapa {Math.min(currentStep + 1, quizQuestions.length)} de {quizQuestions.length} (
-          {Math.round((currentStep / quizQuestions.length) * 100)}%)
-        </div>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-center px-4 py-8">
-        {!isLastQuestion ? (
-          <Quiz
-            questions={quizQuestions}
-            answers={answers}
-            onAnswerChange={handleOptionSelect}
-            currentStep={currentStep}
-            onPrevStep={() => setCurrentStep(prev => Math.max(0, prev - 1))}
-          />
-        ) : (
-          <RegistrationForm
-            data={registrationData}
-            onChange={handleRegistrationChange}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-          />
-        )}
-      </div>
-    </div>
+    <OnboardingLayout 
+      currentStep={currentStep} 
+      totalSteps={quizQuestions.length}
+    >
+      {!isLastQuestion ? (
+        <Quiz
+          questions={quizQuestions}
+          answers={answers}
+          onAnswerChange={handleOptionSelect}
+          currentStep={currentStep}
+          onPrevStep={handlePreviousStep}
+        />
+      ) : (
+        <RegistrationForm
+          data={registrationData}
+          onChange={handleRegistrationChange}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
+      )}
+    </OnboardingLayout>
   );
 };
 
