@@ -77,7 +77,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onOpenVideoModal(index)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenVideoModal(index);
+                  }}
                   className="h-8 w-8 rounded-full"
                   disabled={!hasVideo}
                 >
@@ -106,7 +109,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onOpenReplaceModal(index)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenReplaceModal(index);
+                  }}
                   className="h-8 w-8 rounded-full"
                 >
                   {isPremium ? <Replace size={16} /> : <Lock size={16} className="text-gray-400" />}

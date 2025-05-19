@@ -5,6 +5,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import WeeklyProgress from '@/components/dashboard/WeeklyProgress';
 import WorkoutsList from '@/components/dashboard/WorkoutsList';
 import SubscriptionBanner from '@/components/dashboard/SubscriptionBanner';
+import FitRecipesCard from '@/components/dashboard/FitRecipesCard';
 
 const Dashboard = () => {
   const {
@@ -48,6 +49,9 @@ const Dashboard = () => {
         
         {/* Upgrade/Premium Banner */}
         <SubscriptionBanner />
+        
+        {/* Fit Recipes Card */}
+        <FitRecipesCard />
       </section>
     </div>
   );
