@@ -7,6 +7,7 @@ import PhysicalDataCard from './PhysicalDataCard';
 import PhysicalDataDialog from './PhysicalDataDialog';
 import PremiumRestrictionModal from './PremiumRestrictionModal';
 import ProfileEditForm from './ProfileEditForm';
+import { saveUserData } from '@/utils/userUtils';
 
 interface ProfileInfoProps {
   userData: any;
@@ -23,7 +24,8 @@ const ProfileInfo = ({ userData, setIsEditing }: ProfileInfoProps) => {
     height: userData?.profile?.height_exact || userData?.profile?.height ? Number(userData.profile.height_exact || 1.70) : 1.70,
   });
   
-  const isPremium = userData?.isPremium || false;
+  // Verifica se o usuário é premium baseado no plano
+  const isPremium = userData?.plan === 'premium';
   
   const handleOpenDialog = () => setIsDialogOpen(true);
   const handleCloseDialog = () => setIsDialogOpen(false);
@@ -38,6 +40,7 @@ const ProfileInfo = ({ userData, setIsEditing }: ProfileInfoProps) => {
   
   const handleSaveProfile = (updatedUserData: any) => {
     // Update the local state with the updated user data
+    saveUserData(updatedUserData);
     setIsEditFormOpen(false);
   };
 

@@ -20,6 +20,9 @@ export const isPremiumUser = (): boolean => {
 export const saveUserData = (userData: any): void => {
   try {
     localStorage.setItem('traingo-user', JSON.stringify(userData));
+    
+    // Dispara um evento para notificar outros componentes sobre a alteração dos dados
+    window.dispatchEvent(new Event('storage'));
   } catch (error) {
     console.error('Erro ao salvar dados do usuário:', error);
   }
