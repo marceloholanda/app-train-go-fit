@@ -11,6 +11,7 @@ import SettingsHeader from '@/components/settings/SettingsHeader';
 import AccountSettings from '@/components/settings/AccountSettings';
 import SubscriptionSection from '@/components/settings/SubscriptionSection';
 import PrivacySection from '@/components/settings/PrivacySection';
+import ContactSection from '@/components/settings/ContactSection';
 import DangerZoneSection from '@/components/settings/DangerZoneSection';
 import LogoutButton from '@/components/settings/LogoutButton';
 
@@ -101,6 +102,8 @@ const Settings = () => {
         />
 
         <PrivacySection />
+        
+        <ContactSection />
 
         <DangerZoneSection 
           showDeleteConfirm={showDeleteConfirm}
