@@ -10,6 +10,8 @@ import ExerciseDetail from './pages/ExerciseDetail';
 import Upgrade from './pages/Upgrade';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import TermsOfUse from './pages/TermsOfUse';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Landing from './pages/Landing';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
@@ -45,6 +47,8 @@ const App = () => {
         <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
         <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/settings" element={currentUser ? <Settings /> : <Navigate to="/login" />} />
+        <Route path="/terms" element={<TermsOfUse />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
       
       {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
