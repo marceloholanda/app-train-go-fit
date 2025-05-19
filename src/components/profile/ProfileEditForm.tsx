@@ -67,7 +67,8 @@ const ProfileEditForm = ({ userData, onCancel, onSave }: ProfileEditFormProps) =
         age: userData?.profile?.age || 'unknown',
         weight: userData?.profile?.weight || 'unknown',
         height: userData?.profile?.height || 'unknown',
-        fitness_goal: userData?.profile?.fitness_goal || 'unknown',
+        motivation_type: userData?.profile?.motivation_type || 'unknown',
+        training_barrier: userData?.profile?.training_barrier || 'unknown',
       };
 
       // Generate new workout plan based on updated answers
