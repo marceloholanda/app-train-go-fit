@@ -76,7 +76,7 @@ const Upgrade = () => {
               </li>
               <li className="flex items-start">
                 <Check size={18} className="text-green-500 mr-2 min-w-[18px] mt-0.5" />
-                <span>6 exercícios por treino</span>
+                <span>4 exercícios por treino</span>
               </li>
               <li className="flex items-start">
                 <Check size={18} className="text-green-500 mr-2 min-w-[18px] mt-0.5" />
@@ -88,7 +88,7 @@ const Upgrade = () => {
               </li>
               <li className="flex items-start">
                 <X size={18} className="text-red-500 mr-2 min-w-[18px] mt-0.5" />
-                <span className="text-gray-500">Treino D adicional</span>
+                <span className="text-gray-500">Treino adicional</span>
               </li>
             </ul>
 
