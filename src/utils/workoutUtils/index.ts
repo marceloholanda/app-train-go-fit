@@ -12,4 +12,12 @@ export * from './achievements';
 export * from './streaks';
 export * from './workoutTracking';
 export * from './weeklyProgress';
-export * from './progressTracking';
+// Rename the export from progressTracking to avoid conflict with history.ts
+export { 
+  getUserProgress,
+  recordExerciseCompletion,
+  removeExerciseCompletion,
+  recordWorkoutCompletion,
+  checkAchievementsProgress,
+  getWorkoutDatesForMonth as getWorkoutDatesForMonthFromSupabase
+} from './progressTracking';

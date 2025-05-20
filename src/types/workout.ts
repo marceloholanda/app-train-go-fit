@@ -7,6 +7,8 @@ export interface Exercise {
   descricao?: string;
   substituicoes?: Exercise[];
   completed?: boolean;
+  id?: number; // Adding the missing id property
+  muscle_group?: string; // Adding the missing muscle_group property
 }
 
 export interface WorkoutPlan {

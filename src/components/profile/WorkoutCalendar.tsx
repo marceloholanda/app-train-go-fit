@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Flame, Flag } from 'lucide-react';
 import Card from '@/components/Card';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { getUserProgress, getWorkoutDatesForMonth } from '@/utils/workoutUtils/progressTracking';
+import { getUserProgress, getWorkoutDatesForMonthFromSupabase } from '@/utils/workoutUtils/progressTracking';
 import { useToast } from '@/hooks/use-toast';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
@@ -74,8 +74,8 @@ const WorkoutCalendar = ({ userData }: WorkoutCalendarProps) => {
       const month = selectedDate.getMonth();
       const year = selectedDate.getFullYear();
       
-      // Buscar datas de treino do mês selecionado
-      const dates = await getWorkoutDatesForMonth(currentUser.id, month, year);
+      // Update function name to use the renamed import
+      const dates = await getWorkoutDatesForMonthFromSupabase(currentUser.id, month, year);
       setWorkoutDates(dates);
       
       // No futuro, podemos implementar a lógica para mostrar dias esperados que foram perdidos
