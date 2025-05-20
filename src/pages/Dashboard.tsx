@@ -91,6 +91,11 @@ const Dashboard = () => {
     );
   }
 
+  // Calculate total workouts correctly
+  const totalWorkouts = Array.isArray(workouts) 
+    ? workouts.length 
+    : (workouts?.days || userData?.workoutPlan?.days || 3);
+
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
@@ -100,7 +105,7 @@ const Dashboard = () => {
       <WeeklyProgress 
         progress={weekProgress} 
         completedWorkouts={userData?.workoutProgress?.completedWorkouts?.length || 0} 
-        totalWorkouts={workouts?.days || userData?.workoutPlan?.days || 3} 
+        totalWorkouts={totalWorkouts} 
       />
 
       {/* Workouts List */}

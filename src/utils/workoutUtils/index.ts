@@ -3,7 +3,10 @@
 export * from './dayMapping';
 export * from './iconGeneration';
 export * from './nameGeneration';
-export * from './progress';
+// Export progress.ts but rename the updateWorkoutProgress to avoid conflict
+export { 
+  updateWorkoutProgress as updateWorkoutProgressInSupabase,
+} from './progress';
 export * from './history';
 export * from './achievements';
 export * from './streaks';

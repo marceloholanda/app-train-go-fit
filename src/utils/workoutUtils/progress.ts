@@ -5,15 +5,16 @@ import { supabase } from '@/integrations/supabase/client';
  * Update workout progress in Supabase and localStorage
  * @param dayNumber - The day number to mark as completed or pending
  * @param isCompleted - Whether the workout is completed or not
+ * @returns Promise that resolves when the update is complete
  */
-export const updateWorkoutProgress = async (dayNumber: number, isCompleted: boolean) => {
+export const updateWorkoutProgress = async (dayNumber: number, isCompleted: boolean): Promise<number> => {
   try {
     // Primeiro atualizamos o localStorage para compatibilidade com o código antigo
-    updateLocalProgress(dayNumber, isCompleted);
+    const progress = updateLocalProgress(dayNumber, isCompleted);
     
     // Depois atualizamos no Supabase
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) return progress;
     
     // Buscar o registro de progresso atual
     const { data: progressData, error: fetchError } = await supabase
@@ -26,7 +27,7 @@ export const updateWorkoutProgress = async (dayNumber: number, isCompleted: bool
       
     if (fetchError) {
       console.error("Erro ao buscar progresso:", fetchError);
-      return;
+      return progress;
     }
     
     if (!progressData) {
@@ -47,7 +48,7 @@ export const updateWorkoutProgress = async (dayNumber: number, isCompleted: bool
         console.error("Erro ao criar progresso:", error);
       }
       
-      return;
+      return isCompleted ? 100 / 1 : 0; // 100% if completed, 0% if not
     }
     
     // Atualizar o progresso existente
@@ -70,18 +71,30 @@ export const updateWorkoutProgress = async (dayNumber: number, isCompleted: bool
     if (error) {
       console.error("Erro ao atualizar progresso:", error);
     }
+    
+    // Calculate and return the updated progress percentage
+    const userData = localStorage.getItem('traingo-user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      const workoutPlan = user.workoutPlan;
+      const totalWorkouts = workoutPlan?.days || 0;
+      return totalWorkouts > 0 ? (completedExercises.length / totalWorkouts) * 100 : 0;
+    }
+    return 0;
   } catch (error) {
     console.error("Erro ao atualizar progresso:", error);
+    return 0;
   }
 };
 
 /**
  * Update local storage for workout progress (legacy function)
+ * @returns The calculated progress percentage
  */
-function updateLocalProgress(dayNumber: number, isCompleted: boolean) {
+function updateLocalProgress(dayNumber: number, isCompleted: boolean): number {
   try {
     const userData = localStorage.getItem('traingo-user');
-    if (!userData) return;
+    if (!userData) return 0;
     
     const user = JSON.parse(userData);
     
@@ -116,7 +129,9 @@ function updateLocalProgress(dayNumber: number, isCompleted: boolean) {
     };
     
     localStorage.setItem('traingo-user', JSON.stringify(user));
+    return progress;
   } catch (error) {
     console.error("Erro ao atualizar progresso local:", error);
+    return 0;
   }
 }
