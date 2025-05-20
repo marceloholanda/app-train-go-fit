@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { updateWorkoutProgress } from '@/utils/workoutUtils';
+import { updateWorkoutProgress } from '@/utils/workoutUtils/workoutTracking';
 import { WorkoutDisplay } from '@/types/dashboard';
 import WorkoutItem from './WorkoutItem';
 import { isPremiumUser } from '@/utils/userUtils';
@@ -38,18 +38,10 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
         : workout
     ));
     
-    // Atualiza o progresso da semana
-    // Correctly handle the promise returned by updateWorkoutProgress
-    await updateWorkoutProgress(workoutId, newCompleted);
+    // Atualiza o progresso no Supabase e localmente
+    const newProgress = await updateWorkoutProgress(workoutId, newCompleted);
     
-    // Calculate the new progress based on updated workouts
-    const completedCount = workouts.filter(w => 
-      w.id === workoutId ? newCompleted : w.status === 'completed'
-    ).length;
-    const totalWorkouts = workouts.length;
-    const newProgress = totalWorkouts > 0 ? (completedCount / totalWorkouts) * 100 : 0;
-    
-    // Update the progress state with the calculated value
+    // Atualiza o progresso da semana na UI
     setWeekProgress(newProgress);
     
     toast({
@@ -60,7 +52,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
     });
   };
 
-  if (workouts.length === 0) {
+  if (!workouts || workouts.length === 0) {
     return (
       <div className="text-center py-8 text-gray-400">
         <p>Nenhum plano de treino encontrado.</p>

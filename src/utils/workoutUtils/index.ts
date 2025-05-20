@@ -6,6 +6,7 @@ export * from './nameGeneration';
 // Export progress.ts but rename the updateWorkoutProgress to avoid conflict
 export { 
   updateWorkoutProgress as updateWorkoutProgressInSupabase,
+  saveWorkoutPlanToSupabase
 } from './progress';
 export * from './history';
 export * from './achievements';

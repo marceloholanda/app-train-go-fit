@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { findBestWorkoutPlan } from '@/utils/workoutRecommendation';
 import { QuizAnswers } from '@/utils/workoutRecommendation/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveWorkoutPlanToSupabase } from '@/utils/workoutUtils/progress';
 
 interface UseProfileEditFormProps {
   userData: any;
@@ -13,6 +15,7 @@ interface UseProfileEditFormProps {
 export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     objective: userData?.profile?.objective || 'lose_weight',
@@ -31,6 +34,29 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
     setIsSubmitting(true);
 
     try {
+      // Verificar se o usuário é premium antes de permitir a atualização
+      const isPremium = userData?.premium?.active || false;
+      
+      if (!isPremium) {
+        toast({
+          title: "Recurso Premium",
+          description: "A atualização do plano de treino é exclusiva para usuários premium.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (!currentUser?.id) {
+        toast({
+          title: "Erro de Autenticação",
+          description: "Você precisa estar logado para atualizar seu perfil.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create answers object from form data
       const quizAnswers: QuizAnswers = {
         ...formData,
@@ -54,7 +80,26 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
         workoutPlan: newWorkoutPlan
       };
       
-      // Save updated user data
+      // Atualizar o perfil no Supabase
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          objective: formData.objective,
+          level: formData.level,
+          days_per_week: formData.days_per_week,
+          environment: formData.environment,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', currentUser.id);
+      
+      if (profileError) {
+        throw profileError;
+      }
+      
+      // Salvar o plano de treino atualizado no Supabase
+      await saveWorkoutPlanToSupabase(currentUser.id, newWorkoutPlan);
+      
+      // Save updated user data in localStorage for current session
       localStorage.setItem('traingo-user', JSON.stringify(updatedUserData));
       
       // Notify parent component about the update
@@ -66,14 +111,13 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
       });
       
       // Auto-redirect to dashboard to see the new plan
-      localStorage.setItem('onboarding-completed', 'true');
       navigate('/dashboard');
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao atualizar perfil:", error);
       toast({
         title: "Erro ao atualizar perfil",
-        description: "Não foi possível atualizar seu perfil. Tente novamente.",
+        description: error.message || "Não foi possível atualizar seu perfil. Tente novamente.",
         variant: "destructive",
       });
     } finally {

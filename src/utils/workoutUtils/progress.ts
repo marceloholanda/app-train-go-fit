@@ -1,137 +1,59 @@
-
+/**
+ * Saves the generated workout plan to Supabase user_workouts table
+ * @param userId The authenticated user ID
+ * @param workoutPlan The generated workout plan to save
+ */
 import { supabase } from '@/integrations/supabase/client';
 
-/**
- * Update workout progress in Supabase and localStorage
- * @param dayNumber - The day number to mark as completed or pending
- * @param isCompleted - Whether the workout is completed or not
- * @returns Promise that resolves when the update is complete
- */
-export const updateWorkoutProgress = async (dayNumber: number, isCompleted: boolean): Promise<number> => {
+export const saveWorkoutPlanToSupabase = async (userId: string, workoutPlan: any) => {
   try {
-    // Primeiro atualizamos o localStorage para compatibilidade com o código antigo
-    const progress = updateLocalProgress(dayNumber, isCompleted);
+    if (!userId) {
+      console.error("Erro: ID do usuário não fornecido");
+      return;
+    }
+
+    if (!workoutPlan) {
+      console.error("Erro: Plano de treino não fornecido");
+      return;
+    }
+
+    console.log("Salvando plano de treino no Supabase para o usuário:", userId);
     
-    // Depois atualizamos no Supabase
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return progress;
-    
-    // Buscar o registro de progresso atual
-    const { data: progressData, error: fetchError } = await supabase
-      .from('progress')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('workout_date', { ascending: false })
-      .limit(1)
+    // Check if a workout plan already exists for this user
+    const { data: existingPlan, error: queryError } = await supabase
+      .from('user_workouts')
+      .select('id')
+      .eq('user_id', userId)
       .maybeSingle();
-      
-    if (fetchError) {
-      console.error("Erro ao buscar progresso:", fetchError);
-      return progress;
-    }
     
-    if (!progressData) {
-      // Se não existir registro de progresso, criar um novo
-      const today = new Date().toISOString().split('T')[0];
-      const newProgress = {
-        user_id: user.id,
-        workout_date: today,
-        completed_exercises: isCompleted ? [dayNumber] : [],
-        streak: isCompleted ? 1 : 0
-      };
-      
-      const { error } = await supabase
-        .from('progress')
-        .insert([newProgress]);
-        
-      if (error) {
-        console.error("Erro ao criar progresso:", error);
-      }
-      
-      return isCompleted ? 100 / 1 : 0; // 100% if completed, 0% if not
+    if (queryError) {
+      console.error("Erro ao verificar plano existente:", queryError);
+      return;
     }
-    
-    // Atualizar o progresso existente
-    let completedExercises = progressData.completed_exercises || [];
-    
-    if (isCompleted && !completedExercises.includes(dayNumber)) {
-      completedExercises.push(dayNumber);
-    } else if (!isCompleted) {
-      completedExercises = completedExercises.filter(day => day !== dayNumber);
+
+    let result;
+    // If plan exists, update it, otherwise insert a new one
+    if (existingPlan) {
+      console.log("Atualizando plano de treino existente");
+      result = await supabase
+        .from('user_workouts')
+        .update({ data: workoutPlan, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+    } else {
+      console.log("Inserindo novo plano de treino");
+      result = await supabase
+        .from('user_workouts')
+        .insert({ user_id: userId, data: workoutPlan });
     }
-    
-    // Atualizar o progresso no Supabase
-    const { error } = await supabase
-      .from('progress')
-      .update({
-        completed_exercises: completedExercises
-      })
-      .eq('id', progressData.id);
-      
-    if (error) {
-      console.error("Erro ao atualizar progresso:", error);
+
+    if (result.error) {
+      console.error("Erro ao salvar plano de treino:", result.error);
+    } else {
+      console.log("Plano de treino salvo com sucesso");
     }
-    
-    // Calculate and return the updated progress percentage
-    const userData = localStorage.getItem('traingo-user');
-    if (userData) {
-      const user = JSON.parse(userData);
-      const workoutPlan = user.workoutPlan;
-      const totalWorkouts = workoutPlan?.days || 0;
-      return totalWorkouts > 0 ? (completedExercises.length / totalWorkouts) * 100 : 0;
-    }
-    return 0;
+
+    return result;
   } catch (error) {
-    console.error("Erro ao atualizar progresso:", error);
-    return 0;
+    console.error("Erro ao salvar plano de treino:", error);
   }
 };
-
-/**
- * Update local storage for workout progress (legacy function)
- * @returns The calculated progress percentage
- */
-function updateLocalProgress(dayNumber: number, isCompleted: boolean): number {
-  try {
-    const userData = localStorage.getItem('traingo-user');
-    if (!userData) return 0;
-    
-    const user = JSON.parse(userData);
-    
-    // Inicializar o progresso se não existir
-    if (!user.workoutProgress) {
-      user.workoutProgress = {
-        completedWorkouts: [],
-        lastUpdated: new Date().toISOString(),
-        lastWeekProgress: 0
-      };
-    }
-    
-    let completedWorkouts = [...user.workoutProgress.completedWorkouts];
-    
-    if (isCompleted && !completedWorkouts.includes(dayNumber)) {
-      completedWorkouts.push(dayNumber);
-    } else if (!isCompleted) {
-      completedWorkouts = completedWorkouts.filter(day => day !== dayNumber);
-    }
-    
-    // Calcular o progresso semanal
-    const workoutPlan = user.workoutPlan;
-    const totalWorkouts = workoutPlan?.days || 0;
-    const progress = totalWorkouts > 0 ? (completedWorkouts.length / totalWorkouts) * 100 : 0;
-    
-    // Atualizar o progresso
-    user.workoutProgress = {
-      ...user.workoutProgress,
-      completedWorkouts,
-      lastUpdated: new Date().toISOString(),
-      lastWeekProgress: progress
-    };
-    
-    localStorage.setItem('traingo-user', JSON.stringify(user));
-    return progress;
-  } catch (error) {
-    console.error("Erro ao atualizar progresso local:", error);
-    return 0;
-  }
-}

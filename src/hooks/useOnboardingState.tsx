@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
 import { quizQuestions } from '@/components/quiz/QuizData';
 import { supabase } from '@/integrations/supabase/client';
+import { saveWorkoutPlanToSupabase } from '@/utils/workoutUtils/progress';
 
 export const useOnboardingState = () => {
   const navigate = useNavigate();
@@ -109,19 +109,8 @@ export const useOnboardingState = () => {
         throw profileError;
       }
       
-      // 3. Inserir o plano de treino na tabela user_workouts
-      const workoutData = {
-        user_id: user.id,
-        data: recommendedPlan
-      };
-      
-      const { error: workoutError } = await supabase
-        .from('user_workouts')
-        .insert([workoutData]);
-      
-      if (workoutError) {
-        throw workoutError;
-      }
+      // 3. Salvar o plano de treino no Supabase
+      await saveWorkoutPlanToSupabase(user.id, recommendedPlan);
       
       // 4. Inicializar o progresso do usuário na tabela progress
       const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD

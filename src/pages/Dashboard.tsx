@@ -9,6 +9,7 @@ import SubscriptionBanner from '@/components/dashboard/SubscriptionBanner';
 import FitRecipesCard from '@/components/dashboard/FitRecipesCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { WorkoutDisplay } from '@/types/dashboard';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -44,7 +45,7 @@ const Dashboard = () => {
         
         if (workoutData?.data) {
           console.log("Plano de treino carregado do Supabase:", workoutData.data);
-          setWorkouts(workoutData.data);
+          setWorkouts(workoutData.data as WorkoutDisplay[]);
         }
         
         // Buscar progresso dos treinos
@@ -67,10 +68,27 @@ const Dashboard = () => {
           // Calcular o progresso semanal baseado nos exercícios completados
           if (progressData.completed_exercises && workoutData?.data) {
             const completedCount = progressData.completed_exercises.length || 0;
-            // Fix: Access days count from workoutData.data properly
-            const totalExercises = Array.isArray(workoutData.data) 
-              ? workoutData.data.length 
-              : (workoutData.data.days || 0);
+            
+            // Obter o total de exercícios do plano
+            let totalExercises = 0;
+            const plan = workoutData.data;
+            
+            // Calcula total de exercícios de forma segura
+            if (Array.isArray(plan)) {
+              totalExercises = plan.length;
+            } else if (plan && typeof plan === 'object' && plan !== null) {
+              if ('days' in plan) {
+                totalExercises = (plan as any).days;
+              } else if ('plan' in plan) {
+                // Se for um objeto com propriedade 'plan' (estrutura do backend)
+                const planObj = (plan as any).plan;
+                if (planObj && typeof planObj === 'object') {
+                  totalExercises = Object.keys(planObj).length;
+                }
+              }
+            }
+            
+            // Calcular o progresso percentual
             const weeklyProgress = totalExercises > 0 ? (completedCount / totalExercises) * 100 : 0;
             
             setWeekProgress(weeklyProgress);
