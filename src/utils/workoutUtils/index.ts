@@ -25,6 +25,3 @@ export {
   recordWorkoutCompletion,
   getWorkoutDatesForMonth 
 } from './progressTracking';
-// Export from new dashboard data utilities
-export * from '../dashboardData/workoutProcessor';
-export * from '../dashboardData/supabaseOperations';
