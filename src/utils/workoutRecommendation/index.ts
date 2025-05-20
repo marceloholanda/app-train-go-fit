@@ -31,7 +31,13 @@ export const getRecommendedWorkoutPlan = async (preferences: {
       objective: preferences.objetivo,
       level: preferences.nivel,
       environment: preferences.local,
-      days_per_week: preferences.frequencia
+      days_per_week: preferences.frequencia,
+      // Add default values for optional fields to satisfy the QuizAnswers type
+      age: 'unknown',
+      weight: 'unknown',
+      height: 'unknown',
+      motivation_type: 'unknown',
+      training_barrier: 'unknown'
     };
     
     // Find the best base plan for user preferences
