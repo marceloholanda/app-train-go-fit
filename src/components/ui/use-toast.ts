@@ -1,6 +1,3 @@
 
-import * as React from "react";
-import { useToast } from "@/hooks/use-toast";
-import { toast } from "@/hooks/use-toast";
-
-export { useToast, toast };
+// Fix: Direct re-export from the correct location
+export { useToast, toast } from "@/hooks/use-toast";

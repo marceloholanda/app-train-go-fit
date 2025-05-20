@@ -28,6 +28,7 @@ if (!container) {
 
 const root = createRoot(container);
 
+// Important: React.StrictMode needs to be inside Router for context to work properly
 root.render(
   <React.StrictMode>
     <Router>
