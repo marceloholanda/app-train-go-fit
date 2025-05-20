@@ -1,19 +1,49 @@
-
 export interface Exercise {
-  nome: string;
+  id?: number;
+  name: string;
+  sets: number;
   reps: string;
-  gif_url?: string;
-  video_url?: string;
-  descricao?: string;
-  substituicoes?: Exercise[];
-  completed?: boolean;
+  equipment?: string;
+  muscleGroup?: string;
+  description?: string;
+  videoUrl?: string;
+  imageUrl?: string;
+  restTime?: number;
+  tips?: string[];
+  alternatives?: Exercise[];
+}
+
+export interface WorkoutDay {
+  id: number;
+  name: string;
+  exercises: Exercise[];
+  day?: string;
+  focus?: string;
+  description?: string;
 }
 
 export interface WorkoutPlan {
-  id: string;
+  id?: string;
   name: string;
-  tags: string[];
-  days: number;
-  plan: Record<string, Exercise[]>;
   description?: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  days: number;
+  goal: string;
+  plan: { [key: string]: Exercise[] };
+  tags?: string[];
+  location?: 'home' | 'gym' | 'outdoor';
+  equipment?: string[];
+  frequency?: string;
+  author?: string;
+  notes?: string;
+}
+
+export interface Workout {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  video: string;
+  sets: number;
+  reps: number;
 }

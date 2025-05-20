@@ -177,3 +177,75 @@ export const hasPremiumWelcomeSeen = async (): Promise<boolean> => {
     return false;
   }
 };
+
+/**
+ * Busca todos os dados do usuário necessários para o dashboard
+ */
+export const getUserData = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+    
+    // Buscar perfil do usuário
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    
+    if (profileError) throw profileError;
+    
+    // Buscar plano de treino do usuário
+    const { data: workoutData, error: workoutError } = await supabase
+      .from('user_workouts')
+      .select('workout_plan')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    
+    if (workoutError) throw workoutError;
+    
+    return {
+      name: profile?.nome || 'Usuário',
+      profile: profile || {},
+      workoutPlan: workoutData?.workout_plan || null,
+      plan: profile?.plano || 'free'
+    };
+  } catch (error) {
+    console.error('Erro ao buscar dados do usuário:', error);
+    return null;
+  }
+};
+
+/**
+ * Salva os dados do usuário localmente
+ */
+export const saveUserData = (userData: any): void => {
+  try {
+    localStorage.setItem('traingo-user', JSON.stringify(userData));
+    // Disparar evento para que outros componentes saibam que os dados foram atualizados
+    window.dispatchEvent(new Event('storage'));
+  } catch (error) {
+    console.error('Erro ao salvar dados do usuário localmente:', error);
+  }
+};
+
+/**
+ * Calcula o IMC baseado no peso e altura
+ */
+export const calculateIMC = (weight: number, height: number): number => {
+  if (weight <= 0 || height <= 0) return 0;
+  return weight / (height * height);
+};
+
+/**
+ * Retorna a classificação do IMC
+ */
+export const getIMCClassification = (imc: number): string => {
+  if (imc <= 0) return 'Não calculado';
+  if (imc < 18.5) return 'Abaixo do peso';
+  if (imc < 25) return 'Peso normal';
+  if (imc < 30) return 'Sobrepeso';
+  if (imc < 35) return 'Obesidade grau I';
+  if (imc < 40) return 'Obesidade grau II';
+  return 'Obesidade grau III';
+};

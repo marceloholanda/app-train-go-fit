@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Exercise, WorkoutDay } from '@/types/workout';
@@ -49,9 +48,23 @@ export const useWorkoutData = (workoutId: string | number) => {
         
         // Safety check for the type of workout_plan
         if (typeof workoutPlan === 'object' && workoutPlan !== null) {
-          const days = workoutPlan.days || [];
-          const foundDay = Array.isArray(days) ? 
-            days.find((day: any) => day.id === dayId) : null;
+          let foundDay = null;
+          
+          // Check if workoutPlan has 'days' array (new format)
+          if (Array.isArray(workoutPlan.days)) {
+            foundDay = workoutPlan.days.find((day: any) => day.id === dayId);
+          } 
+          // Otherwise use the plan object (old format)
+          else if (workoutPlan.plan && typeof workoutPlan.plan === 'object') {
+            const exercises = workoutPlan.plan[dayId];
+            if (exercises) {
+              foundDay = {
+                id: dayId,
+                name: `Dia ${dayId}`,
+                exercises: exercises
+              };
+            }
+          }
           
           if (!foundDay) {
             setError('Dia de treino não encontrado');

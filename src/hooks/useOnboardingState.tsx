@@ -31,6 +31,16 @@ export const useOnboardingState = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workoutPlan, setWorkoutPlan] = useState<any>(null);
+  // Add missing state variables needed by Onboarding.tsx
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [registrationData, setRegistrationData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [personalizedMessage, setPersonalizedMessage] = useState('');
+  const [showResults, setShowResults] = useState(false);
 
   const nextStep = useCallback(() => {
     setStep(prev => prev + 1);
@@ -47,6 +57,26 @@ export const useOnboardingState = () => {
     }));
   }, []);
 
+  // Add the missing handler functions
+  const handleOptionSelect = useCallback((questionId: string, answer: string) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
+    nextStep();
+  }, [nextStep]);
+
+  const handleRegistrationChange = useCallback((field: string, value: string) => {
+    setRegistrationData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
+
+  const handlePreviousStep = useCallback(() => {
+    prevStep();
+  }, [prevStep]);
+
   const generateWorkoutPlan = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -59,6 +89,10 @@ export const useOnboardingState = () => {
       });
       
       setWorkoutPlan(plan);
+      if (plan.personalizedMessage) {
+        setPersonalizedMessage(plan.personalizedMessage);
+      }
+      setShowResults(true);
       return plan;
     } catch (err) {
       console.error('Error generating workout plan:', err);
@@ -72,6 +106,7 @@ export const useOnboardingState = () => {
   const saveUserProfile = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setIsSubmitting(true);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -126,8 +161,13 @@ export const useOnboardingState = () => {
       return false;
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   }, [formData, workoutPlan, navigate]);
+
+  const handleSubmit = useCallback(() => {
+    generateWorkoutPlan();
+  }, [generateWorkoutPlan]);
 
   return {
     step,
@@ -139,7 +179,18 @@ export const useOnboardingState = () => {
     prevStep,
     updateFormData,
     generateWorkoutPlan,
-    saveUserProfile
+    saveUserProfile,
+    // Add the missing properties needed by Onboarding.tsx
+    answers,
+    registrationData,
+    isSubmitting,
+    personalizedMessage,
+    showResults,
+    handleOptionSelect,
+    handleRegistrationChange,
+    handlePreviousStep,
+    handleSubmit,
+    currentStep: step - 1 // Convert 1-based to 0-based index
   };
 };
 
