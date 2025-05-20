@@ -1,5 +1,5 @@
 
-import { toast } from "sonner";
+import { toast as sonnerToast } from "sonner";
 
 interface ToastOptions {
   description?: string;
@@ -10,20 +10,20 @@ interface ToastOptions {
 
 export function useToast() {
   return {
-    toast,
+    toast: sonnerToast,
     success: (title: string, options?: ToastOptions) => {
-      toast.success(title, options);
+      sonnerToast.success(title, options);
     },
     error: (title: string, options?: ToastOptions) => {
-      toast.error(title, options);
+      sonnerToast.error(title, options);
     },
     warning: (title: string, options?: ToastOptions) => {
-      toast.warning(title, options);
+      sonnerToast.warning(title, options);
     },
     info: (title: string, options?: ToastOptions) => {
-      toast.info(title, options);
+      sonnerToast.info(title, options);
     },
   };
 }
 
-export { toast };
+export const toast = sonnerToast;
