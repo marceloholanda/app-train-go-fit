@@ -24,7 +24,8 @@ const Onboarding = () => {
 
   // Create an adapter function to convert our handler to match expected ChangeEvent signature
   const handleRegistrationChangeAdapter = (e: ChangeEvent<HTMLInputElement>) => {
-    handleRegistrationChange(e.target.name, e.target.value);
+    const { name, value } = e.target;
+    handleRegistrationChange(name, value);
   };
 
   const isLastQuestion = currentStep === quizQuestions.length;

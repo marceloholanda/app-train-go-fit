@@ -7,7 +7,7 @@ import { WorkoutPlan, Exercise } from '@/types/workout';
 import { WorkoutDisplay } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { getUserData } from '@/utils/userUtils';
-import { standardizeExercise } from '@/utils/exerciseFormatter';
+import { standardizeExercises } from '@/utils/exerciseFormatter';
 
 export const useDashboardData = () => {
   const navigate = useNavigate();
@@ -138,7 +138,7 @@ export const useDashboardData = () => {
         if (progressData && progressData.length > 0) {
           // Extrair os números dos dias de treino das strings "day_1", "day_2", etc.
           completedWorkouts = progressData
-            .filter(item => item.exercise_name.startsWith('day_'))
+            .filter(item => item.exercise_name.startsWith('day'))
             .map(item => parseInt(item.exercise_name.split('_')[1]));
         }
       }
@@ -152,17 +152,15 @@ export const useDashboardData = () => {
       const workoutStatus: 'completed' | 'pending' = completedWorkouts.includes(dayNumber) ? 'completed' : 'pending';
       
       // Ensure exercises always have nome property by standardizing them
-      const exercises = exercisesRaw.map(ex => {
-        return standardizeExercise(ex as Partial<Exercise>);
-      });
+      const standardizedExercises = standardizeExercises(exercisesRaw as any);
       
       const workoutItem: WorkoutDisplay = {
         id: dayNumber,
-        name: generateWorkoutName(dayNumber, exercises),
+        name: generateWorkoutName(dayNumber, standardizedExercises),
         day: weekDays[index] || `Dia ${dayNumber}`,
         status: workoutStatus,
-        exercises: exercises.length,
-        icon: getWorkoutIcon(exercises)
+        exercises: standardizedExercises.length,
+        icon: getWorkoutIcon(standardizedExercises)
       };
       console.log(`[TrainGO] Workout day ${dayNumber} processed:`, workoutItem.name);
       return workoutItem;

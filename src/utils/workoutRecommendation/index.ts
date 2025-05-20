@@ -26,6 +26,14 @@ export const getRecommendedWorkoutPlan = async (preferences: {
   const { generatePersonalizedMessage } = await import('./messageGenerator');
   
   try {
+    // Convert preferences to quiz answers format
+    const quizAnswers = {
+      objective: preferences.objetivo,
+      level: preferences.nivel,
+      environment: preferences.local,
+      days_per_week: preferences.frequencia
+    };
+    
     // Find the best base plan for user preferences
     const basePlan = planFinder.findPlanForPreferences(
       preferences.objetivo,

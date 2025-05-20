@@ -37,8 +37,9 @@ export const useWorkoutData = (workoutId: string | number) => {
           return;
         }
         
-        // Parse workout plan
-        const workoutPlan = userData.workout_plan as WorkoutPlan;
+        // Parse workout plan - cast to WorkoutPlan type with safety checks
+        const workoutPlanData = userData.workout_plan as any;
+        const workoutPlan = workoutPlanData as WorkoutPlan;
         
         // Find day by ID
         const dayId = parseInt(String(workoutId));
@@ -52,12 +53,23 @@ export const useWorkoutData = (workoutId: string | number) => {
           let foundDay = null;
           
           // Check if workoutPlan has 'days' property (new format)
-          if ('days' in workoutPlan && typeof workoutPlan.days === 'number') {
+          if ('days' in workoutPlan && Array.isArray(workoutPlan.days)) {
             // For array-based days format in newer plans
-            if (Array.isArray(workoutPlan.days)) {
-              foundDay = workoutPlan.days.find((day: any) => day.id === dayId);
-            } 
-          } 
+            foundDay = workoutPlan.days.find((day: any) => day.id === dayId);
+          } else if ('days' in workoutPlan && typeof workoutPlan.days === 'number') {
+            // Days is just a number, use plan object
+            if ('plan' in workoutPlan && typeof workoutPlan.plan === 'object') {
+              const dayKey = String(dayId);
+              const exercises = workoutPlan.plan[dayKey];
+              if (exercises) {
+                foundDay = {
+                  id: dayId,
+                  name: `Dia ${dayId}`,
+                  exercises: exercises
+                };
+              }
+            }
+          }
           
           // Otherwise use the plan object (old format)
           if (!foundDay && 'plan' in workoutPlan && typeof workoutPlan.plan === 'object') {
