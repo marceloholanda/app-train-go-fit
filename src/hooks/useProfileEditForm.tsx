@@ -6,6 +6,7 @@ import { findBestWorkoutPlan } from '@/utils/workoutRecommendation';
 import { QuizAnswers } from '@/utils/workoutRecommendation/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveWorkoutPlanToSupabase } from '@/utils/workoutUtils/progress';
+import { supabase } from '@/integrations/supabase/client'; // Added missing import
 
 interface UseProfileEditFormProps {
   userData: any;
