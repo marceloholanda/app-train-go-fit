@@ -32,7 +32,7 @@ root.render(
     <BrowserRouter>
       <AuthProvider>
         <App />
-        <Toaster />
+        <Toaster position="top-center" />
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
