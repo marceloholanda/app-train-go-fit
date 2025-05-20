@@ -61,3 +61,53 @@ export const saveUserData = (userData: any) => {
     return false;
   }
 };
+
+/**
+ * Check if the current user has a premium subscription
+ */
+export const isPremiumUser = (): boolean => {
+  try {
+    const userData = localStorage.getItem('traingo-user');
+    if (!userData) return false;
+    
+    const user = JSON.parse(userData);
+    return user.isPremium === true;
+  } catch (error) {
+    console.error('Error checking premium status:', error);
+    return false;
+  }
+};
+
+/**
+ * Set the premium welcome modal status to shown
+ */
+export const setPremiumWelcomeShown = (): void => {
+  try {
+    localStorage.setItem('premium-welcome-shown', 'true');
+  } catch (error) {
+    console.error('Error setting premium welcome status:', error);
+  }
+};
+
+/**
+ * Check if the premium welcome modal has been shown before
+ */
+export const hasPremiumWelcomeBeenShown = (): boolean => {
+  try {
+    return localStorage.getItem('premium-welcome-shown') === 'true';
+  } catch (error) {
+    console.error('Error checking premium welcome status:', error);
+    return false;
+  }
+};
+
+/**
+ * Reset the premium welcome modal status
+ */
+export const resetPremiumWelcomeStatus = (): void => {
+  try {
+    localStorage.removeItem('premium-welcome-shown');
+  } catch (error) {
+    console.error('Error resetting premium welcome status:', error);
+  }
+};
