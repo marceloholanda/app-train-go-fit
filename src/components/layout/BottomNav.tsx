@@ -1,17 +1,9 @@
 
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { Home, User, Settings } from 'lucide-react';
 
 const BottomNav = () => {
-  const location = useLocation();
-  const pathname = location.pathname;
-
-  const isActive = (path: string) => {
-    if (path === '/dashboard' && pathname === '/') return true;
-    return pathname === path || pathname.startsWith(path + '/');
-  };
-
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-gray-800 bg-black z-50 lg:hidden">
       <div className="flex items-center justify-around h-16">

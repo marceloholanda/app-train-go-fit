@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter as Router } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './contexts/AuthContext'
@@ -28,13 +28,13 @@ if (!container) {
 
 const root = createRoot(container);
 
-// Important: React.StrictMode needs to be inside Router for context to work properly
+// React.StrictMode wrapped around everything to ensure proper context
 root.render(
   <React.StrictMode>
-    <Router>
+    <BrowserRouter>
       <AuthProvider>
         <App />
       </AuthProvider>
-    </Router>
+    </BrowserRouter>
   </React.StrictMode>
 );

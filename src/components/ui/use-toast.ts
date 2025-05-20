@@ -1,3 +1,3 @@
 
-// Fix: Direct re-export from the correct location
+// Direct re-export from the hooks directory
 export { useToast, toast } from "@/hooks/use-toast";
