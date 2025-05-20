@@ -10,7 +10,7 @@ import { standardizeExercises } from '@/utils/exerciseFormatter';
 
 export const useDashboardData = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const toast = useToast();
   
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,9 +37,8 @@ export const useDashboardData = () => {
         
         if (!userData) {
           console.error("[TrainGO] Failed to fetch user data");
-          toast({
-            title: "Erro ao carregar dados",
-            description: "Não foi possível carregar seu perfil.",
+          toast.error("Erro ao carregar dados", {
+            description: "Não foi possível carregar seu perfil."
           });
           navigate('/login');
           return;
@@ -76,16 +75,14 @@ export const useDashboardData = () => {
           await processWorkoutPlan(userData);
         } else {
           console.error("[TrainGO] No workout plan found in user data");
-          toast({
-            title: "Plano não encontrado",
-            description: "Não foi possível encontrar seu plano de treino.",
+          toast.error("Plano não encontrado", {
+            description: "Não foi possível encontrar seu plano de treino."
           });
         }
       } catch (error) {
         console.error('[TrainGO] Erro ao carregar dados do usuário:', error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Não foi possível carregar seu perfil.",
+        toast.error("Erro ao carregar dados", {
+          description: "Não foi possível carregar seu perfil."
         });
       } finally {
         setIsLoading(false);
