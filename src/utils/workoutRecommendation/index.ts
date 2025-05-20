@@ -8,6 +8,7 @@ export * from './planAdaptation';
 export * from './messageGenerator';
 export * from './environmentMapping';
 export * from './exerciseSubstitution';
+export * from './types';
 
 /**
  * Main function to get a workout plan based on user preferences

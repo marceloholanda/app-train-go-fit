@@ -19,8 +19,12 @@ export const replaceExerciseForEnvironment = (exerciseName: string, environment:
   );
   
   if (!needsReplacement) {
-    // If not a machine exercise, return the same exercise
-    return { nome: exerciseName, reps };
+    // If not a machine exercise, return the same exercise with both naming conventions
+    return { 
+      name: exerciseName, 
+      nome: exerciseName, 
+      reps 
+    };
   }
   
   // Mapping of replacements for common exercises
@@ -63,5 +67,10 @@ export const replaceExerciseForEnvironment = (exerciseName: string, environment:
   const replacement = replacements[environment][exerciseName.toLowerCase()] || 
     (environment === 'home' ? 'Exercício com peso corporal' : 'Exercício ao ar livre');
   
-  return { nome: replacement, reps };
+  // Return the replacement with both name properties for compatibility
+  return { 
+    name: replacement, 
+    nome: replacement, 
+    reps 
+  };
 };

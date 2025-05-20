@@ -1,3 +1,4 @@
+
 /**
  * Type for workout plan preferences
  */
@@ -9,21 +10,37 @@ export interface WorkoutPlanPreferences {
 }
 
 /**
+ * Type for quiz answers
+ */
+export interface QuizAnswers {
+  objective: string;
+  level: string;
+  environment: string;
+  days_per_week: string | number;
+}
+
+/**
  * Type for a single exercise
  */
 export interface Exercise {
   id: number;
   name: string;
+  nome?: string; // Portuguese alternative
   sets: number;
   reps: string;
   restTime: number;
   equipment?: string;
   muscleGroup?: string;
   description?: string;
+  descricao?: string; // Portuguese alternative
   videoUrl?: string;
+  video_url?: string; // Alternative format
   imageUrl?: string;
+  gif_url?: string; // Alternative format
   tips?: string[];
   alternatives?: Exercise[];
+  substituicoes?: Exercise[]; // Portuguese alternative
+  completed?: boolean; // For tracking completion status
 }
 
 /**

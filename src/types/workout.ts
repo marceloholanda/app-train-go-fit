@@ -1,16 +1,23 @@
+
 export interface Exercise {
   id?: number;
   name: string;
+  nome?: string; // Portuguese alternative
   sets: number;
   reps: string;
   equipment?: string;
   muscleGroup?: string;
   description?: string;
+  descricao?: string; // Portuguese alternative
   videoUrl?: string;
+  video_url?: string; // Alternative format
   imageUrl?: string;
+  gif_url?: string; // Alternative format
   restTime?: number;
   tips?: string[];
   alternatives?: Exercise[];
+  substituicoes?: Exercise[]; // Portuguese alternative
+  completed?: boolean; // For tracking completion status
 }
 
 export interface WorkoutDay {
