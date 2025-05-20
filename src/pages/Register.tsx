@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -12,15 +11,13 @@ const Register = () => {
   
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
     if (password !== confirmPassword) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "As senhas não coincidem",
         variant: "destructive",
       });
@@ -28,8 +25,7 @@ const Register = () => {
     }
     
     if (password.length < 6) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "A senha deve ter pelo menos 6 caracteres",
         variant: "destructive",
       });
@@ -51,14 +47,12 @@ const Register = () => {
       // Redirect to onboarding after successful registration
       navigate('/onboarding');
       
-      toast({
-        title: "Sucesso!",
+      toast("Sucesso!", {
         description: "Conta criada com sucesso",
       });
     } catch (error) {
       console.error('Registration error:', error);
-      toast({
-        title: "Erro",
+      toast("Erro", {
         description: "Falha ao criar conta. Tente novamente.",
         variant: "destructive",
       });

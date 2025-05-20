@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateUserName } from '@/utils/userUtils';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { isPremiumUser } from '@/utils/userUtils';
 
 const Settings = () => {
@@ -14,8 +14,7 @@ const Settings = () => {
 
   const handleUpdateName = async () => {
     if (name.trim() === '') {
-      toast({
-        title: "Erro",
+      toast("Erro", {
         description: "O nome não pode estar vazio.",
         variant: "destructive"
       });
@@ -24,13 +23,11 @@ const Settings = () => {
 
     const success = await updateUserName(name);
     if (success) {
-      toast({
-        title: "Nome atualizado!",
+      toast("Nome atualizado!", {
         description: "Seu nome foi atualizado com sucesso."
       });
     } else {
-      toast({
-        title: "Erro",
+      toast("Erro", {
         description: "Não foi possível atualizar o nome.",
         variant: "destructive"
       });

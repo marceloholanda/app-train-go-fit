@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { trackExerciseCompletion } from '@/utils/workoutUtils';
 import { isPremiumUser } from '@/utils/userUtils';
 import { Button } from '@/components/ui/button';
@@ -55,20 +54,22 @@ const ExerciseDetail: React.FC = () => {
       setAllExercisesCompleted(allCompleted);
       
       // Show toast notification
-      toast({
-        title: newExercisesState[index] ? "Exercício concluído!" : "Exercício desmarcado",
-        description: newExercisesState[index] 
-          ? "Continue assim! Seu progresso foi atualizado." 
-          : "O exercício foi marcado como pendente."
-      });
+      if (newExercisesState[index]) {
+        toast("Exercício concluído!", {
+          description: "Continue assim! Seu progresso foi atualizado."
+        });
+      } else {
+        toast("Exercício desmarcado", {
+          description: "O exercício foi marcado como pendente."
+        });
+      }
     } catch (error) {
       console.error("Error tracking exercise completion:", error);
       // Restore previous state on error
       const revertedState = [...exercisesState];
       setExercisesState(revertedState);
       
-      toast({
-        title: "Erro",
+      toast("Erro", {
         description: "Não foi possível atualizar o status do exercício.",
         variant: "destructive"
       });

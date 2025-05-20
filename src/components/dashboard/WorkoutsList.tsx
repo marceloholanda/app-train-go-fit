@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { updateWorkoutProgress } from '@/utils/workoutUtils';
 import { WorkoutDisplay } from '@/types/dashboard';
 import WorkoutItem from './WorkoutItem';
@@ -57,16 +57,18 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
       const newProgress = await updateWorkoutProgress(workoutId, newCompleted);
       setWeekProgress(newProgress);
       
-      toast({
-        title: newCompleted ? "Treino concluído!" : "Treino desmarcado",
-        description: newCompleted 
-          ? "Continue assim! Seu progresso foi atualizado." 
-          : "O treino foi marcado como pendente."
-      });
+      if (newCompleted) {
+        toast("Treino concluído!", {
+          description: "Continue assim! Seu progresso foi atualizado."
+        });
+      } else {
+        toast("Treino desmarcado", {
+          description: "O treino foi marcado como pendente."
+        });
+      }
     } catch (error) {
       console.error("Error updating workout progress:", error);
-      toast({
-        title: "Erro",
+      toast("Erro", {
         description: "Não foi possível atualizar o status do treino.",
         variant: "destructive"
       });

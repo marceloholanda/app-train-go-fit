@@ -1,8 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getRecommendedWorkoutPlan } from '@/utils/workoutRecommendation';
 import { generateWorkoutPlanType } from '@/utils/workoutRecommendation/types';
 
@@ -149,8 +148,7 @@ export const useOnboardingState = () => {
       // Navigate to dashboard
       navigate('/dashboard');
       
-      toast({
-        title: "Perfil criado com sucesso!",
+      toast("Perfil criado com sucesso!", {
         description: "Bem-vindo(a) ao TrainGO. Seu plano de treino está pronto."
       });
       

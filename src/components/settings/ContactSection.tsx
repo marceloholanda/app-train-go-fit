@@ -2,15 +2,14 @@
 import React from 'react';
 import { ChevronRight, MessageCircle } from 'lucide-react';
 import Card from '@/components/Card';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const ContactSection: React.FC = () => {
   const handleContactClick = () => {
     // Aqui poderia abrir um modal ou redirecionar para um formulário
     // Por enquanto, mostraremos uma notificação
-    toast({
-      title: "Contato",
-      description: "Funcionalidade de contato em desenvolvimento. Em breve você poderá enviar suas dúvidas e feedback.",
+    toast("Contato", {
+      description: "Funcionalidade de contato em desenvolvimento. Em breve você poderá enviar suas dúvidas e feedback."
     });
     
     // Abrir email como alternativa temporária
