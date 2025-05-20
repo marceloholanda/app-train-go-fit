@@ -33,16 +33,20 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
     setAchievements(achievementsData);
     
     // Verificar novas conquistas desbloqueadas
-    const newAchievement = checkNewAchievement();
-    if (newAchievement) {
-      showNewAchievementToast(newAchievement);
-    }
+    const checkAchievements = async () => {
+      const newAchievement = await checkNewAchievement("first_workout");
+      if (newAchievement) {
+        showNewAchievementToast(newAchievement);
+      }
+    };
+    
+    checkAchievements();
   }, [userData]);
 
   const showNewAchievementToast = (achievement: any) => {
     toast({
       title: "🎉 Nova Conquista Desbloqueada!",
-      description: `Parabéns! Você desbloqueou: ${achievement.name}`,
+      description: `Parabéns! Você desbloqueou: ${achievement.badge_name || achievement.name}`,
       variant: "default",
       className: "bg-traingo-primary/20 border-traingo-primary text-white",
       duration: 5000,

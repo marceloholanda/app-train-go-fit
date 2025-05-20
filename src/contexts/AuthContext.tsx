@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   // Login function using Supabase
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<void> => {
     try {
       console.log("[TrainGO] Attempting to login:", email);
       
@@ -51,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       console.log("[TrainGO] Login successful for:", email);
-      return data;
     } catch (error: any) {
       console.error('[TrainGO] Login error:', error.message);
       throw error;
@@ -59,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Signup function using Supabase
-  const signup = async (email: string, password: string, userData: any) => {
+  const signup = async (email: string, password: string, userData: any): Promise<void> => {
     try {
       console.log("[TrainGO] Attempting to sign up:", email);
       
@@ -76,7 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       console.log("[TrainGO] Signup successful for:", email);
-      return data;
     } catch (error: any) {
       console.error('[TrainGO] Signup error:', error.message);
       throw error;
@@ -84,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Logout function using Supabase
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
       console.log("[TrainGO] Logging out user");
       
@@ -127,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // Define the value object to be provided to consumers
-  const value = {
+  const value: AuthContextType = {
     currentUser,
     session,
     login,

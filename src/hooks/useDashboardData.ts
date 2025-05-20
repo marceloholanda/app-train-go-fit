@@ -52,22 +52,27 @@ export const useDashboardData = () => {
         setUserData(userData);
         
         // Buscar progresso da semana
-        const { data: progressData } = await supabase
-          .from('progress')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .gte('date', new Date(new Date().setDate(new Date().getDate() - 7)).toISOString())
-          .eq('completed', true);
-        
-        const completedWorkouts = progressData ? progressData.map(p => parseInt(p.exercise_name.split('_')[1])) : [];
-        const weekProgressValue = completedWorkouts.length > 0 ? 
-          (completedWorkouts.length / (userData.workoutPlan?.days || 1)) * 100 : 0;
-        
-        setWeekProgress(Math.min(100, weekProgressValue));
+        try {
+          const { data: progressData } = await supabase
+            .from('progress')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .gte('date', new Date(new Date().setDate(new Date().getDate() - 7)).toISOString())
+            .eq('completed', true);
+          
+          const completedWorkouts = progressData ? progressData.map(p => parseInt(p.exercise_name.split('_')[1])) : [];
+          const weekProgressValue = completedWorkouts.length > 0 ? 
+            (completedWorkouts.length / (userData.workoutPlan?.days || 1)) * 100 : 0;
+          
+          setWeekProgress(Math.min(100, weekProgressValue));
+        } catch (error) {
+          console.error("[TrainGO] Error fetching progress data:", error);
+          setWeekProgress(0);
+        }
         
         // Processar o plano de treino
         if (userData.workoutPlan) {
-          processWorkoutPlan(userData, completedWorkouts);
+          await processWorkoutPlan(userData);
         } else {
           console.error("[TrainGO] No workout plan found in user data");
           toast({
@@ -92,7 +97,7 @@ export const useDashboardData = () => {
   }, [navigate, toast]);
   
   // Processa o plano de treino e prepara os dados para exibição
-  const processWorkoutPlan = (user: any, completedWorkouts: number[] = []) => {
+  const processWorkoutPlan = async (user: any) => {
     if (!user.workoutPlan) {
       console.error("[TrainGO] No workout plan in user data");
       setWorkouts([]);
@@ -109,6 +114,23 @@ export const useDashboardData = () => {
     });
     
     const weekDays = mapWorkoutDays(plan.days);
+    
+    // Buscar progresso para verificar treinos completados
+    const { data: { session } } = await supabase.auth.getSession();
+    let completedWorkouts: number[] = [];
+    
+    if (session) {
+      const { data: progressData } = await supabase
+        .from('progress')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('completed', true);
+      
+      completedWorkouts = progressData ? progressData.map(p => {
+        const parts = p.exercise_name.split('_');
+        return parts.length > 1 ? parseInt(parts[1]) : 0;
+      }) : [];
+    }
     
     // Cria os cards de treino para o dashboard
     const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercises], index) => {
@@ -131,11 +153,15 @@ export const useDashboardData = () => {
     setWorkouts(workoutItems);
   };
 
+  const updateWeekProgress = async (newProgress: number) => {
+    setWeekProgress(Math.min(100, newProgress));
+  };
+
   return {
     userData,
     isLoading,
     weekProgress,
-    setWeekProgress,
+    setWeekProgress: updateWeekProgress,
     workouts,
     setWorkouts,
   };

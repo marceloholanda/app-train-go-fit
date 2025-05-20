@@ -133,3 +133,41 @@ export const getUserAchievements = async (): Promise<Achievement[]> => {
     return [];
   }
 };
+
+/**
+ * Recupera conquistas estáticas para exibição 
+ */
+export const getAchievements = (): any[] => {
+  // Retorna uma lista estática de conquistas para exibição na interface
+  return [
+    {
+      id: 'bronze',
+      name: 'Primeiro Treino',
+      description: 'Completou seu primeiro treino. O início de uma jornada incrível!',
+      unlocked: true,
+      unlockedDate: new Date().toISOString(),
+      threshold: 1
+    },
+    {
+      id: 'silver',
+      name: 'Consistente',
+      description: 'Treinou por 3 dias consecutivos. A consistência é a chave!',
+      unlocked: false,
+      threshold: 3
+    },
+    {
+      id: 'gold',
+      name: 'Semana Perfeita',
+      description: 'Uma semana inteira de treinos consecutivos. Impressionante!',
+      unlocked: false,
+      threshold: 7
+    },
+    {
+      id: 'platinum',
+      name: 'Plano Completo',
+      description: 'Completou todos os treinos do seu plano. Muito bem!',
+      unlocked: false,
+      threshold: 30
+    }
+  ];
+};

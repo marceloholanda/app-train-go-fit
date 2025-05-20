@@ -87,28 +87,36 @@ export const useOnboardingState = () => {
       }
 
       // Salvar perfil do usuário no Supabase
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          nome: registrationData.name,
-          objetivo: quizAnswers.objective,
-          nivel_experiencia: quizAnswers.level,
-          frequencia_treino: quizAnswers.days_per_week,
-          local_treino: quizAnswers.environment,
-        })
-        .eq('user_id', userId);
+      try {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            nome: registrationData.name,
+            objetivo: quizAnswers.objective,
+            nivel_experiencia: quizAnswers.level,
+            frequencia_treino: quizAnswers.days_per_week,
+            local_treino: quizAnswers.environment,
+          })
+          .eq('user_id', userId);
 
-      if (profileError) throw profileError;
+        if (profileError) throw profileError;
+      } catch (error: any) {
+        console.error("[TrainGO] Erro ao atualizar perfil:", error.message);
+      }
 
       // Salvar plano de treino no Supabase
-      const { error: workoutError } = await supabase
-        .from('user_workouts')
-        .insert({
-          user_id: userId,
-          workout_plan: recommendedPlan
-        });
+      try {
+        const { error: workoutError } = await supabase
+          .from('user_workouts')
+          .insert({
+            user_id: userId,
+            workout_plan: recommendedPlan
+          });
 
-      if (workoutError) throw workoutError;
+        if (workoutError) throw workoutError;
+      } catch (error: any) {
+        console.error("[TrainGO] Erro ao salvar plano de treino:", error.message);
+      }
       
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);
