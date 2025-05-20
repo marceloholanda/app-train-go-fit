@@ -2,7 +2,7 @@
 import React from 'react';
 import QuizQuestion from './QuizQuestion';
 import { ArrowLeft } from 'lucide-react';
-import { QuizAnswers } from '@/utils/workoutRecommendation/types';
+import { QuizAnswers } from '@/utils/workoutRecommendation';
 
 // Definição dos tipos para as perguntas do quiz
 export interface QuizQuestionType {

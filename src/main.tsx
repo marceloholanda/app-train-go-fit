@@ -1,12 +1,9 @@
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App.tsx';
-import './index.css';
-import { AuthProvider } from './contexts/AuthContext';
-import { Toaster } from './components/ui/sonner';
-import { ThemeProvider } from 'next-themes';
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter as Router } from 'react-router-dom'
+import App from './App.tsx'
+import './index.css'
+import { AuthProvider } from './contexts/AuthContext'
 
 // Register service worker
 if ('serviceWorker' in navigator) {
@@ -21,23 +18,10 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-const container = document.getElementById("root");
-if (!container) {
-  throw new Error("Root element not found");
-}
-
-const root = createRoot(container);
-
-// Make sure BrowserRouter is the outermost wrapper for all components using react-router
-root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider defaultTheme="dark" attribute="class">
-        <AuthProvider>
-          <App />
-          <Toaster />
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+createRoot(document.getElementById("root")!).render(
+  <Router>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </Router>
 );

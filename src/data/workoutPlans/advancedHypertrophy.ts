@@ -9,36 +9,34 @@ export const advancedHypertrophy: WorkoutPlan = {
   description: "Plano avançado para ganho de massa muscular com divisão otimizada por grupos musculares",
   plan: {
     dia1: [
-      { name: "Supino reto", nome: "Supino reto", reps: "4x10-12", sets: 4 },
-      { name: "Crucifixo", nome: "Crucifixo", reps: "3x12", sets: 3 },
-      { name: "Tríceps corda", nome: "Tríceps corda", reps: "3x12-15", sets: 3 },
-      { name: "Mergulho entre bancos", nome: "Mergulho entre bancos", reps: "3x10-12", sets: 3 }
+      { nome: "Supino reto", reps: "4x10-12" },
+      { nome: "Crucifixo", reps: "3x12" },
+      { nome: "Tríceps corda", reps: "3x12-15" },
+      { nome: "Mergulho entre bancos", reps: "3x10-12" }
     ],
     dia2: [
-      { name: "Agachamento", nome: "Agachamento", reps: "4x10-12", sets: 4 },
-      { name: "Leg press", nome: "Leg press", reps: "4x12-15", sets: 4 },
-      { name: "Cadeira extensora", nome: "Cadeira extensora", reps: "3x12-15", sets: 3 },
-      { name: "Panturrilha em pé", nome: "Panturrilha em pé", reps: "4x15-20", sets: 4 }
+      { nome: "Agachamento", reps: "4x10-12" },
+      { nome: "Leg press", reps: "4x12-15" },
+      { nome: "Cadeira extensora", reps: "3x12-15" },
+      { nome: "Panturrilha em pé", reps: "4x15-20" }
     ],
     dia3: [
-      { name: "Puxada frontal", nome: "Puxada frontal", reps: "4x10-12", sets: 4 },
-      { name: "Remada curvada", nome: "Remada curvada", reps: "4x10-12", sets: 4 },
-      { name: "Rosca direta", nome: "Rosca direta", reps: "3x12", sets: 3 },
-      { name: "Rosca alternada", nome: "Rosca alternada", reps: "3x12", sets: 3 }
+      { nome: "Puxada frontal", reps: "4x10-12" },
+      { nome: "Remada curvada", reps: "4x10-12" },
+      { nome: "Rosca direta", reps: "3x12" },
+      { nome: "Rosca alternada", reps: "3x12" }
     ],
     dia4: [
-      { name: "Desenvolvimento com halteres", nome: "Desenvolvimento com halteres", reps: "3x12", sets: 3 },
-      { name: "Elevação lateral", nome: "Elevação lateral", reps: "3x15", sets: 3 },
-      { name: "Prancha", nome: "Prancha", reps: "3x30s", sets: 3 },
-      { name: "Elevação de pernas", nome: "Elevação de pernas", reps: "3x15", sets: 3 }
+      { nome: "Desenvolvimento com halteres", reps: "3x12" },
+      { nome: "Elevação lateral", reps: "3x15" },
+      { nome: "Prancha", reps: "3x30s" },
+      { nome: "Elevação de pernas", reps: "3x15" }
     ],
     dia5: [
-      { name: "Agachamento com halteres", nome: "Agachamento com halteres", reps: "3x15", sets: 3 },
-      { name: "Flexão de braço", nome: "Flexão de braço", reps: "3x10", sets: 3 },
-      { name: "Remada baixa com barra", nome: "Remada baixa com barra", reps: "3x12", sets: 3 },
-      { name: "Abdominal remador", nome: "Abdominal remador", reps: "3x20", sets: 3 }
+      { nome: "Agachamento com halteres", reps: "3x15" },
+      { nome: "Flexão de braço", reps: "3x10" },
+      { nome: "Remada baixa com barra", reps: "3x12" },
+      { nome: "Abdominal remador", reps: "3x20" }
     ]
-  },
-  level: "advanced",
-  goal: "gain_muscle"
+  }
 };

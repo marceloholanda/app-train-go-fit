@@ -8,8 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -26,16 +26,20 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      // Simulação de login
       await login(formData.email, formData.password);
       
-      toast.success("Login bem-sucedido!", {
-        description: "Redirecionando para o dashboard..."
+      toast({
+        title: "Login bem-sucedido!",
+        description: "Redirecionando para o dashboard...",
       });
       
       navigate('/dashboard');
-    } catch (error: any) {
-      toast.error("Falha no login", {
-        description: error.message || "Email ou senha incorretos."
+    } catch (error) {
+      toast({
+        title: "Falha no login",
+        description: "Email ou senha incorretos.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

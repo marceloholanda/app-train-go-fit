@@ -5,7 +5,6 @@ import WorkoutPlanResult from '@/components/onboarding/WorkoutPlanResult';
 import Quiz from '@/components/quiz/Quiz';
 import RegistrationForm from '@/components/quiz/RegistrationForm';
 import { quizQuestions } from '@/components/quiz/QuizData';
-import { ChangeEvent } from 'react';
 
 const Onboarding = () => {
   const {
@@ -21,12 +20,6 @@ const Onboarding = () => {
     handlePreviousStep,
     handleSubmit
   } = useOnboardingState();
-
-  // Create an adapter function to convert our handler to match expected ChangeEvent signature
-  const handleRegistrationChangeAdapter = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    handleRegistrationChange(name, value);
-  };
 
   const isLastQuestion = currentStep === quizQuestions.length;
 
@@ -59,7 +52,7 @@ const Onboarding = () => {
       ) : (
         <RegistrationForm
           data={registrationData}
-          onChange={handleRegistrationChangeAdapter}
+          onChange={handleRegistrationChange}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
         />

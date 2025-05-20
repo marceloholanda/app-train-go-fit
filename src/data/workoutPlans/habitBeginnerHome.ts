@@ -9,27 +9,25 @@ export const habitBeginnerHome: WorkoutPlan = {
   description: "Plano simples para iniciantes criarem o hábito de exercício em casa",
   plan: {
     dia1: [
-      { name: "Marcha estacionária", nome: "Marcha estacionária", reps: "3x30s", sets: 3 },
-      { name: "Agachamento na parede", nome: "Agachamento na parede", reps: "3x20s", sets: 3 },
-      { name: "Flexão na parede", nome: "Flexão na parede", reps: "3x10", sets: 3 },
-      { name: "Prancha no joelho", nome: "Prancha no joelho", reps: "3x15s", sets: 3 },
-      { name: "Alongamento leve", nome: "Alongamento leve", reps: "3 minutos", sets: 1 }
+      { nome: "Marcha estacionária", reps: "3x30s" },
+      { nome: "Agachamento na parede", reps: "3x20s" },
+      { nome: "Flexão na parede", reps: "3x10" },
+      { nome: "Prancha no joelho", reps: "3x15s" },
+      { nome: "Alongamento leve", reps: "3 minutos" }
     ],
     dia2: [
-      { name: "Alongamento dinâmico", nome: "Alongamento dinâmico", reps: "5 minutos", sets: 1 },
-      { name: "Agachamento livre", nome: "Agachamento livre", reps: "3x10", sets: 3 },
-      { name: "Rotação de tronco", nome: "Rotação de tronco", reps: "3x10 (cada lado)", sets: 3 },
-      { name: "Abdominal curto", nome: "Abdominal curto", reps: "3x10", sets: 3 },
-      { name: "Respiração profunda", nome: "Respiração profunda", reps: "2 minutos", sets: 1 }
+      { nome: "Alongamento dinâmico", reps: "5 minutos" },
+      { nome: "Agachamento livre", reps: "3x10" },
+      { nome: "Rotação de tronco", reps: "3x10 (cada lado)" },
+      { nome: "Abdominal curto", reps: "3x10" },
+      { nome: "Respiração profunda", reps: "2 minutos" }
     ],
     dia3: [
-      { name: "Caminhada no lugar", nome: "Caminhada no lugar", reps: "5 minutos", sets: 1 },
-      { name: "Elevação de joelhos", nome: "Elevação de joelhos", reps: "3x10 (cada perna)", sets: 3 },
-      { name: "Ponte de glúteos", nome: "Ponte de glúteos", reps: "3x10", sets: 3 },
-      { name: "Bird dog", nome: "Bird dog", reps: "3x8 (cada lado)", sets: 3 },
-      { name: "Alongamento global", nome: "Alongamento global", reps: "3 minutos", sets: 1 }
+      { nome: "Caminhada no lugar", reps: "5 minutos" },
+      { nome: "Elevação de joelhos", reps: "3x10 (cada perna)" },
+      { nome: "Ponte de glúteos", reps: "3x10" },
+      { nome: "Bird dog", reps: "3x8 (cada lado)" },
+      { nome: "Alongamento global", reps: "3 minutos" }
     ]
-  },
-  level: "beginner",
-  goal: "create_habit"
+  }
 };

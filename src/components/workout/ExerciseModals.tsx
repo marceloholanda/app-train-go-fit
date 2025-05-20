@@ -6,7 +6,8 @@ import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
 import ExerciseAddModal from '@/components/workout/ExerciseAddModal';
 import ExerciseImageModal from '@/components/workout/ExerciseImageModal';
 import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
-import useExerciseMedia from '@/hooks/useExerciseMedia';
+import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
+import { getExerciseImageUrl } from '@/utils/workoutRecommendation/exerciseImages';
 
 interface ExerciseModalsProps {
   selectedExerciseIndex: number;
@@ -43,18 +44,28 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
   onReplaceExercise,
   onAddExercises
 }) => {
-  const { getVideoUrl, getImageUrl } = useExerciseMedia();
+  // Função para obter o URL do vídeo (da propriedade do exercício ou do mapeamento)
+  const getVideoUrl = (exercise: Exercise | undefined): string => {
+    if (!exercise) return '';
+    
+    // Usar o URL do vídeo do exercício, se disponível
+    if (exercise.video_url) return exercise.video_url;
+    
+    // Caso contrário, procurar no mapeamento
+    return getExerciseVideoUrl(exercise.nome) || '';
+  };
+
   const selectedExercise = selectedExerciseIndex !== -1 ? visibleExercises[selectedExerciseIndex] : undefined;
 
   return (
     <>
-      {/* Render exercise-specific modals only when an exercise is selected */}
-      {selectedExerciseIndex !== -1 && selectedExercise && (
+      {/* Exercise Modals */}
+      {selectedExerciseIndex !== -1 && (
         <>
           <ExerciseVideoModal
             isOpen={isVideoModalOpen}
             onClose={onCloseVideoModal}
-            exerciseName={selectedExercise.nome || selectedExercise.name}
+            exerciseName={selectedExercise?.nome || ""}
             videoUrl={getVideoUrl(selectedExercise)}
             isPremium={isPremium}
           />
@@ -63,22 +74,22 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             isOpen={isReplaceModalOpen}
             onClose={onCloseReplaceModal}
             isPremium={isPremium}
-            currentExercise={selectedExercise}
-            alternativeExercises={selectedExercise.substituicoes || []}
+            currentExercise={selectedExercise!}
+            alternativeExercises={selectedExercise?.substituicoes || []}
             onReplaceExercise={onReplaceExercise}
           />
           
           <ExerciseImageModal
             isOpen={isImageModalOpen}
             onClose={onCloseImageModal}
-            exerciseName={selectedExercise.nome || selectedExercise.name}
-            imageUrl={getImageUrl(selectedExercise)}
-            description={selectedExercise.descricao || selectedExercise.description}
+            exerciseName={selectedExercise?.nome || ""}
+            imageUrl={getExerciseImageUrl(selectedExercise?.nome || "")}
+            description={selectedExercise?.descricao}
           />
         </>
       )}
       
-      {/* Add Exercise Modal (not dependent on selected exercise) */}
+      {/* Add Exercise Modal */}
       <ExerciseAddModal
         isOpen={isAddExerciseModalOpen}
         onClose={onCloseAddExerciseModal}

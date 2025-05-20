@@ -1,28 +1,22 @@
 
-import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import PrimaryButton from '@/components/PrimaryButton';
-import { Dumbbell, Zap, Users } from 'lucide-react';
+import { ChevronRight, Dumbbell, Zap, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Landing = () => {
-  const { currentUser, loading } = useAuth();
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   
-  // Show loading indicator while auth state is being determined
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  // Redirect to dashboard if user is logged in
-  if (currentUser) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  // Check if user is already authenticated
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/dashboard');
+    }
+  }, [currentUser, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -47,11 +41,11 @@ const Landing = () => {
           </p>
           
           <div className="flex flex-col items-center justify-center">
-            <Link to="/onboarding">
-              <PrimaryButton>
-                Começar Agora
-              </PrimaryButton>
-            </Link>
+            <PrimaryButton 
+              onClick={() => navigate('/onboarding')}
+            >
+              Começar Agora
+            </PrimaryButton>
           </div>
         </div>
       </section>
@@ -88,11 +82,12 @@ const Landing = () => {
           </div>
           
           <div className="mt-12 text-center">
-            <Link to="/onboarding">
-              <PrimaryButton className="mx-auto">
-                Descubra Seu Perfil
-              </PrimaryButton>
-            </Link>
+            <PrimaryButton 
+              onClick={() => navigate('/onboarding')}
+              className="mx-auto"
+            >
+              Descubra Seu Perfil
+            </PrimaryButton>
           </div>
         </div>
       </section>

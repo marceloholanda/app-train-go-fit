@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileInfo from '@/components/profile/ProfileInfo';
 import WorkoutCalendar from '@/components/profile/WorkoutCalendar';
@@ -13,6 +14,7 @@ import PlanStatusCard from '@/components/profile/PlanStatusCard';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -30,8 +32,10 @@ const Profile = () => {
         }
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
-        toast("Erro ao carregar dados", {
-          description: "Não foi possível carregar seu perfil."
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Não foi possível carregar seu perfil.",
+          variant: "destructive",
         });
       } finally {
         setIsLoading(false);
@@ -39,7 +43,7 @@ const Profile = () => {
     };
 
     loadUserData();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   // Função para atualizar os dados do usuário na interface
   const updateUserData = () => {

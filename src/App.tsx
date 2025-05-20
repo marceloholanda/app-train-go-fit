@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
@@ -13,45 +13,48 @@ import Settings from './pages/Settings';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Landing from './pages/Landing';
-import AuthLayout from './layouts/AuthLayout';
-import Index from './pages/Index';
+import { Toaster } from '@/components/ui/toaster';
+import { useToast } from '@/hooks/use-toast';
+import BottomNav from './components/layout/BottomNav';
 
 const App = () => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Simplified loading state since AuthProvider already handles this
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  // Verificar se acabamos de completar o onboarding
+  useEffect(() => {
+    const completedOnboarding = localStorage.getItem('onboarding-completed');
+    if (completedOnboarding === 'true' && currentUser) {
+      console.log("[TrainGO] Auto-redirecting to dashboard after onboarding");
+      localStorage.removeItem('onboarding-completed');
+      navigate('/dashboard');
+    }
+  }, [currentUser, navigate]);
 
   return (
     <div className="bg-background text-foreground">
       <Routes>
-        {/* Root path uses Index component to handle redirects */}
-        <Route path="/" element={<Index />} />
-        
-        {/* Public pages */}
-        <Route path="/landing" element={<Landing />} />
+        {/* Páginas públicas */}
+        <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Landing />} />
         <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
-        <Route path="/register" element={currentUser ? <Navigate to="/dashboard" /> : <Register />} />
+        <Route path="/register" element={currentUser ? <Navigate to="/onboarding" /> : <Register />} />
         <Route path="/onboarding" element={<Onboarding />} />
         
-        {/* Protected pages */}
-        <Route element={<AuthLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/exercise/:id" element={<ExerciseDetail />} />
-          <Route path="/upgrade" element={<Upgrade />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-        </Route>
-        
+        {/* Páginas protegidas */}
+        <Route path="/dashboard" element={currentUser ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
+        <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={currentUser ? <Settings /> : <Navigate to="/login" />} />
         <Route path="/terms" element={<TermsOfUse />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
+      
+      {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
+      {currentUser && <BottomNav />}
+      
+      <Toaster />
     </div>
   );
 };

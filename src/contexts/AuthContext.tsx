@@ -1,27 +1,20 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Session } from '@supabase/supabase-js';
-import { useToast } from "@/hooks/use-toast";
 
 // Define the Auth context type
 interface AuthContextType {
-  currentUser: User | null;
-  session: Session | null;
+  currentUser: any | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  signup: (email: string, password: string, userData: any) => Promise<void>;
-  loading: boolean;
 }
 
 // Create the Auth context with default values
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
-  session: null,
   login: async () => {},
-  logout: async () => {},
-  signup: async () => {},
-  loading: true,
+  logout: async () => {}
 });
 
 // Custom hook to use the Auth context
@@ -31,120 +24,94 @@ export function useAuth() {
 
 // Auth Provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-  
-  // Login function using Supabase
-  const login = async (email: string, password: string): Promise<void> => {
+  const navigate = useNavigate();
+
+  // Mock login function (simulação enquanto não usamos Supabase Auth)
+  const login = async (email: string, password: string) => {
     try {
       console.log("[TrainGO] Attempting to login:", email);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) throw error;
-
-      console.log("[TrainGO] Login successful for:", email);
-      toast.success("Login realizado com sucesso!");
-    } catch (error: any) {
-      console.error('[TrainGO] Login error:', error.message);
-      toast.error("Falha no login", {
-        description: error.message
-      });
-      throw error;
-    }
-  };
-
-  // Signup function using Supabase
-  const signup = async (email: string, password: string, userData: any): Promise<void> => {
-    try {
-      console.log("[TrainGO] Attempting to sign up:", email);
+      // Check if user exists in localStorage (from onboarding)
+      const existingUserData = localStorage.getItem('traingo-user');
       
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name: userData.name,
-          }
+      if (existingUserData) {
+        const userData = JSON.parse(existingUserData);
+        // If the email matches, use that user data
+        if (userData.email === email) {
+          console.log("[TrainGO] Found existing user data, using it");
+          setCurrentUser(userData);
+          return;
         }
-      });
-
-      if (error) throw error;
-
-      console.log("[TrainGO] Signup successful for:", email);
-      toast.success("Conta criada com sucesso!");
-    } catch (error: any) {
-      console.error('[TrainGO] Signup error:', error.message);
-      toast.error("Falha no cadastro", {
-        description: error.message
-      });
+      }
+      
+      // Otherwise create a new basic user
+      const user = { 
+        email, 
+        id: 'mock-user-id',
+        name: email.split('@')[0] 
+      };
+      
+      console.log("[TrainGO] Creating new user:", user.name);
+      
+      // Store in localStorage as a simple auth mechanism
+      localStorage.setItem('traingo-user', JSON.stringify(user));
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('[TrainGO] Login error:', error);
       throw error;
     }
   };
 
-  // Logout function using Supabase
-  const logout = async (): Promise<void> => {
+  // Mock logout function
+  const logout = async () => {
     try {
       console.log("[TrainGO] Logging out user");
+      localStorage.removeItem('traingo-user');
+      setCurrentUser(null);
       
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
-      
-      console.log("[TrainGO] Successfully logged out");
-      toast.success("Logout realizado com sucesso!");
-    } catch (error: any) {
-      console.error('[TrainGO] Logout error:', error.message);
-      toast.error("Falha ao sair", {
-        description: error.message
-      });
+      // Redirecionar para a página de login após logout
+      console.log("[TrainGO] Redirecting to login page after logout");
+      navigate('/login');
+    } catch (error) {
+      console.error('[TrainGO] Logout error:', error);
       throw error;
     }
   };
 
-  // Check for existing session on initial load and set up auth state change listener
+  // Check for existing user session on initial load
   useEffect(() => {
-    // First set up the auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        console.log("[TrainGO] Auth state changed:", event);
-        setSession(currentSession);
-        setCurrentUser(currentSession?.user ?? null);
+    const checkAuthState = () => {
+      try {
+        console.log("[TrainGO] Checking auth state...");
+        const userData = localStorage.getItem('traingo-user');
+        if (userData) {
+          console.log("[TrainGO] Found user data in localStorage");
+          setCurrentUser(JSON.parse(userData));
+        } else {
+          console.log("[TrainGO] No user data found in localStorage");
+        }
+      } catch (error) {
+        console.error('[TrainGO] Auth state check error:', error);
+      } finally {
         setLoading(false);
       }
-    );
-
-    // Then check for an existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log("[TrainGO] Got existing session:", currentSession ? "Yes" : "No");
-      setSession(currentSession);
-      setCurrentUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
     };
+
+    checkAuthState();
   }, []);
 
   // Define the value object to be provided to consumers
-  const value: AuthContextType = {
+  const value = {
     currentUser,
-    session,
     login,
-    logout,
-    signup,
-    loading
+    logout
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

@@ -60,7 +60,8 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
       // Notify parent component about the update
       onSave(updatedUserData);
       
-      toast.success("Perfil atualizado", {
+      toast({
+        title: "Perfil atualizado",
         description: "Seu perfil e plano de treino foram atualizados com sucesso!",
       });
       
@@ -70,8 +71,10 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
       
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
-      toast.error("Erro ao atualizar perfil", {
+      toast({
+        title: "Erro ao atualizar perfil",
         description: "Não foi possível atualizar seu perfil. Tente novamente.",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);

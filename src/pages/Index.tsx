@@ -1,25 +1,13 @@
-
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+// Update this page (the content is just a fallback if you fail to update the page)
 
 const Index = () => {
-  const { currentUser, loading } = useAuth();
-  
-  // Show loading indicator while auth state is being determined
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
+        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
       </div>
-    );
-  }
-  
-  // Use Navigate component for declarative navigation
-  return currentUser ? (
-    <Navigate to="/dashboard" replace />
-  ) : (
-    <Navigate to="/landing" replace />
+    </div>
   );
 };
 

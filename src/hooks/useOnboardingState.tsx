@@ -1,195 +1,136 @@
-import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "sonner";
-import { getRecommendedWorkoutPlan } from '@/utils/workoutRecommendation';
-import { generateWorkoutPlanType } from '@/utils/workoutRecommendation/types';
-
-// Define a proper JSON type that Supabase can accept
-type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
-type Json = JsonValue;
-
-export interface OnboardingFormData {
-  name: string;
-  goal: string;
-  experience: string;
-  frequency: string;
-  location: string;
-}
+import { useToast } from "@/hooks/use-toast";
+import { findBestWorkoutPlan, generatePersonalizedMessage, QuizAnswers } from '@/utils/workoutRecommendation';
+import { WorkoutPlan } from '@/data/workoutPlans';
+import { useAuth } from '@/contexts/AuthContext';
+import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
+import { quizQuestions } from '@/components/quiz/QuizData';
 
 export const useOnboardingState = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<OnboardingFormData>({
-    name: '',
-    goal: '',
-    experience: '',
-    frequency: '',
-    location: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [workoutPlan, setWorkoutPlan] = useState<any>(null);
-  // Add missing state variables needed by Onboarding.tsx
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const { toast } = useToast();
+  const { login } = useAuth();
+
+  // State variables
+  const [currentStep, setCurrentStep] = useState(0);
+  const [answers, setAnswers] = useState<Partial<QuizAnswers>>({});
   const [registrationData, setRegistrationData] = useState({
     name: '',
     email: '',
     password: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
   const [personalizedMessage, setPersonalizedMessage] = useState('');
   const [showResults, setShowResults] = useState(false);
 
-  const nextStep = useCallback(() => {
-    setStep(prev => prev + 1);
-  }, []);
-
-  const prevStep = useCallback(() => {
-    setStep(prev => prev - 1);
-  }, []);
-
-  const updateFormData = useCallback((data: Partial<OnboardingFormData>) => {
-    setFormData(prev => ({
-      ...prev,
-      ...data
-    }));
-  }, []);
-
-  // Add the missing handler functions
-  const handleOptionSelect = useCallback((questionId: string, answer: string) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: answer
-    }));
-    nextStep();
-  }, [nextStep]);
-
-  const handleRegistrationChange = useCallback((field: string, value: string) => {
-    setRegistrationData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  }, []);
-
-  const handlePreviousStep = useCallback(() => {
-    prevStep();
-  }, [prevStep]);
-
-  const generateWorkoutPlan = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const plan = await getRecommendedWorkoutPlan({
-        objetivo: formData.goal,
-        nivel: formData.experience,
-        frequencia: formData.frequency,
-        local: formData.location
-      });
-      
-      setWorkoutPlan(plan);
-      if (plan.personalizedMessage) {
-        setPersonalizedMessage(plan.personalizedMessage);
-      }
-      setShowResults(true);
-      return plan;
-    } catch (err) {
-      console.error('Error generating workout plan:', err);
-      setError('Não foi possível gerar o plano de treino. Tente novamente.');
-      return null;
-    } finally {
-      setLoading(false);
+  // Quiz navigation handlers
+  const handleOptionSelect = (questionId: keyof QuizAnswers, value: string) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    // Automatic advance to next question unless it's the last one
+    if (currentStep < quizQuestions.length - 1) {
+      setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+      }, 500);
+    } else {
+      setCurrentStep(quizQuestions.length); // Go to registration form
     }
-  }, [formData]);
+  };
 
-  const saveUserProfile = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRegistrationData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePreviousStep = () => {
+    setCurrentStep(prev => Math.max(0, prev - 1));
+  };
+
+  // Form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No active session found');
+      // Simulação de cadastro
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Verificamos que todas as perguntas foram respondidas
+      const quizAnswers = answers as QuizAnswers;
+      
+      if (Object.keys(quizAnswers).length !== quizQuestions.length) {
+        throw new Error("Por favor, responda todas as perguntas do quiz");
       }
+
+      // Encontrar o plano de treino mais adequado
+      const recommendedPlan = findBestWorkoutPlan(quizAnswers);
+      const message = generatePersonalizedMessage(quizAnswers, recommendedPlan);
       
-      // Save profile data
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: session.user.id,
-          nome: formData.name,
-          objetivo: formData.goal,
-          nivel_experiencia: formData.experience,
-          frequencia_treino: formData.frequency,
-          local_treino: formData.location
-        });
+      console.log("[TrainGO] Recommended workout plan:", recommendedPlan);
       
-      if (profileError) throw profileError;
+      // Convert weight and height ranges to approximate numbers for IMC calculation
+      const weight_exact = weightRangeToNumber(quizAnswers.weight);
+      const height_exact = heightRangeToNumber(quizAnswers.height);
+      const age_exact = ageRangeToNumber(quizAnswers.age);
       
-      // Save workout plan if available
-      if (workoutPlan) {
-        // Convert workout plan to a format that can be stored as JSON
-        const workoutPlanJson = JSON.parse(JSON.stringify(workoutPlan)) as Json;
-        
-        const { error: workoutError } = await supabase
-          .from('user_workouts')
-          .upsert({
-            user_id: session.user.id,
-            workout_plan: workoutPlanJson
-          });
-        
-        if (workoutError) throw workoutError;
-      }
+      // Salvar o plano de treino no localStorage
+      const userData = {
+        ...registrationData,
+        id: 'mock-user-id', // ID para autenticação
+        profile: {
+          ...quizAnswers,
+          weight_exact,
+          height_exact,
+          age_exact
+        },
+        workoutPlan: recommendedPlan,
+        workoutProgress: {
+          completedWorkouts: [],
+          lastWeekProgress: 0
+        }
+      };
+
+      localStorage.setItem('traingo-user', JSON.stringify(userData));
       
-      // Mark onboarding as completed
-      localStorage.setItem('onboarding-completed', 'true');
+      // Fazer login automático após cadastro
+      console.log("[TrainGO] Autologin after registration with:", registrationData.email);
+      await login(registrationData.email, registrationData.password);
       
-      // Navigate to dashboard
-      navigate('/dashboard');
+      setWorkoutPlan(recommendedPlan);
+      setPersonalizedMessage(message);
       
-      toast("Perfil criado com sucesso!", {
-        description: "Bem-vindo(a) ao TrainGO. Seu plano de treino está pronto."
+      toast({
+        title: "Cadastro concluído!",
+        description: "Seu plano de treino foi criado com sucesso.",
       });
-      
-      return true;
-    } catch (err: any) {
-      console.error('Error saving user profile:', err);
-      setError(err.message || 'Não foi possível salvar seu perfil. Tente novamente.');
-      return false;
+
+      setShowResults(true);
+    } catch (error) {
+      console.error("[TrainGO] Erro no cadastro:", error);
+      toast({
+        title: "Erro no cadastro",
+        description: "Não foi possível concluir o cadastro. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false);
       setIsSubmitting(false);
     }
-  }, [formData, workoutPlan, navigate]);
-
-  const handleSubmit = useCallback(() => {
-    generateWorkoutPlan();
-  }, [generateWorkoutPlan]);
+  };
 
   return {
-    step,
-    formData,
-    loading,
-    error,
-    workoutPlan,
-    nextStep,
-    prevStep,
-    updateFormData,
-    generateWorkoutPlan,
-    saveUserProfile,
-    // Add the missing properties needed by Onboarding.tsx
+    currentStep,
     answers,
     registrationData,
     isSubmitting,
+    workoutPlan,
     personalizedMessage,
     showResults,
+    quizQuestions,
     handleOptionSelect,
     handleRegistrationChange,
     handlePreviousStep,
-    handleSubmit,
-    currentStep: step - 1 // Convert 1-based to 0-based index
+    handleSubmit
   };
 };
-
-export default useOnboardingState;

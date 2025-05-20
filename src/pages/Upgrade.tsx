@@ -1,12 +1,14 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import { ArrowLeft, Check, X, Zap } from 'lucide-react';
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 const Upgrade = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isSubscribing, setIsSubscribing] = useState(false);
 
   const handleSubscribe = async () => {
@@ -24,14 +26,17 @@ const Upgrade = () => {
         localStorage.setItem('traingo-user', JSON.stringify(userData));
       }
 
-      toast("Assinatura realizada!", {
-        description: "Bem-vindo ao plano PRO do TrainGO."
+      toast({
+        title: "Assinatura realizada!",
+        description: "Bem-vindo ao plano PRO do TrainGO.",
       });
 
       navigate('/dashboard', { replace: true }); // Força navegação completa para recarregar o estado
     } catch (error) {
-      toast("Erro no pagamento", {
-        description: "Não foi possível processar seu pagamento. Tente novamente."
+      toast({
+        title: "Erro no pagamento",
+        description: "Não foi possível processar seu pagamento. Tente novamente.",
+        variant: "destructive",
       });
     } finally {
       setIsSubscribing(false);

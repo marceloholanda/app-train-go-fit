@@ -9,18 +9,16 @@ export const habitConsistencyPlan: WorkoutPlan = {
   description: "Plano simples para iniciantes criarem o hábito de exercício em casa com treinos curtos",
   plan: {
     dia1: [
-      { name: "Marcha estacionária", nome: "Marcha estacionária", reps: "3x30s", sets: 3 },
-      { name: "Agachamento na parede", nome: "Agachamento na parede", reps: "3x20s", sets: 3 },
-      { name: "Flexão na parede", nome: "Flexão na parede", reps: "3x10", sets: 3 },
-      { name: "Prancha no joelho", nome: "Prancha no joelho", reps: "3x15s", sets: 3 }
+      { nome: "Marcha estacionária", reps: "3x30s" },
+      { nome: "Agachamento na parede", reps: "3x20s" },
+      { nome: "Flexão na parede", reps: "3x10" },
+      { nome: "Prancha no joelho", reps: "3x15s" }
     ],
     dia2: [
-      { name: "Alongamento dinâmico", nome: "Alongamento dinâmico", reps: "5 minutos", sets: 1 },
-      { name: "Agachamento livre", nome: "Agachamento livre", reps: "3x10", sets: 3 },
-      { name: "Rotação de tronco", nome: "Rotação de tronco", reps: "3x10 (cada lado)", sets: 3 },
-      { name: "Abdominal curto", nome: "Abdominal curto", reps: "3x10", sets: 3 }
+      { nome: "Alongamento dinâmico", reps: "5 minutos" },
+      { nome: "Agachamento livre", reps: "3x10" },
+      { nome: "Rotação de tronco", reps: "3x10 (cada lado)" },
+      { nome: "Abdominal curto", reps: "3x10" }
     ]
-  },
-  level: "beginner",
-  goal: "create_habit"
+  }
 };

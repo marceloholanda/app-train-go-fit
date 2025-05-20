@@ -140,36 +140,4 @@ export const adaptPlanToDaysPerWeek = (
   
   adaptedPlan.plan = processedPlan;
   return adaptedPlan;
-};
-
-/**
- * Adapts a workout plan based on the provided user preferences
- */
-export function adaptPlan(basePlan: WorkoutPlan, preferences: {
-  objetivo: string;
-  nivel: string;
-  frequencia: string;
-  local: string;
-}) {
-  // Convert frequency string like "3x" to number
-  const daysPerWeek = parseInt(preferences.frequencia.replace('x', ''), 10) || 3;
-  
-  // Map environment from Portuguese to English
-  let environment = 'gym';
-  if (preferences.local === 'casa') environment = 'home';
-  if (preferences.local === 'ar_livre') environment = 'outdoor';
-  
-  // Map objective from Portuguese to English
-  let objective = 'gain_muscle';
-  if (preferences.objetivo === 'perder_peso') objective = 'lose_weight';
-  if (preferences.objetivo === 'manter_forma') objective = 'maintain';
-  if (preferences.objetivo === 'saude') objective = 'health_energy';
-  
-  // Map level from Portuguese to English
-  let level = 'beginner';
-  if (preferences.nivel === 'intermediario') level = 'intermediate';
-  if (preferences.nivel === 'avancado') level = 'advanced';
-  
-  // Use the days per week adaptation function
-  return adaptPlanToDaysPerWeek(basePlan, daysPerWeek, environment, objective, level);
 }

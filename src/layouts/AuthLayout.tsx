@@ -1,15 +1,26 @@
 
-import React from 'react';
-import { Outlet, NavLink, useLocation, Navigate } from 'react-router-dom';
-import { HomeIcon, UserIcon, Settings } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Outlet, NavLink, useLocation, Navigate } from "react-router-dom";
+import { HomeIcon, UserIcon, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const AuthLayout = () => {
-  const { currentUser } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const location = useLocation();
 
+  // Simulating authentication check
+  useEffect(() => {
+    // In a real app, this would check for a token in localStorage or cookies
+    const user = localStorage.getItem("traingo-user");
+    setIsAuthenticated(!!user);
+  }, []);
+
+  // If authentication status is still loading, show nothing
+  if (isAuthenticated === null) {
+    return null;
+  }
+
   // If not authenticated, redirect to login
-  if (!currentUser) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

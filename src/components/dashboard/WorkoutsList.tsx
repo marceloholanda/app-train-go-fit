@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { updateWorkoutProgress } from '@/utils/workoutUtils';
 import { WorkoutDisplay } from '@/types/dashboard';
 import WorkoutItem from './WorkoutItem';
@@ -18,28 +19,14 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
   setWeekProgress 
 }) => {
   const navigate = useNavigate();
-  const [userIsPremium, setUserIsPremium] = useState(false);
-  
-  // Check premium status on component mount
-  useEffect(() => {
-    const checkPremiumStatus = async () => {
-      try {
-        const premium = await isPremiumUser();
-        setUserIsPremium(premium);
-      } catch (error) {
-        console.error("Error checking premium status:", error);
-        setUserIsPremium(false);
-      }
-    };
-    
-    checkPremiumStatus();
-  }, []);
+  const { toast } = useToast();
+  const isPremium = isPremiumUser();
 
   const handleWorkoutClick = (workoutId: number) => {
     navigate(`/exercise/${workoutId}`);
   };
 
-  const toggleWorkoutCompletion = async (e: React.MouseEvent, workoutId: number, currentStatus: 'completed' | 'pending') => {
+  const toggleWorkoutCompletion = (e: React.MouseEvent, workoutId: number, currentStatus: 'completed' | 'pending') => {
     e.stopPropagation();
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
     const newCompleted = newStatus === 'completed';
@@ -51,26 +38,16 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
         : workout
     ));
     
-    try {
-      // Atualiza o progresso da semana
-      const newProgress = await updateWorkoutProgress(workoutId, newCompleted);
-      setWeekProgress(newProgress);
-      
-      if (newCompleted) {
-        toast("Treino concluído!", {
-          description: "Continue assim! Seu progresso foi atualizado."
-        });
-      } else {
-        toast("Treino desmarcado", {
-          description: "O treino foi marcado como pendente."
-        });
-      }
-    } catch (error) {
-      console.error("Error updating workout progress:", error);
-      toast("Erro", {
-        description: "Não foi possível atualizar o status do treino."
-      });
-    }
+    // Atualiza o progresso da semana
+    const newProgress = updateWorkoutProgress(workoutId, newCompleted);
+    setWeekProgress(newProgress);
+    
+    toast({
+      title: newCompleted ? "Treino concluído!" : "Treino desmarcado",
+      description: newCompleted 
+        ? "Continue assim! Seu progresso foi atualizado." 
+        : "O treino foi marcado como pendente."
+    });
   };
 
   if (workouts.length === 0) {
@@ -93,7 +70,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
         <WorkoutItem
           key={workout.id}
           workout={workout}
-          isPremium={userIsPremium}
+          isPremium={isPremium}
           onWorkoutClick={handleWorkoutClick}
           onToggleCompletion={toggleWorkoutCompletion}
         />
