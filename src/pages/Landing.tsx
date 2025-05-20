@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import PrimaryButton from '@/components/PrimaryButton';
@@ -12,12 +12,17 @@ const Landing = () => {
   
   // Show loading indicator while auth state is being determined
   // Also redirect if user is already logged in
-  if (loading || currentUser) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  // Redirect to dashboard if user is logged in
+  if (currentUser) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
