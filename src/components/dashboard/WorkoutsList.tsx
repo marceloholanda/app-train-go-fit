@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
 import { updateWorkoutProgress } from '@/utils/workoutUtils';
@@ -19,7 +19,17 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
   setWeekProgress 
 }) => {
   const navigate = useNavigate();
-  const isPremium = isPremiumUser();
+  const [userIsPremium, setUserIsPremium] = useState(false);
+  
+  // Check premium status on component mount
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      const premium = await isPremiumUser();
+      setUserIsPremium(premium);
+    };
+    
+    checkPremiumStatus();
+  }, []);
 
   const handleWorkoutClick = (workoutId: number) => {
     navigate(`/exercise/${workoutId}`);
@@ -78,7 +88,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
         <WorkoutItem
           key={workout.id}
           workout={workout}
-          isPremium={isPremium}
+          isPremium={userIsPremium}
           onWorkoutClick={handleWorkoutClick}
           onToggleCompletion={toggleWorkoutCompletion}
         />

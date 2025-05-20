@@ -20,7 +20,7 @@ export const updateWorkoutProgress = async (workoutId: number, completed: boolea
       .eq('user_id', userId)
       .eq('exercise_name', exerciseName)
       .eq('date', today)
-      .single();
+      .maybeSingle();
     
     if (existingProgress) {
       // Atualizar registro existente
@@ -92,7 +92,7 @@ export const trackExerciseCompletion = async (
       .eq('user_id', userId)
       .eq('exercise_name', exerciseName)
       .eq('date', today)
-      .single();
+      .maybeSingle();
     
     if (existingProgress) {
       // Atualizar registro existente

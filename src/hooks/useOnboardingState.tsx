@@ -86,30 +86,34 @@ export const useOnboardingState = () => {
         throw new Error("Erro ao obter ID do usuário");
       }
 
-      // Create the profiles table if necessary before attempting to save user data
-      // This is commented out since we're not using SQL in this step
-      /*
+      // Create profile entry for the new user
       try {
-        const { data: profileData, error: profileError } = await supabase
+        const { error: profileError } = await supabase
           .from('profiles')
-          .update({
-            name: registrationData.name,
-            objective: quizAnswers.objective,
-            experience_level: quizAnswers.level,
-            workout_frequency: quizAnswers.days_per_week,
-            workout_location: quizAnswers.environment,
-          })
-          .eq('user_id', userId);
+          .insert({
+            id: userId,
+            nome: registrationData.name,
+            objetivo: quizAnswers.objective,
+            nivel_experiencia: quizAnswers.level,
+            frequencia_treino: quizAnswers.days_per_week,
+            local_treino: quizAnswers.environment,
+          });
 
         if (profileError) throw profileError;
+        
+        // Create workout plan for the user
+        const { error: workoutError } = await supabase
+          .from('user_workouts')
+          .insert({
+            user_id: userId,
+            workout_plan: recommendedPlan
+          });
+          
+        if (workoutError) throw workoutError;
       } catch (error: any) {
-        console.error("[TrainGO] Error updating profile:", error.message);
+        console.error("[TrainGO] Error creating user profile or workout plan:", error.message);
       }
-      */
 
-      // We'll store workout plan directly in local storage for now
-      localStorage.setItem('workout_plan', JSON.stringify(recommendedPlan));
-      
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);
       

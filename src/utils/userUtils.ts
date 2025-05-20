@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -17,7 +16,7 @@ export const isPremiumUser = async (userId?: string): Promise<boolean> => {
     const { data: profile } = await supabase
       .from('profiles')
       .select('plano')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     return profile?.plano === 'premium';
@@ -50,7 +49,7 @@ export const saveUserData = async (userData: any): Promise<void> => {
         frequencia_treino: userData.profile?.days_per_week,
         local_treino: userData.profile?.environment,
       })
-      .eq('user_id', userId);
+      .eq('id', userId);
 
     if (error) throw error;
     
@@ -98,7 +97,7 @@ export const getUserData = async () => {
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
     
     // Buscar plano de treino do usuário
@@ -223,7 +222,7 @@ export const hasSeenPremiumWelcome = async (): Promise<boolean> => {
     const { data: profile } = await supabase
       .from('profiles')
       .select('premium_welcome_seen')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     return !!profile?.premium_welcome_seen;
@@ -246,7 +245,7 @@ export const markPremiumWelcomeSeen = async (): Promise<void> => {
     await supabase
       .from('profiles')
       .update({ premium_welcome_seen: true })
-      .eq('user_id', userId);
+      .eq('id', userId);
   } catch (error) {
     console.error('Erro ao marcar boas-vindas premium como visto:', error);
   }
@@ -265,7 +264,7 @@ export const resetPremiumWelcomeStatus = async (): Promise<void> => {
     await supabase
       .from('profiles')
       .update({ premium_welcome_seen: false })
-      .eq('user_id', userId);
+      .eq('id', userId);
   } catch (error) {
     console.error('Erro ao resetar status de boas-vindas premium:', error);
   }

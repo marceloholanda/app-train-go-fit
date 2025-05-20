@@ -52,13 +52,21 @@ export const useDashboardData = () => {
         setUserData(userData);
         
         // Buscar progresso da semana
-        // Use a try catch block to safely handle this part since we're not sure
-        // if the 'progress' table exists yet
         try {
-          // Temporarily fake this data until we create the proper tables
-          const completedWorkouts = [];
-          const weekProgressValue = 0;
-          setWeekProgress(Math.min(100, weekProgressValue));
+          const userId = session.user.id;
+          const startOfWeek = new Date();
+          startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+          
+          const { data: progressData } = await supabase
+            .from('progress')
+            .select('*')
+            .eq('user_id', userId)
+            .gte('date', startOfWeek.toISOString().split('T')[0])
+            .eq('completed', true);
+            
+          const completedWorkouts = progressData || [];
+          const weekProgressValue = Math.min(100, (completedWorkouts.length / 7) * 100);
+          setWeekProgress(weekProgressValue);
         } catch (error) {
           console.error("[TrainGO] Error fetching progress data:", error);
           setWeekProgress(0);
@@ -109,8 +117,33 @@ export const useDashboardData = () => {
     
     const weekDays = mapWorkoutDays(plan.days);
     
-    // Initialize with an empty array until we create the progress table
+    // Buscar informações de progresso no Supabase
     let completedWorkouts: number[] = [];
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const userId = session.user.id;
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Buscar treinos concluídos hoje
+        const { data: progressData } = await supabase
+          .from('progress')
+          .select('exercise_name')
+          .eq('user_id', userId)
+          .eq('date', today)
+          .eq('completed', true);
+          
+        if (progressData && progressData.length > 0) {
+          // Extrair os números dos dias de treino das strings "day_1", "day_2", etc.
+          completedWorkouts = progressData
+            .filter(item => item.exercise_name.startsWith('day_'))
+            .map(item => parseInt(item.exercise_name.split('_')[1]));
+        }
+      }
+    } catch (error) {
+      console.error("[TrainGO] Error fetching workout progress:", error);
+    }
     
     // Cria os cards de treino para o dashboard
     const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercises], index) => {

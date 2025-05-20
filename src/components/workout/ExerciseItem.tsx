@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Exercise } from '@/types/workout';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Lock, Play, Replace } from 'lucide-react';
@@ -30,7 +30,16 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
 }) => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
-  const isPremium = isPremiumUser();
+  const [userIsPremium, setUserIsPremium] = useState(false);
+  
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      const premium = await isPremiumUser();
+      setUserIsPremium(premium);
+    };
+    
+    checkPremiumStatus();
+  }, []);
 
   const handleReplaceExercise = (newExercise: Exercise) => {
     if (onReplaceExercise) {
@@ -77,7 +86,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
                   onClick={() => setIsVideoModalOpen(true)}
                   className="h-8 w-8 rounded-full"
                 >
-                  {isPremium ? (
+                  {userIsPremium ? (
                     <Play size={16} />
                   ) : (
                     <Lock size={16} className="text-gray-400" />
@@ -85,7 +94,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {isPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
+                {userIsPremium ? "Ver vídeo do exercício" : "Disponível apenas no plano Premium"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -104,7 +113,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {isPremium ? "Substituir exercício" : "Opção Premium: Substituir"}
+                {userIsPremium ? "Substituir exercício" : "Opção Premium: Substituir"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -117,14 +126,14 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
         onClose={() => setIsVideoModalOpen(false)}
         exerciseName={exercise.nome}
         videoUrl={exercise.video_url || ""}
-        isPremium={isPremium}
+        isPremium={userIsPremium}
       />
 
       {/* Modal de Substituição */}
       <ExerciseReplaceModal
         isOpen={isReplaceModalOpen}
         onClose={() => setIsReplaceModalOpen(false)}
-        isPremium={isPremium}
+        isPremium={userIsPremium}
         currentExercise={exercise}
         alternativeExercises={exercise.substituicoes || []}
         onReplaceExercise={handleReplaceExercise}

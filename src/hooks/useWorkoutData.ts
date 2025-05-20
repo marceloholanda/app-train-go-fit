@@ -31,44 +31,106 @@ export const useWorkoutData = (id: string | undefined) => {
         
         const userId = session.user.id;
         
-        // For now, we'll just set a default user level
-        setUserLevel('beginner');
-        
-        // Try to get workout plan from localStorage 
-        const workoutPlanJson = localStorage.getItem('workout_plan');
-        if (!workoutPlanJson) {
-          toast({
-            title: "Plano não encontrado",
-            description: "Não foi possível encontrar seu plano de treino.",
-            variant: "destructive",
-          });
-          navigate('/dashboard');
-          return;
+        // Get user level from profiles
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('nivel_experiencia')
+            .eq('id', userId)
+            .single();
+            
+          if (profile && profile.nivel_experiencia) {
+            setUserLevel(profile.nivel_experiencia);
+          }
+        } catch (error) {
+          console.error('Error fetching user level:', error);
         }
         
-        const workoutPlan = JSON.parse(workoutPlanJson);
-        
-        // Encontrar o dia de treino baseado no ID
-        const dayNumber = parseInt(id);
-        const dayKey = `dia${dayNumber}`;
-        const dayExercises = workoutPlan.plan?.[dayKey];
-        
-        if (!dayExercises) {
-          toast({
-            title: "Treino não encontrado",
-            description: "Este treino não existe no seu plano atual.",
-            variant: "destructive",
-          });
-          navigate('/dashboard');
-          return;
+        // Try to get workout plan from Supabase
+        try {
+          const { data: userWorkoutData } = await supabase
+            .from('user_workouts')
+            .select('workout_plan')
+            .eq('user_id', userId)
+            .single();
+            
+          if (!userWorkoutData || !userWorkoutData.workout_plan) {
+            throw new Error('No workout plan found');
+          }
+          
+          const workoutPlan = userWorkoutData.workout_plan;
+          
+          // Encontrar o dia de treino baseado no ID
+          const dayNumber = parseInt(id);
+          const dayKey = `dia${dayNumber}`;
+          const dayExercises = workoutPlan.plan?.[dayKey];
+          
+          if (!dayExercises) {
+            toast({
+              title: "Treino não encontrado",
+              description: "Este treino não existe no seu plano atual.",
+              variant: "destructive",
+            });
+            navigate('/dashboard');
+            return;
+          }
+          
+          // Check if workout is completed today
+          const today = new Date().toISOString().split('T')[0];
+          const { data: progressData } = await supabase
+            .from('progress')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('date', today)
+            .eq('exercise_name', `day_${dayNumber}`)
+            .eq('completed', true)
+            .maybeSingle();
+            
+          setIsCompleted(!!progressData);
+          setWorkoutDay(`Dia ${dayNumber}`);
+          
+          // Initialize all exercises as not completed
+          setExercises(dayExercises.map((ex: Exercise) => ({ ...ex, completed: false })));
+          
+        } catch (error) {
+          console.error('Error fetching workout plan from Supabase:', error);
+          
+          // Fallback to localStorage if Supabase fails
+          const workoutPlanJson = localStorage.getItem('workout_plan');
+          if (!workoutPlanJson) {
+            toast({
+              title: "Plano não encontrado",
+              description: "Não foi possível encontrar seu plano de treino.",
+              variant: "destructive",
+            });
+            navigate('/dashboard');
+            return;
+          }
+          
+          const workoutPlan = JSON.parse(workoutPlanJson);
+          
+          // Encontrar o dia de treino baseado no ID
+          const dayNumber = parseInt(id);
+          const dayKey = `dia${dayNumber}`;
+          const dayExercises = workoutPlan.plan?.[dayKey];
+          
+          if (!dayExercises) {
+            toast({
+              title: "Treino não encontrado",
+              description: "Este treino não existe no seu plano atual.",
+              variant: "destructive",
+            });
+            navigate('/dashboard');
+            return;
+          }
+          
+          // Set default state
+          setIsCompleted(false);
+          setWorkoutDay(`Dia ${dayNumber}`);
+          
+          // Initialize all exercises as not completed
+          setExercises(dayExercises.map((ex: Exercise) => ({ ...ex, completed: false })));
         }
-        
-        // Set default state
-        setIsCompleted(false);
-        setWorkoutDay(`Dia ${dayNumber}`);
-        
-        // Initialize all exercises as not completed
-        setExercises(dayExercises.map((ex: Exercise) => ({ ...ex, completed: false })));
           
       } catch (error) {
         console.error('Erro ao carregar treino:', error);
@@ -96,8 +158,16 @@ export const useWorkoutData = (id: string | undefined) => {
     
     setExercises(updatedExercises);
     
-    // For now, we'll just update the state locally
-    // In the future, we'll implement the Supabase integration
+    // Track exercise completion in Supabase
+    try {
+      await trackExerciseCompletion(
+        dayNumber,
+        index,
+        updatedExercises[index].completed
+      );
+    } catch (error) {
+      console.error('Error tracking exercise completion:', error);
+    }
     
     // Check if all exercises are completed
     const allCompleted = updatedExercises.every(ex => ex.completed);
@@ -113,15 +183,19 @@ export const useWorkoutData = (id: string | undefined) => {
     
     setIsCompleted(true);
     
-    // For now, we'll skip the actual database update
-    // const progress = await updateWorkoutProgress(parseInt(id), true);
-    
-    toast({
-      title: "Treino concluído!",
-      description: "Parabéns! Seu progresso foi atualizado.",
-    });
-    
-    return 0; // Return a default value for now
+    try {
+      const progress = await updateWorkoutProgress(parseInt(id), true);
+      
+      toast({
+        title: "Treino concluído!",
+        description: "Parabéns! Seu progresso foi atualizado.",
+      });
+      
+      return progress;
+    } catch (error) {
+      console.error('Error marking workout as completed:', error);
+      return 0;
+    }
   };
   
   const markWorkoutAsPending = async () => {
@@ -129,9 +203,12 @@ export const useWorkoutData = (id: string | undefined) => {
     
     setIsCompleted(false);
     
-    // For now, we'll skip the actual database update
-    // return await updateWorkoutProgress(parseInt(id), false);
-    return 0; // Return a default value for now
+    try {
+      return await updateWorkoutProgress(parseInt(id), false);
+    } catch (error) {
+      console.error('Error marking workout as pending:', error);
+      return 0;
+    }
   };
   
   const handleToggleWorkout = async () => {
@@ -148,21 +225,26 @@ export const useWorkoutData = (id: string | undefined) => {
     
     setExercises(updatedExercises);
     
-    // For now, we'll skip the actual database update
-    
-    if (newStatus) {
-      toast({
-        title: "Treino concluído!",
-        description: "Parabéns! Seu progresso foi atualizado.",
-      });
-    } else {
-      toast({
-        title: "Treino desmarcado",
-        description: "O treino foi marcado como pendente.",
-      });
+    try {
+      const progress = await updateWorkoutProgress(parseInt(id), newStatus);
+      
+      if (newStatus) {
+        toast({
+          title: "Treino concluído!",
+          description: "Parabéns! Seu progresso foi atualizado.",
+        });
+      } else {
+        toast({
+          title: "Treino desmarcado",
+          description: "O treino foi marcado como pendente.",
+        });
+      }
+      
+      return progress;
+    } catch (error) {
+      console.error('Error toggling workout status:', error);
+      return 0;
     }
-    
-    return 0; // Return a default value for now
   };
 
   return {

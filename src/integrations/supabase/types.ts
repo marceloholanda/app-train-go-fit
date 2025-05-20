@@ -36,6 +36,81 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          frequencia_treino: string | null
+          id: string
+          local_treino: string | null
+          nivel_experiencia: string | null
+          nome: string | null
+          objetivo: string | null
+          plano: string | null
+          premium_welcome_seen: boolean | null
+        }
+        Insert: {
+          frequencia_treino?: string | null
+          id: string
+          local_treino?: string | null
+          nivel_experiencia?: string | null
+          nome?: string | null
+          objetivo?: string | null
+          plano?: string | null
+          premium_welcome_seen?: boolean | null
+        }
+        Update: {
+          frequencia_treino?: string | null
+          id?: string
+          local_treino?: string | null
+          nivel_experiencia?: string | null
+          nome?: string | null
+          objetivo?: string | null
+          plano?: string | null
+          premium_welcome_seen?: boolean | null
+        }
+        Relationships: []
+      }
+      progress: {
+        Row: {
+          completed: boolean | null
+          date: string
+          exercise_name: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          date: string
+          exercise_name: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          date?: string
+          exercise_name?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_workouts: {
+        Row: {
+          id: string
+          user_id: string
+          workout_plan: Json | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          workout_plan?: Json | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          workout_plan?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
