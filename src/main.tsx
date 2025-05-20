@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
-import { Toaster } from './components/ui/toaster';
+import { Toaster } from './components/ui/sonner';
 
 // Register service worker
 if ('serviceWorker' in navigator) {
