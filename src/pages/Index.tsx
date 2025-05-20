@@ -15,7 +15,7 @@ const Index = () => {
     );
   }
   
-  // Use Navigate component instead of programmatic navigation
+  // Use Navigate component for declarative navigation
   return currentUser ? (
     <Navigate to="/dashboard" replace />
   ) : (

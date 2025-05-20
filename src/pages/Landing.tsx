@@ -11,6 +11,7 @@ const Landing = () => {
   const { currentUser, loading } = useAuth();
   
   // Show loading indicator while auth state is being determined
+  // Also redirect if user is already logged in
   if (loading || currentUser) {
     return (
       <div className="flex items-center justify-center min-h-screen">

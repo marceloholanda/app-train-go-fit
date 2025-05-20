@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from "@/hooks/use-toast";
@@ -35,8 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
+  
   // Login function using Supabase
   const login = async (email: string, password: string): Promise<void> => {
     try {
@@ -90,8 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       
       console.log("[TrainGO] Successfully logged out");
-      console.log("[TrainGO] Redirecting to login page after logout");
-      navigate('/login');
+      
+      // Note: Navigate to login page will happen via route protection
+      // rather than programmatic navigation
     } catch (error: any) {
       console.error('[TrainGO] Logout error:', error.message);
       throw error;
