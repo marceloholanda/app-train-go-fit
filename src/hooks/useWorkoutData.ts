@@ -1,17 +1,12 @@
-
 import { useState, useEffect } from 'react';
 import { Exercise } from '@/types/workout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { updateWorkoutProgress } from '@/utils/workoutUtils/workoutTracking';
-import { recordExerciseCompletion, removeExerciseCompletion } from '@/utils/workoutUtils/progressTracking';
-import { checkNewAchievements } from '@/utils/workoutUtils/achievementsService';
-import { useAuth } from '@/contexts/AuthContext';
+import { updateWorkoutProgress } from '@/utils/workoutUtils';
 
 export const useWorkoutData = (id: string | undefined) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser } = useAuth();
   
   const [workoutDay, setWorkoutDay] = useState<string>('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -94,48 +89,23 @@ export const useWorkoutData = (id: string | undefined) => {
     loadWorkoutData();
   }, [id, navigate, toast]);
 
-  const handleExerciseToggle = async (index: number) => {
-    if (!currentUser?.id || !id) return;
-    
+  const handleExerciseToggle = (index: number) => {
     const updatedExercises = exercises.map((exercise, i) => 
       i === index ? { ...exercise, completed: !exercise.completed } : exercise
     );
     
     setExercises(updatedExercises);
     
-    // Salvar estado dos exercícios no localStorage para UI consistente
+    // Salvar estado dos exercícios
     try {
       const userData = localStorage.getItem('traingo-user');
-      if (userData) {
+      if (userData && id) {
         const user = JSON.parse(userData);
         user[`exercises_day${id}`] = updatedExercises;
         localStorage.setItem('traingo-user', JSON.stringify(user));
       }
     } catch (error) {
       console.error('Erro ao salvar estado dos exercícios:', error);
-    }
-    
-    // Atualizar o progresso no Supabase
-    const exercise = exercises[index];
-    const exerciseId = exercise.id || parseInt(id);
-    const exerciseName = exercise.nome;
-    const muscleGroup = exercise.muscle_group;
-    
-    if (updatedExercises[index].completed) {
-      // Registrar conclusão do exercício
-      await recordExerciseCompletion(
-        currentUser.id,
-        exerciseId,
-        exerciseName,
-        muscleGroup
-      );
-    } else {
-      // Remover registro de conclusão
-      await removeExerciseCompletion(
-        currentUser.id,
-        exerciseId,
-        exerciseName
-      );
     }
     
     // Verificar se todos exercícios estão concluídos
@@ -145,29 +115,13 @@ export const useWorkoutData = (id: string | undefined) => {
     } else if (!allCompleted && isCompleted) {
       markWorkoutAsPending();
     }
-    
-    // Verificar se há novas conquistas após completar exercício
-    if (updatedExercises[index].completed) {
-      setTimeout(async () => {
-        if (currentUser?.id) {
-          await checkNewAchievements(currentUser.id);
-        }
-      }, 1000);
-    }
   };
 
-  const markWorkoutAsCompleted = async () => {
-    if (!id || !currentUser?.id) return;
+  const markWorkoutAsCompleted = () => {
+    if (!id) return;
     
     setIsCompleted(true);
-    await updateWorkoutProgress(parseInt(id), true);
-    
-    // Verificar conquistas após completar treino
-    setTimeout(async () => {
-      if (currentUser?.id) {
-        await checkNewAchievements(currentUser.id);
-      }
-    }, 1000);
+    updateWorkoutProgress(parseInt(id), true);
     
     toast({
       title: "Treino concluído!",
@@ -176,14 +130,14 @@ export const useWorkoutData = (id: string | undefined) => {
   };
   
   const markWorkoutAsPending = () => {
-    if (!id || !currentUser?.id) return;
+    if (!id) return;
     
     setIsCompleted(false);
     updateWorkoutProgress(parseInt(id), false);
   };
   
-  const handleToggleWorkout = async () => {
-    if (!id || !currentUser?.id) return;
+  const handleToggleWorkout = () => {
+    if (!id) return;
     
     const newStatus = !isCompleted;
     setIsCompleted(newStatus);
@@ -208,17 +162,8 @@ export const useWorkoutData = (id: string | undefined) => {
       console.error('Erro ao salvar estado dos exercícios:', error);
     }
     
-    // Atualizar progresso no Supabase
-    await updateWorkoutProgress(parseInt(id), newStatus);
-    
-    // Verificar conquistas após concluir ou desmarcar treino
-    if (newStatus) {
-      setTimeout(async () => {
-        if (currentUser?.id) {
-          await checkNewAchievements(currentUser.id);
-        }
-      }, 1000);
-    }
+    // Atualizar progresso
+    updateWorkoutProgress(parseInt(id), newStatus);
     
     toast({
       title: newStatus ? "Treino concluído!" : "Treino desmarcado",

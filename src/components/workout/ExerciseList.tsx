@@ -12,7 +12,6 @@ interface ExerciseListProps {
   handleExerciseToggle: (index: number) => void;
   handleOpenVideoModal: (index: number) => void;
   handleOpenReplaceModal: (index: number) => void;
-  handleOpenImageModal: (index: number) => void;
   handleAddExerciseModal: () => void;
 }
 
@@ -23,7 +22,6 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
   handleExerciseToggle,
   handleOpenVideoModal,
   handleOpenReplaceModal,
-  handleOpenImageModal,
   handleAddExerciseModal
 }) => {
   return (
@@ -38,7 +36,6 @@ const ExerciseList: React.FC<ExerciseListProps> = ({
           onToggleComplete={handleExerciseToggle}
           onOpenVideoModal={handleOpenVideoModal}
           onOpenReplaceModal={handleOpenReplaceModal}
-          onOpenImageModal={handleOpenImageModal}
         />
       ))}
       

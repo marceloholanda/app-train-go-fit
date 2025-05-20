@@ -1,88 +1,68 @@
 
 import { useState } from 'react';
-import { isPremiumUser } from '@/utils/userUtils';
+import { Exercise } from '@/types/workout';
+import { isPremiumUser, hasSeenPremiumWelcome, markPremiumWelcomeSeen } from '@/utils/userUtils';
+import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
 
 export const useExerciseModals = () => {
-  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState(-1);
+  const [isPremium, setIsPremium] = useState(isPremiumUser());
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(-1);
   const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
-  const [isPremium, setIsPremium] = useState(isPremiumUser());
-
+  
+  // Check if user is premium and hasn't seen welcome message
   const checkPremiumStatus = () => {
-    const userIsPremium = isPremiumUser();
-    setIsPremium(userIsPremium);
+    const premiumStatus = isPremiumUser();
+    setIsPremium(premiumStatus);
+    
+    // Show welcome modal if premium and hasn't seen message
+    if (premiumStatus && !hasSeenPremiumWelcome()) {
+      setShowPremiumWelcome(true);
+    }
   };
-
-  const handleOpenVideoModal = (index: number) => {
-    setSelectedExerciseIndex(index);
+  
+  const handleOpenVideoModal = (exerciseIndex: number) => {
+    setSelectedExerciseIndex(exerciseIndex);
     setIsVideoModalOpen(true);
   };
 
-  const handleOpenReplaceModal = (index: number) => {
-    setSelectedExerciseIndex(index);
+  const handleOpenReplaceModal = (exerciseIndex: number) => {
+    setSelectedExerciseIndex(exerciseIndex);
     setIsReplaceModalOpen(true);
-  };
-  
-  const handleOpenImageModal = (index: number) => {
-    setSelectedExerciseIndex(index);
-    setIsImageModalOpen(true);
-  };
-
-  const handleCloseVideoModal = () => {
-    setIsVideoModalOpen(false);
-  };
-
-  const handleCloseReplaceModal = () => {
-    setIsReplaceModalOpen(false);
-  };
-  
-  const handleCloseImageModal = () => {
-    setIsImageModalOpen(false);
-  };
-
-  const handleOpenAddExerciseModal = () => {
-    setIsAddExerciseModalOpen(true);
-  };
-
-  const handleCloseAddExerciseModal = () => {
-    setIsAddExerciseModalOpen(false);
-  };
-
-  const handleOpenPremiumWelcome = () => {
-    setShowPremiumWelcome(true);
   };
 
   const handleClosePremiumWelcome = () => {
     setShowPremiumWelcome(false);
+    markPremiumWelcomeSeen();
   };
-
+  
+  // Helper para obter o URL do vídeo de um exercício
+  const getVideoUrl = (exercise: Exercise): string => {
+    if (exercise.video_url) return exercise.video_url;
+    
+    const videoUrl = getExerciseVideoUrl(exercise.nome);
+    return videoUrl || '';
+  };
+  
   return {
-    selectedExerciseIndex,
-    isVideoModalOpen,
-    isReplaceModalOpen,
-    isAddExerciseModalOpen,
-    isImageModalOpen,
-    showPremiumWelcome,
     isPremium,
+    setIsPremium,
+    isVideoModalOpen,
     setIsVideoModalOpen,
+    isReplaceModalOpen,
     setIsReplaceModalOpen,
+    isAddExerciseModalOpen, 
     setIsAddExerciseModalOpen,
-    setIsImageModalOpen,
-    checkPremiumStatus,
+    selectedExerciseIndex,
+    setSelectedExerciseIndex,
+    showPremiumWelcome,
+    setShowPremiumWelcome,
     handleOpenVideoModal,
     handleOpenReplaceModal,
-    handleOpenImageModal,
-    handleCloseVideoModal,
-    handleCloseReplaceModal,
-    handleCloseImageModal,
-    handleOpenAddExerciseModal,
-    handleCloseAddExerciseModal,
-    handleOpenPremiumWelcome,
-    handleClosePremiumWelcome
+    handleClosePremiumWelcome,
+    checkPremiumStatus,
+    getVideoUrl
   };
 };
-
-export default useExerciseModals;

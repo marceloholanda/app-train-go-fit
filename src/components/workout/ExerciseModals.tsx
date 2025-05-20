@@ -4,10 +4,8 @@ import { Exercise } from '@/types/workout';
 import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
 import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
 import ExerciseAddModal from '@/components/workout/ExerciseAddModal';
-import ExerciseImageModal from '@/components/workout/ExerciseImageModal';
 import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
 import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
-import { getExerciseImageUrl } from '@/utils/workoutRecommendation/exerciseImages';
 
 interface ExerciseModalsProps {
   selectedExerciseIndex: number;
@@ -16,12 +14,10 @@ interface ExerciseModalsProps {
   isVideoModalOpen: boolean;
   isReplaceModalOpen: boolean;
   isAddExerciseModalOpen: boolean;
-  isImageModalOpen: boolean;
   showPremiumWelcome: boolean;
   onCloseVideoModal: () => void;
   onCloseReplaceModal: () => void;
   onCloseAddExerciseModal: () => void;
-  onCloseImageModal: () => void;
   onClosePremiumWelcome: () => void;
   onReplaceExercise: (newExercise: Exercise) => void;
   onAddExercises: (newExercises: Exercise[]) => void;
@@ -34,12 +30,10 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
   isVideoModalOpen,
   isReplaceModalOpen,
   isAddExerciseModalOpen,
-  isImageModalOpen,
   showPremiumWelcome,
   onCloseVideoModal,
   onCloseReplaceModal,
   onCloseAddExerciseModal,
-  onCloseImageModal,
   onClosePremiumWelcome,
   onReplaceExercise,
   onAddExercises
@@ -55,8 +49,6 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
     return getExerciseVideoUrl(exercise.nome) || '';
   };
 
-  const selectedExercise = selectedExerciseIndex !== -1 ? visibleExercises[selectedExerciseIndex] : undefined;
-
   return (
     <>
       {/* Exercise Modals */}
@@ -65,8 +57,8 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
           <ExerciseVideoModal
             isOpen={isVideoModalOpen}
             onClose={onCloseVideoModal}
-            exerciseName={selectedExercise?.nome || ""}
-            videoUrl={getVideoUrl(selectedExercise)}
+            exerciseName={visibleExercises[selectedExerciseIndex]?.nome || ""}
+            videoUrl={getVideoUrl(visibleExercises[selectedExerciseIndex])}
             isPremium={isPremium}
           />
 
@@ -74,17 +66,9 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             isOpen={isReplaceModalOpen}
             onClose={onCloseReplaceModal}
             isPremium={isPremium}
-            currentExercise={selectedExercise!}
-            alternativeExercises={selectedExercise?.substituicoes || []}
+            currentExercise={visibleExercises[selectedExerciseIndex]}
+            alternativeExercises={visibleExercises[selectedExerciseIndex]?.substituicoes || []}
             onReplaceExercise={onReplaceExercise}
-          />
-          
-          <ExerciseImageModal
-            isOpen={isImageModalOpen}
-            onClose={onCloseImageModal}
-            exerciseName={selectedExercise?.nome || ""}
-            imageUrl={getExerciseImageUrl(selectedExercise?.nome || "")}
-            description={selectedExercise?.descricao}
           />
         </>
       )}

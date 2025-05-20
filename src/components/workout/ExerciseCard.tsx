@@ -21,7 +21,6 @@ interface ExerciseCardProps {
   onToggleComplete: (index: number) => void;
   onOpenVideoModal: (index: number) => void;
   onOpenReplaceModal: (index: number) => void;
-  onOpenImageModal: (index: number) => void;
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ 
@@ -30,22 +29,16 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   isPremium, 
   onToggleComplete, 
   onOpenVideoModal, 
-  onOpenReplaceModal,
-  onOpenImageModal
+  onOpenReplaceModal 
 }) => {
   // Verificar se há vídeo disponível para este exercício
   const hasVideo = Boolean(exercise.video_url || getExerciseVideoUrl(exercise.nome));
-  
-  const handleCardClick = () => {
-    onOpenImageModal(index);
-  };
   
   return (
     <Card 
       key={index} 
       variant="outline" 
       className={`transition-colors ${exercise.completed ? 'border-green-600/30 bg-green-950/10' : ''}`}
-      onClick={handleCardClick}
     >
       {/* Imagem do exercício - Usando Supabase */}
       <div className="w-full h-36 mb-3 bg-black/10 rounded-lg overflow-hidden shadow-md">
@@ -77,10 +70,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenVideoModal(index);
-                  }}
+                  onClick={() => onOpenVideoModal(index)}
                   className="h-8 w-8 rounded-full"
                   disabled={!hasVideo}
                 >
@@ -109,10 +99,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenReplaceModal(index);
-                  }}
+                  onClick={() => onOpenReplaceModal(index)}
                   className="h-8 w-8 rounded-full"
                 >
                   {isPremium ? <Replace size={16} /> : <Lock size={16} className="text-gray-400" />}
@@ -126,10 +113,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
           {/* Botão de conclusão do exercício */}
           <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleComplete(index);
-            }}
+            onClick={() => onToggleComplete(index)}
             className="p-2"
           >
             {exercise.completed ? (

@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ProfileProvider } from '@/contexts/ProfileContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -35,29 +34,27 @@ const App = () => {
 
   return (
     <div className="bg-background text-foreground">
-      <ProfileProvider>
-        <Routes>
-          {/* Páginas públicas */}
-          <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Landing />} />
-          <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
-          <Route path="/register" element={currentUser ? <Navigate to="/onboarding" /> : <Register />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          
-          {/* Páginas protegidas */}
-          <Route path="/dashboard" element={currentUser ? <Dashboard /> : <Navigate to="/login" />} />
-          <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
-          <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
-          <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
-          <Route path="/settings" element={currentUser ? <Settings /> : <Navigate to="/login" />} />
-          <Route path="/terms" element={<TermsOfUse />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-        </Routes>
+      <Routes>
+        {/* Páginas públicas */}
+        <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Landing />} />
+        <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
+        <Route path="/register" element={currentUser ? <Navigate to="/onboarding" /> : <Register />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         
-        {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
-        {currentUser && <BottomNav />}
-        
-        <Toaster />
-      </ProfileProvider>
+        {/* Páginas protegidas */}
+        <Route path="/dashboard" element={currentUser ? <Dashboard /> : <Navigate to="/login" />} />
+        <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
+        <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={currentUser ? <Settings /> : <Navigate to="/login" />} />
+        <Route path="/terms" element={<TermsOfUse />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+      </Routes>
+      
+      {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
+      {currentUser && <BottomNav />}
+      
+      <Toaster />
     </div>
   );
 };

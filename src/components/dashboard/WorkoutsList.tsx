@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { updateWorkoutProgress } from '@/utils/workoutUtils/workoutTracking';
+import { updateWorkoutProgress } from '@/utils/workoutUtils';
 import { WorkoutDisplay } from '@/types/dashboard';
 import WorkoutItem from './WorkoutItem';
 import { isPremiumUser } from '@/utils/userUtils';
@@ -26,7 +26,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
     navigate(`/exercise/${workoutId}`);
   };
 
-  const toggleWorkoutCompletion = async (e: React.MouseEvent, workoutId: number, currentStatus: 'completed' | 'pending') => {
+  const toggleWorkoutCompletion = (e: React.MouseEvent, workoutId: number, currentStatus: 'completed' | 'pending') => {
     e.stopPropagation();
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
     const newCompleted = newStatus === 'completed';
@@ -38,10 +38,8 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
         : workout
     ));
     
-    // Atualiza o progresso no Supabase e localmente
-    const newProgress = await updateWorkoutProgress(workoutId, newCompleted);
-    
-    // Atualiza o progresso da semana na UI
+    // Atualiza o progresso da semana
+    const newProgress = updateWorkoutProgress(workoutId, newCompleted);
     setWeekProgress(newProgress);
     
     toast({
@@ -52,7 +50,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
     });
   };
 
-  if (!workouts || workouts.length === 0) {
+  if (workouts.length === 0) {
     return (
       <div className="text-center py-8 text-gray-400">
         <p>Nenhum plano de treino encontrado.</p>

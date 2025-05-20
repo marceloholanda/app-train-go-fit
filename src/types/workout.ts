@@ -1,32 +1,18 @@
 
 export interface Exercise {
   nome: string;
-  series?: number;
-  repeticoes?: number | string;
-  reps?: string;  // Used in place of repeticoes in many components
-  link?: string;
-  image?: string;
-  instructions?: string[];
-  variations?: string[];
-  muscle_group?: string;
-  id?: number;
-  completed?: boolean;
-  video_url?: string;
+  reps: string;
   gif_url?: string;
+  video_url?: string;
   substituicoes?: Exercise[];
-  descricao?: string;
+  completed?: boolean;
 }
 
 export interface WorkoutPlan {
-  id?: string;
+  id: string;
   name: string;
+  tags: string[];
   days: number;
-  level?: string;
-  goal?: string;
-  equipment?: string;
-  tags?: string[];
+  plan: Record<string, Exercise[]>;
   description?: string;
-  plan: {
-    [key: string]: Exercise[];
-  };
 }

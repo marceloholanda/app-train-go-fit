@@ -10,7 +10,6 @@ import UserLevel from '@/components/profile/UserLevel';
 import UpgradeBanner from '@/components/profile/UpgradeBanner';
 import MonthlyEvaluation from '@/components/profile/MonthlyEvaluation';
 import LevelOnboardingBanner from '@/components/profile/LevelOnboardingBanner';
-import PlanStatusCard from '@/components/profile/PlanStatusCard';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -45,27 +44,6 @@ const Profile = () => {
     loadUserData();
   }, [navigate, toast]);
 
-  // Função para atualizar os dados do usuário na interface
-  const updateUserData = () => {
-    try {
-      const user = localStorage.getItem('traingo-user');
-      if (user) {
-        setUserData(JSON.parse(user));
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar dados do usuário:', error);
-    }
-  };
-
-  // Escutar mudanças no localStorage para atualização dinâmica
-  useEffect(() => {
-    window.addEventListener('storage', updateUserData);
-    
-    return () => {
-      window.removeEventListener('storage', updateUserData);
-    };
-  }, []);
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -74,7 +52,7 @@ const Profile = () => {
     );
   }
 
-  const isPremium = userData?.plan === 'premium';
+  const isPremium = userData?.isPremium || false;
 
   return (
     <div className="min-h-screen pb-24">
@@ -84,16 +62,15 @@ const Profile = () => {
       <MonthlyEvaluation />
       <LevelOnboardingBanner />
 
-      <div className="p-6">
-        {/* Status do Plano */}
-        <PlanStatusCard isPremium={isPremium} />
-        
-        <ProfileInfo userData={userData} setIsEditing={setIsEditing} />
-        <UserLevel userData={userData} />
-        <WorkoutCalendar userData={userData} />
-        <AchievementsList userData={userData} />
-        <UpgradeBanner isPremium={isPremium} />
-      </div>
+      {!isEditing && (
+        <div className="p-6">
+          <ProfileInfo userData={userData} setIsEditing={setIsEditing} />
+          <UserLevel userData={userData} />
+          <WorkoutCalendar userData={userData} />
+          <AchievementsList userData={userData} />
+          <UpgradeBanner isPremium={isPremium} />
+        </div>
+      )}
     </div>
   );
 };

@@ -26,6 +26,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      // Simulação de login
       await login(formData.email, formData.password);
       
       toast({
@@ -34,10 +35,10 @@ const Login = () => {
       });
       
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Falha no login",
-        description: error.message || "Email ou senha incorretos.",
+        description: "Email ou senha incorretos.",
         variant: "destructive",
       });
     } finally {

@@ -9,33 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      achievements: {
-        Row: {
-          badge_description: string
-          badge_id: string
-          badge_name: string
-          id: string
-          unlocked_at: string
-          user_id: string
-        }
-        Insert: {
-          badge_description: string
-          badge_id: string
-          badge_name: string
-          id?: string
-          unlocked_at?: string
-          user_id: string
-        }
-        Update: {
-          badge_description?: string
-          badge_id?: string
-          badge_name?: string
-          id?: string
-          unlocked_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
