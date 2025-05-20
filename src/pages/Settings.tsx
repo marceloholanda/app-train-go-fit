@@ -15,8 +15,7 @@ const Settings = () => {
   const handleUpdateName = async () => {
     if (name.trim() === '') {
       toast("Erro", {
-        description: "O nome não pode estar vazio.",
-        variant: "destructive"
+        description: "O nome não pode estar vazio."
       });
       return;
     }
@@ -28,8 +27,7 @@ const Settings = () => {
       });
     } else {
       toast("Erro", {
-        description: "Não foi possível atualizar o nome.",
-        variant: "destructive"
+        description: "Não foi possível atualizar o nome."
       });
     }
   };

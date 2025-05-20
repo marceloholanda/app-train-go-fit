@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import Button from '@/components/Button';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { saveUserData } from '@/utils/userUtils';
 
 interface PhysicalDataDialogProps {
@@ -31,8 +30,6 @@ const PhysicalDataDialog = ({
   setPhysicalData, 
   userData 
 }: PhysicalDataDialogProps) => {
-  const { toast } = useToast();
-  
   const form = useForm({
     defaultValues: {
       age: String(physicalData.age),
@@ -64,17 +61,14 @@ const PhysicalDataDialog = ({
       
       saveUserData(updatedUserData);
       
-      toast({
-        title: "Dados atualizados",
-        description: "Suas informações físicas foram atualizadas com sucesso.",
+      toast("Dados atualizados", {
+        description: "Suas informações físicas foram atualizadas com sucesso."
       });
       
       onClose();
     } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível atualizar seus dados físicos.",
-        variant: "destructive",
+      toast("Erro ao salvar", {
+        description: "Não foi possível atualizar seus dados físicos."
       });
     }
   };

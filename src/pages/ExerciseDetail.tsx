@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
@@ -70,8 +71,7 @@ const ExerciseDetail: React.FC = () => {
       setExercisesState(revertedState);
       
       toast("Erro", {
-        description: "Não foi possível atualizar o status do exercício.",
-        variant: "destructive"
+        description: "Não foi possível atualizar o status do exercício."
       });
     }
   };

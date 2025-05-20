@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -33,8 +34,7 @@ const Login = () => {
       navigate('/dashboard');
     } catch (error: any) {
       toast("Falha no login", {
-        description: error.message || "Email ou senha incorretos.",
-        variant: "destructive"
+        description: error.message || "Email ou senha incorretos."
       });
     } finally {
       setIsLoading(false);

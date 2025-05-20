@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import Button from '@/components/Button';
 import { Edit2 } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // Mapeia os valores do quiz para textos legíveis
 const objectiveMap: Record<string, string> = {
@@ -18,7 +17,6 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader = ({ userData, setUserData }: ProfileHeaderProps) => {
-  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     name: userData?.name || '',
@@ -45,15 +43,12 @@ const ProfileHeader = ({ userData, setUserData }: ProfileHeaderProps) => {
       setUserData(updatedUser);
       setIsEditing(false);
       
-      toast({
-        title: "Perfil atualizado",
+      toast("Perfil atualizado", {
         description: "Suas informações foram salvas com sucesso.",
       });
     } catch (error) {
-      toast({
-        title: "Erro ao salvar",
+      toast("Erro ao salvar", {
         description: "Não foi possível atualizar seu perfil.",
-        variant: "destructive",
       });
     }
   };

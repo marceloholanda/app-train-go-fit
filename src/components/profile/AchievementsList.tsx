@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Award } from 'lucide-react';
 import Card from '@/components/Card';
@@ -6,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { getUserAchievements } from '@/utils/workoutUtils/achievements';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 
@@ -62,7 +61,6 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
   const [achievements, setAchievements] = useState<any[]>(staticAchievements);
   const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     // Load achievements - mix of static data and any unlocked achievements from DB
@@ -100,10 +98,8 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
   }, [userData]);
 
   const showNewAchievementToast = (achievement: any) => {
-    toast({
-      title: "🎉 Nova Conquista Desbloqueada!",
+    toast("🎉 Nova Conquista Desbloqueada!", {
       description: `Parabéns! Você desbloqueou: ${achievement.badge_name || achievement.name}`,
-      variant: "default",
       className: "bg-traingo-primary/20 border-traingo-primary text-white",
       duration: 5000,
     });

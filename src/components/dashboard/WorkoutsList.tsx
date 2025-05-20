@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
@@ -69,8 +68,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
     } catch (error) {
       console.error("Error updating workout progress:", error);
       toast("Erro", {
-        description: "Não foi possível atualizar o status do treino.",
-        variant: "destructive"
+        description: "Não foi possível atualizar o status do treino."
       });
     }
   };
