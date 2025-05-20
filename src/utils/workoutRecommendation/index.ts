@@ -20,14 +20,14 @@ export const getRecommendedWorkoutPlan = async (preferences: {
   frequencia: string;
   local: string;
 }) => {
-  // Import the plan finder and other needed utilities
-  const { findBestPlan } = await import('./planFinder');
-  const { adaptPlanToUserPreferences } = await import('./planAdaptation');
+  // Import needed modules
+  const planFinder = await import('./planFinder');
+  const planAdaptation = await import('./planAdaptation');
   const { generatePersonalizedMessage } = await import('./messageGenerator');
   
   try {
     // Find the best base plan for user preferences
-    const basePlan = findBestPlan(
+    const basePlan = planFinder.findPlanForPreferences(
       preferences.objetivo,
       preferences.nivel,
       preferences.frequencia,
@@ -39,7 +39,7 @@ export const getRecommendedWorkoutPlan = async (preferences: {
     }
     
     // Adapt the plan to user preferences
-    const adaptedPlan = adaptPlanToUserPreferences(basePlan, preferences);
+    const adaptedPlan = planAdaptation.adaptPlan(basePlan, preferences);
     
     // Generate a personalized message
     const message = generatePersonalizedMessage(

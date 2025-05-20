@@ -1,5 +1,6 @@
 
 import { Exercise } from '@/types/workout';
+import { standardizeExercise } from '@/utils/exerciseFormatter';
 
 /**
  * Replaces an exercise with an alternative suitable for a specific environment
@@ -20,11 +21,12 @@ export const replaceExerciseForEnvironment = (exerciseName: string, environment:
   
   if (!needsReplacement) {
     // If not a machine exercise, return the same exercise with both naming conventions
-    return { 
+    return standardizeExercise({ 
       name: exerciseName, 
       nome: exerciseName, 
-      reps 
-    };
+      reps,
+      sets: 3 // Default sets value
+    });
   }
   
   // Mapping of replacements for common exercises
@@ -68,9 +70,10 @@ export const replaceExerciseForEnvironment = (exerciseName: string, environment:
     (environment === 'home' ? 'Exercício com peso corporal' : 'Exercício ao ar livre');
   
   // Return the replacement with both name properties for compatibility
-  return { 
+  return standardizeExercise({ 
     name: replacement, 
     nome: replacement, 
-    reps 
-  };
+    reps,
+    sets: 3 // Default sets value
+  });
 };
