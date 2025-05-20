@@ -13,13 +13,10 @@ import Settings from './pages/Settings';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Landing from './pages/Landing';
-import { Toaster } from '@/components/ui/toaster';
-import { useToast } from '@/hooks/use-toast';
 import BottomNav from './components/layout/BottomNav';
 
 const App = () => {
   const { currentUser } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   // Verificar se acabamos de completar o onboarding
@@ -53,8 +50,6 @@ const App = () => {
       
       {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
       {currentUser && <BottomNav />}
-      
-      <Toaster />
     </div>
   );
 };

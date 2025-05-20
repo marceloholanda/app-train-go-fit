@@ -1,9 +1,11 @@
 
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter as Router } from 'react-router-dom'
-import App from './App.tsx'
-import './index.css'
-import { AuthProvider } from './contexts/AuthContext'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter as Router } from 'react-router-dom';
+import App from './App.tsx';
+import './index.css';
+import { AuthProvider } from './contexts/AuthContext';
+import { Toaster } from '@/components/ui/toaster';
 
 // Register service worker
 if ('serviceWorker' in navigator) {
@@ -19,9 +21,12 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <Router>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </Router>
+  <React.StrictMode>
+    <Router>
+      <AuthProvider>
+        <App />
+        <Toaster />
+      </AuthProvider>
+    </Router>
+  </React.StrictMode>
 );
