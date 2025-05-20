@@ -16,19 +16,25 @@ export interface QuizAnswers {
   objective: string;
   level: string;
   environment: string;
-  days_per_week: string | number;
+  days_per_week: string;
+  // Add additional fields that appear in QuizData.ts
+  age: string;
+  weight: string;
+  height: string;
+  motivation_type: string;
+  training_barrier: string;
 }
 
 /**
  * Type for a single exercise
  */
 export interface Exercise {
-  id: number;
+  id?: number;
   name: string;
   nome?: string; // Portuguese alternative
   sets: number;
   reps: string;
-  restTime: number;
+  restTime?: number;
   equipment?: string;
   muscleGroup?: string;
   description?: string;
