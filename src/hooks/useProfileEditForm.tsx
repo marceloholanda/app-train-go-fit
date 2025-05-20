@@ -11,7 +11,7 @@ interface UseProfileEditFormProps {
 }
 
 export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps) => {
-  const toast = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({

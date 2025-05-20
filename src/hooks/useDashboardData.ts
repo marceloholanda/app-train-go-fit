@@ -11,7 +11,7 @@ import { standardizeExercises } from '@/utils/exerciseFormatter';
 
 export const useDashboardData = () => {
   const navigate = useNavigate();
-  const toast = useToast();
+  const { toast } = useToast();
   
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -27,13 +28,13 @@ const Login = () => {
     try {
       await login(formData.email, formData.password);
       
-      toast("Login bem-sucedido!", {
+      toast.success("Login bem-sucedido!", {
         description: "Redirecionando para o dashboard..."
       });
       
       navigate('/dashboard');
     } catch (error: any) {
-      toast("Falha no login", {
+      toast.error("Falha no login", {
         description: error.message || "Email ou senha incorretos."
       });
     } finally {

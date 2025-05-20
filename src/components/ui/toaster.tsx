@@ -21,3 +21,5 @@ export function Toaster() {
     />
   )
 }
+
+export default Toaster;
