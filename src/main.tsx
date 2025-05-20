@@ -30,13 +30,13 @@ const root = createRoot(container);
 
 root.render(
   <React.StrictMode>
-    <ThemeProvider defaultTheme="dark" attribute="class">
-      <BrowserRouter>
+    <BrowserRouter>
+      <ThemeProvider defaultTheme="dark" attribute="class">
         <AuthProvider>
           <App />
           <Toaster />
         </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
