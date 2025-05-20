@@ -67,8 +67,11 @@ const Dashboard = () => {
           // Calcular o progresso semanal baseado nos exercícios completados
           if (progressData.completed_exercises && workoutData?.data) {
             const completedCount = progressData.completed_exercises.length || 0;
-            const totalWorkouts = workoutData?.data?.days || 0;
-            const weeklyProgress = totalWorkouts > 0 ? (completedCount / totalWorkouts) * 100 : 0;
+            // Fix: Access days count from workoutData.data properly
+            const totalExercises = Array.isArray(workoutData.data) 
+              ? workoutData.data.length 
+              : (workoutData.data.days || 0);
+            const weeklyProgress = totalExercises > 0 ? (completedCount / totalExercises) * 100 : 0;
             
             setWeekProgress(weeklyProgress);
           }
@@ -92,9 +95,12 @@ const Dashboard = () => {
   }
 
   // Calculate total workouts correctly
+  // Fix: Handle the workouts array properly to determine total count
   const totalWorkouts = Array.isArray(workouts) 
     ? workouts.length 
-    : (workouts?.days || userData?.workoutPlan?.days || 3);
+    : (workouts && typeof workouts === 'object' && 'days' in workouts) 
+      ? (workouts.days as number) 
+      : (userData?.workoutPlan?.days || 3);
 
   return (
     <div className="min-h-screen pb-24">
