@@ -13,7 +13,6 @@ import Settings from './pages/Settings';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Landing from './pages/Landing';
-import BottomNav from './components/layout/BottomNav';
 import AuthLayout from './layouts/AuthLayout';
 import Index from './pages/Index';
 
@@ -55,9 +54,6 @@ const App = () => {
         <Route path="/terms" element={<TermsOfUse />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
-      
-      {/* Only show bottom navigation when user is logged in */}
-      {currentUser && <BottomNav />}
     </div>
   );
 };
