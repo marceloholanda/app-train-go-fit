@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Exercise } from '@/types/workout';
 import { useNavigate } from 'react-router-dom';

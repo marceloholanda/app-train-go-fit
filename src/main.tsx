@@ -1,7 +1,6 @@
 
-import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter as Router } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './contexts/AuthContext'
@@ -19,22 +18,10 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-const container = document.getElementById("root");
-
-// Make sure root element exists
-if (!container) {
-  throw new Error("Root element not found");
-}
-
-const root = createRoot(container);
-
-// React.StrictMode wrapped around everything to ensure proper context
-root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+createRoot(document.getElementById("root")!).render(
+  <Router>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </Router>
 );

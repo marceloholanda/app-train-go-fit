@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
@@ -13,29 +13,30 @@ import Settings from './pages/Settings';
 import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Landing from './pages/Landing';
-import Index from './pages/Index';
 import { Toaster } from '@/components/ui/toaster';
+import { useToast } from '@/hooks/use-toast';
 import BottomNav from './components/layout/BottomNav';
 
 const App = () => {
   const { currentUser } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Verificar se acabamos de completar o onboarding
-  React.useEffect(() => {
+  useEffect(() => {
     const completedOnboarding = localStorage.getItem('onboarding-completed');
     if (completedOnboarding === 'true' && currentUser) {
       console.log("[TrainGO] Auto-redirecting to dashboard after onboarding");
       localStorage.removeItem('onboarding-completed');
-      // We'll handle navigation in the component itself
+      navigate('/dashboard');
     }
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   return (
     <div className="bg-background text-foreground">
       <Routes>
         {/* Páginas públicas */}
-        <Route path="/" element={<Index />} />
-        <Route path="/landing" element={<Landing />} />
+        <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Landing />} />
         <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/register" element={currentUser ? <Navigate to="/onboarding" /> : <Register />} />
         <Route path="/onboarding" element={<Onboarding />} />

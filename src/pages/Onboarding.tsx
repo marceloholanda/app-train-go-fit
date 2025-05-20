@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 import OnboardingLayout from '@/components/onboarding/OnboardingLayout';
 import WorkoutPlanResult from '@/components/onboarding/WorkoutPlanResult';

@@ -1,9 +1,10 @@
+
 import { Exercise } from '@/types/workout';
 
 /**
  * Gera um nome para o treino baseado nos exercícios
  */
-export const generateWorkoutNameFromExercises = (dayNumber: number, exercises: Exercise[]): string => {
+export const generateWorkoutName = (dayNumber: number, exercises: Exercise[]): string => {
   // Determina o tipo de treino com base nos exercícios
   const muscleGroups: {[key: string]: number} = {};
   
@@ -95,6 +96,3 @@ export const generateWorkoutNameFromExercises = (dayNumber: number, exercises: E
   // Se o grupo muscular principal não está no mapa, usa um nome genérico
   return muscleGroupNames[topMuscleGroup] || `Treino ${dayNumber}`;
 };
-
-// Exports the renamed function but also keeps the original name for backward compatibility
-export { generateWorkoutNameFromExercises as generateWorkoutName };
