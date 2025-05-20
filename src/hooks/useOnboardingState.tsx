@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -74,104 +73,73 @@ export const useOnboardingState = () => {
       const height_exact = heightRangeToNumber(quizAnswers.height);
       const age_exact = ageRangeToNumber(quizAnswers.age);
       
-      try {
-        // 1. Criar o usuário no Supabase Auth
-        const user = await signup(registrationData.email, registrationData.password);
-        
-        if (!user) {
-          throw new Error("Erro ao criar usuário");
-        }
-        
-        // 2. Criar perfil no Supabase
-        const profileData = {
-          user_id: user.id,
-          name: registrationData.name,
-          email: registrationData.email,
-          objective: quizAnswers.objective,
-          level: quizAnswers.level,
-          days_per_week: quizAnswers.days_per_week,
-          environment: quizAnswers.environment,
-          age: quizAnswers.age,
-          weight: quizAnswers.weight,
-          height: quizAnswers.height,
-          age_exact: age_exact,
-          weight_exact: weight_exact,
-          height_exact: height_exact,
-          motivation_type: quizAnswers.motivation_type,
-          training_barrier: quizAnswers.training_barrier
-        };
-
-        const { data: profileResult, error: profileError } = await supabase
-          .from('profiles')
-          .insert([profileData])
-          .select()
-          .single();
-        
-        if (profileError) {
-          throw profileError;
-        }
-        
-        // 3. Salvar o plano de treino no Supabase
-        await saveWorkoutPlanToSupabase(user.id, recommendedPlan);
-        
-        // 4. Inicializar o progresso do usuário na tabela progress
-        const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
-        const progressData = {
-          user_id: user.id,
-          workout_date: today,
-          completed_exercises: [] as any[],
-          streak: 0
-        };
-        
-        const { error: progressError } = await supabase
-          .from('progress')
-          .insert([progressData]);
-        
-        if (progressError) {
-          throw progressError;
-        }
-        
-        setWorkoutPlan(recommendedPlan);
-        setPersonalizedMessage(message);
-        
-        // Marcar onboarding como concluído para o redirecionamento automático ao dashboard
-        localStorage.setItem('onboarding-completed', 'true');
-        
-        toast({
-          title: "Cadastro concluído!",
-          description: "Seu plano de treino foi criado com sucesso.",
-        });
-
-        setShowResults(true);
-      } catch (authError: any) {
-        // Fix: Removed reference to toast.toasts
-        // Tratamento de erros específicos do Supabase
-        if (authError.message?.includes('email already exists')) {
-          toast({
-            title: "E-mail já cadastrado",
-            description: "Este e-mail já possui uma conta. Tente fazer login.",
-            variant: "destructive",
-          });
-        } else if (authError.message?.includes('password')) {
-          toast({
-            title: "Senha inválida",
-            description: "Sua senha deve ter pelo menos 6 caracteres.",
-            variant: "destructive",
-          });
-        } else {
-          // Erro genérico
-          toast({
-            title: "Erro no cadastro",
-            description: authError.message || "Ocorreu um erro inesperado. Tente novamente.",
-            variant: "destructive",
-          });
-        }
-        throw authError; // Re-throw para interromper o fluxo
+      // 1. Criar o usuário no Supabase Auth
+      const user = await signup(registrationData.email, registrationData.password);
+      
+      if (!user) {
+        throw new Error("Erro ao criar usuário");
       }
+      
+      // 2. Criar perfil no Supabase
+      const profileData = {
+        user_id: user.id,
+        name: registrationData.name,
+        email: registrationData.email,
+        objective: quizAnswers.objective,
+        level: quizAnswers.level,
+        days_per_week: quizAnswers.days_per_week,
+        environment: quizAnswers.environment,
+        age: quizAnswers.age,
+        weight: quizAnswers.weight,
+        height: quizAnswers.height,
+        age_exact: age_exact,
+        weight_exact: weight_exact,
+        height_exact: height_exact,
+        motivation_type: quizAnswers.motivation_type,
+        training_barrier: quizAnswers.training_barrier
+      };
+
+      const { data: profileResult, error: profileError } = await supabase
+        .from('profiles')
+        .insert([profileData])
+        .select()
+        .single();
+      
+      if (profileError) {
+        throw profileError;
+      }
+      
+      // 3. Salvar o plano de treino no Supabase
+      await saveWorkoutPlanToSupabase(user.id, recommendedPlan);
+      
+      // 4. Inicializar o progresso do usuário na tabela progress
+      const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const progressData = {
+        user_id: user.id,
+        workout_date: today,
+        completed_exercises: [] as any[],
+        streak: 0
+      };
+      
+      const { error: progressError } = await supabase
+        .from('progress')
+        .insert([progressData]);
+      
+      if (progressError) {
+        throw progressError;
+      }
+      
+      setWorkoutPlan(recommendedPlan);
+      setPersonalizedMessage(message);
+      
+      toast({
+        title: "Cadastro concluído!",
+        description: "Seu plano de treino foi criado com sucesso.",
+      });
+
+      setShowResults(true);
     } catch (error: any) {
       console.error("[TrainGO] Erro no cadastro:", error);
-      // Esta mensagem só será exibida se não houver tratamento específico acima
-      // Fix: Removed reference to toast.toasts to avoid build error
       toast({
         title: "Erro no cadastro",
         description: error.message || "Não foi possível concluir o cadastro. Tente novamente.",

@@ -50,33 +50,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Cadastro com Supabase Auth - ATUALIZADO para não requerer confirmação de e-mail
+  // Cadastro com Supabase Auth
   const signup = async (email: string, password: string) => {
     try {
       console.log("[TrainGO] Signing up with Supabase:", email);
-      
-      // Configuração para cadastro sem confirmação de e-mail
-      // Removemos o emailRedirectTo já que a confirmação está desativada no Supabase
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            confirmed: true
-          }
-        }
-      });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       
       if (error) throw error;
       
       console.log("[TrainGO] Signup successful:", data?.user?.email);
-      
-      // Após o cadastro bem-sucedido, fazemos login automaticamente
-      if (data.user) {
-        console.log("[TrainGO] Auto-login after signup");
-        await login(email, password);
-      }
-      
       return data.user;
     } catch (error) {
       console.error('[TrainGO] Signup error:', error);
