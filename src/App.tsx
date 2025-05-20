@@ -33,13 +33,14 @@ const App = () => {
   return (
     <div className="bg-background text-foreground">
       <Routes>
-        {/* Páginas públicas */}
-        <Route path="/" element={currentUser ? <Navigate to="/dashboard" /> : <Landing />} />
+        {/* Public pages */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
-        <Route path="/register" element={currentUser ? <Navigate to="/onboarding" /> : <Register />} />
+        <Route path="/register" element={currentUser ? <Navigate to="/dashboard" /> : <Register />} />
         <Route path="/onboarding" element={<Onboarding />} />
         
-        {/* Páginas protegidas */}
+        {/* Protected pages */}
         <Route element={<AuthLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/exercise/:id" element={<ExerciseDetail />} />
@@ -52,7 +53,7 @@ const App = () => {
         <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
       
-      {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
+      {/* Only show bottom navigation when user is logged in */}
       {currentUser && <BottomNav />}
     </div>
   );

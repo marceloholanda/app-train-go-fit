@@ -10,7 +10,7 @@ const Index = () => {
   if (currentUser) {
     return <Navigate to="/dashboard" replace />;
   } else {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/landing" replace />;
   }
 };
 
