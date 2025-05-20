@@ -1,21 +1,12 @@
-
 export interface Exercise {
   nome: string;
-  reps: string;
-  gif_url?: string;
-  video_url?: string;
-  descricao?: string;
-  substituicoes?: Exercise[];
+  series: number;
+  repeticoes: number | string;
+  link?: string;
+  image?: string;
+  instructions?: string[];
+  variations?: string[];
+  muscle_group?: string;
+  id?: number;
   completed?: boolean;
-  id?: number; // Adding the missing id property
-  muscle_group?: string; // Adding the missing muscle_group property
-}
-
-export interface WorkoutPlan {
-  id: string;
-  name: string;
-  tags: string[];
-  days: number;
-  plan: Record<string, Exercise[]>;
-  description?: string;
 }

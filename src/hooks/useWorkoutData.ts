@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { updateWorkoutProgress } from '@/utils/workoutUtils/workoutTracking';
 import { recordExerciseCompletion, removeExerciseCompletion } from '@/utils/workoutUtils/progressTracking';
+import { checkNewAchievements } from '@/utils/workoutUtils/achievementsService';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useWorkoutData = (id: string | undefined) => {
@@ -144,13 +145,29 @@ export const useWorkoutData = (id: string | undefined) => {
     } else if (!allCompleted && isCompleted) {
       markWorkoutAsPending();
     }
+    
+    // Verificar se há novas conquistas após completar exercício
+    if (updatedExercises[index].completed) {
+      setTimeout(async () => {
+        if (currentUser?.id) {
+          await checkNewAchievements(currentUser.id);
+        }
+      }, 1000);
+    }
   };
 
-  const markWorkoutAsCompleted = () => {
+  const markWorkoutAsCompleted = async () => {
     if (!id || !currentUser?.id) return;
     
     setIsCompleted(true);
-    updateWorkoutProgress(parseInt(id), true);
+    await updateWorkoutProgress(parseInt(id), true);
+    
+    // Verificar conquistas após completar treino
+    setTimeout(async () => {
+      if (currentUser?.id) {
+        await checkNewAchievements(currentUser.id);
+      }
+    }, 1000);
     
     toast({
       title: "Treino concluído!",
@@ -193,6 +210,15 @@ export const useWorkoutData = (id: string | undefined) => {
     
     // Atualizar progresso no Supabase
     await updateWorkoutProgress(parseInt(id), newStatus);
+    
+    // Verificar conquistas após concluir ou desmarcar treino
+    if (newStatus) {
+      setTimeout(async () => {
+        if (currentUser?.id) {
+          await checkNewAchievements(currentUser.id);
+        }
+      }, 1000);
+    }
     
     toast({
       title: newStatus ? "Treino concluído!" : "Treino desmarcado",

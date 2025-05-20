@@ -8,14 +8,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
-import { getUserProgress, checkAchievementsProgress } from '@/utils/workoutUtils/progressTracking';
 import { useAuth } from '@/contexts/AuthContext';
+import { getAchievementsFromSupabase, checkNewAchievements } from '@/utils/workoutUtils/achievementsService';
 
 const achievementIcons: Record<string, React.ReactNode> = {
   bronze: '🥉',
   silver: '🥈',
   gold: '🥇',
-  platinum: '🔥'
+  platinum: '🔥',
+  consistency_pro: '🏆'
 };
 
 interface AchievementsListProps {
@@ -32,61 +33,29 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
 
   useEffect(() => {
     loadAchievements();
-  }, [currentUser, userData]);
+  }, [currentUser]);
 
   const loadAchievements = async () => {
     try {
       if (!currentUser?.id) return;
       
-      // Verificar o progresso atual do usuário
-      const userProgress = await getUserProgress(currentUser.id);
-      setWorkoutCount(userProgress.workoutDates.length);
-      
-      // Definir as conquistas disponíveis
-      const achievementsList = [
-        { 
-          id: 'bronze', 
-          name: 'Iniciante Bronze', 
-          description: 'Complete 3 dias seguidos de treino', 
-          threshold: 3,
-          unlocked: userProgress.longestStreak >= 3,
-          unlockedDate: userProgress.longestStreak >= 3 ? new Date().toISOString() : null
-        },
-        { 
-          id: 'silver', 
-          name: 'Atleta Prata', 
-          description: 'Complete 7 dias seguidos de treino', 
-          threshold: 7,
-          unlocked: userProgress.longestStreak >= 7,
-          unlockedDate: userProgress.longestStreak >= 7 ? new Date().toISOString() : null
-        },
-        { 
-          id: 'gold', 
-          name: 'Campeão Ouro', 
-          description: 'Complete 14 dias seguidos de treino', 
-          threshold: 14,
-          unlocked: userProgress.longestStreak >= 14,
-          unlockedDate: userProgress.longestStreak >= 14 ? new Date().toISOString() : null
-        },
-        { 
-          id: 'platinum', 
-          name: 'Lenda Platina', 
-          description: 'Complete 30 dias seguidos de treino', 
-          threshold: 30,
-          unlocked: userProgress.longestStreak >= 30,
-          unlockedDate: userProgress.longestStreak >= 30 ? new Date().toISOString() : null
-        }
-      ];
-      
+      // Carregar conquistas do Supabase
+      const achievementsList = await getAchievementsFromSupabase(currentUser.id);
       setAchievements(achievementsList);
       
-      // Verificar se há alguma nova conquista para mostrar toast
-      const newAchievements = await checkAchievementsProgress(currentUser.id);
-      if (newAchievements.length > 0) {
-        const latestAchievement = newAchievements[newAchievements.length - 1];
-        showNewAchievementToast(latestAchievement);
+      // Definir contagem de treinos (para exibição do progresso)
+      if (achievementsList.length > 0) {
+        const firstAchievement = achievementsList.find(a => a.id === 'bronze');
+        if (firstAchievement) {
+          setWorkoutCount(firstAchievement.unlocked ? firstAchievement.threshold : 0);
+        }
       }
       
+      // Verificar se há novas conquistas desbloqueadas
+      const newAchievement = await checkNewAchievements(currentUser.id);
+      if (newAchievement) {
+        showNewAchievementToast(newAchievement);
+      }
     } catch (error) {
       console.error("Erro ao carregar conquistas:", error);
     }
@@ -147,7 +116,7 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
                 "mb-2 text-3xl",
                 achievement.unlocked && "animate-bounce"
               )}>
-                {achievementIcons[achievement.id]}
+                {achievementIcons[achievement.id] || '🏅'}
               </div>
               <Badge 
                 className={cn(
@@ -172,7 +141,7 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
           <DialogContent className="bg-gray-900 border border-gray-800">
             <DialogHeader>
               <DialogTitle className="flex items-center justify-center text-xl">
-                <span className="text-3xl mr-2">{selectedAchievement && achievementIcons[selectedAchievement.id]}</span>
+                <span className="text-3xl mr-2">{selectedAchievement && (achievementIcons[selectedAchievement.id] || '🏅')}</span>
                 {selectedAchievement?.name || "Conquista"}
               </DialogTitle>
               <DialogDescription className="text-center pt-4">
@@ -187,7 +156,7 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
                   ? "bg-traingo-primary/20 border-2 border-traingo-primary"
                   : "bg-gray-800/30 border-2 border-gray-700"
               )}>
-                {selectedAchievement && achievementIcons[selectedAchievement.id]}
+                {selectedAchievement && (achievementIcons[selectedAchievement.id] || '🏅')}
               </div>
               
               <div className="text-center">

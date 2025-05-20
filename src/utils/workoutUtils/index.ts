@@ -8,7 +8,12 @@ export {
   saveWorkoutPlanToSupabase
 } from './progress';
 export * from './history';
-export * from './achievements';
+// Export achievements service from the new file
+export {
+  getAchievementsFromSupabase,
+  checkNewAchievements,
+  saveAchievement
+} from './achievementsService';
 export * from './streaks';
 export * from './workoutTracking';
 export * from './weeklyProgress';
@@ -18,6 +23,5 @@ export {
   recordExerciseCompletion,
   removeExerciseCompletion,
   recordWorkoutCompletion,
-  checkAchievementsProgress,
   getWorkoutDatesForMonth as getWorkoutDatesForMonthFromSupabase
 } from './progressTracking';

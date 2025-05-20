@@ -4,6 +4,7 @@ import { Calendar as CalendarIcon, Flame, Flag } from 'lucide-react';
 import Card from '@/components/Card';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { getUserProgress, getWorkoutDatesForMonth as getWorkoutDatesForMonthFromSupabase } from '@/utils/workoutUtils/progressTracking';
+import { checkNewAchievements } from '@/utils/workoutUtils/achievementsService';
 import { useToast } from '@/hooks/use-toast';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,6 +62,11 @@ const WorkoutCalendar = ({ userData }: WorkoutCalendarProps) => {
         completed: completedThisWeek,
         total: daysThisWeek
       });
+      
+      // Verificar se há novas conquistas desbloqueadas com base no progresso
+      if (progress.longestStreak > 0) {
+        await checkNewAchievements(currentUser.id);
+      }
       
     } catch (error) {
       console.error("Erro ao carregar dados de streak:", error);
