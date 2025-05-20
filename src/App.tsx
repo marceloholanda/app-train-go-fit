@@ -14,6 +14,7 @@ import TermsOfUse from './pages/TermsOfUse';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Landing from './pages/Landing';
 import BottomNav from './components/layout/BottomNav';
+import AuthLayout from './layouts/AuthLayout';
 
 const App = () => {
   const { currentUser } = useAuth();
@@ -39,11 +40,14 @@ const App = () => {
         <Route path="/onboarding" element={<Onboarding />} />
         
         {/* Páginas protegidas */}
-        <Route path="/dashboard" element={currentUser ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/exercise/:id" element={currentUser ? <ExerciseDetail /> : <Navigate to="/login" />} />
-        <Route path="/upgrade" element={currentUser ? <Upgrade /> : <Navigate to="/login" />} />
-        <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
-        <Route path="/settings" element={currentUser ? <Settings /> : <Navigate to="/login" />} />
+        <Route element={<AuthLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/exercise/:id" element={<ExerciseDetail />} />
+          <Route path="/upgrade" element={<Upgrade />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+        
         <Route path="/terms" element={<TermsOfUse />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>

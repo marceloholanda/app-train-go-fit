@@ -1,13 +1,11 @@
-
-import React, { useEffect, useState } from 'react';
-import { Outlet, NavLink, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Outlet, NavLink, useLocation, Navigate } from 'react-router-dom';
 import { HomeIcon, UserIcon, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const AuthLayout = () => {
   const { currentUser } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
 
   // If not authenticated, redirect to login
   if (!currentUser) {
