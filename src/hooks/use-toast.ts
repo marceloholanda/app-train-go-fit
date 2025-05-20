@@ -9,15 +9,9 @@ interface ToastOptions {
   position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center";
 }
 
-interface Toast {
-  success: (title: string, options?: ToastOptions) => void;
-  error: (title: string, options?: ToastOptions) => void;
-  warning: (title: string, options?: ToastOptions) => void;
-  info: (title: string, options?: ToastOptions) => void;
-}
-
-export function useToast(): Toast {
+export function useToast() {
   return {
+    toast,
     success: (title: string, options?: ToastOptions) => {
       toast.success(title, options);
     },

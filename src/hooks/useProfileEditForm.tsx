@@ -11,7 +11,7 @@ interface UseProfileEditFormProps {
 }
 
 export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps) => {
-  const { toast } = useToast();
+  const toast = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,8 +60,7 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
       // Notify parent component about the update
       onSave(updatedUserData);
       
-      toast({
-        title: "Perfil atualizado",
+      toast.success("Perfil atualizado", {
         description: "Seu perfil e plano de treino foram atualizados com sucesso!",
       });
       
@@ -71,8 +70,7 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
       
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
-      toast({
-        title: "Erro ao atualizar perfil",
+      toast.error("Erro ao atualizar perfil", {
         description: "Não foi possível atualizar seu perfil. Tente novamente.",
       });
     } finally {

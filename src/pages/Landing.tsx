@@ -4,7 +4,7 @@ import { Link, Navigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import PrimaryButton from '@/components/PrimaryButton';
-import { ChevronRight, Dumbbell, Zap, Users } from 'lucide-react';
+import { Dumbbell, Zap, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Landing = () => {
