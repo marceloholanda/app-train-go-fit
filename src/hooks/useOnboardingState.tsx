@@ -7,11 +7,12 @@ import { WorkoutPlan } from '@/data/workoutPlans';
 import { useAuth } from '@/contexts/AuthContext';
 import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
 import { quizQuestions } from '@/components/quiz/QuizData';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useOnboardingState = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { signup } = useAuth();
 
   // State variables
   const [currentStep, setCurrentStep] = useState(0);
@@ -54,9 +55,6 @@ export const useOnboardingState = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulação de cadastro
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
       // Verificamos que todas as perguntas foram respondidas
       const quizAnswers = answers as QuizAnswers;
       
@@ -75,28 +73,66 @@ export const useOnboardingState = () => {
       const height_exact = heightRangeToNumber(quizAnswers.height);
       const age_exact = ageRangeToNumber(quizAnswers.age);
       
-      // Salvar o plano de treino no localStorage
-      const userData = {
-        ...registrationData,
-        id: 'mock-user-id', // ID para autenticação
-        profile: {
-          ...quizAnswers,
-          weight_exact,
-          height_exact,
-          age_exact
-        },
-        workoutPlan: recommendedPlan,
-        workoutProgress: {
-          completedWorkouts: [],
-          lastWeekProgress: 0
-        }
-      };
-
-      localStorage.setItem('traingo-user', JSON.stringify(userData));
+      // 1. Criar o usuário no Supabase Auth
+      const user = await signup(registrationData.email, registrationData.password);
       
-      // Fazer login automático após cadastro
-      console.log("[TrainGO] Autologin after registration with:", registrationData.email);
-      await login(registrationData.email, registrationData.password);
+      if (!user) {
+        throw new Error("Erro ao criar usuário");
+      }
+      
+      // 2. Criar perfil no Supabase
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert([{
+          user_id: user.id,
+          name: registrationData.name,
+          email: registrationData.email,
+          objective: quizAnswers.objective,
+          level: quizAnswers.level,
+          days_per_week: quizAnswers.days_per_week,
+          environment: quizAnswers.environment,
+          age: quizAnswers.age,
+          weight: quizAnswers.weight,
+          height: quizAnswers.height,
+          age_exact: age_exact,
+          weight_exact: weight_exact,
+          height_exact: height_exact,
+          motivation_type: quizAnswers.motivation_type,
+          training_barrier: quizAnswers.training_barrier
+        }])
+        .select()
+        .single();
+      
+      if (profileError) {
+        throw profileError;
+      }
+      
+      // 3. Inserir o plano de treino na tabela user_workouts
+      const { error: workoutError } = await supabase
+        .from('user_workouts')
+        .insert([{
+          user_id: user.id,
+          data: recommendedPlan
+        }]);
+      
+      if (workoutError) {
+        throw workoutError;
+      }
+      
+      // 4. Inicializar o progresso do usuário na tabela progress
+      const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const { error: progressError } = await supabase
+        .from('progress')
+        .insert([{
+          user_id: user.id,
+          workout_date: today,
+          completed_exercises: [],
+          streak: 0
+        }]);
+      
+      if (progressError) {
+        throw progressError;
+      }
       
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);
@@ -107,11 +143,11 @@ export const useOnboardingState = () => {
       });
 
       setShowResults(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error("[TrainGO] Erro no cadastro:", error);
       toast({
         title: "Erro no cadastro",
-        description: "Não foi possível concluir o cadastro. Tente novamente.",
+        description: error.message || "Não foi possível concluir o cadastro. Tente novamente.",
         variant: "destructive",
       });
     } finally {
