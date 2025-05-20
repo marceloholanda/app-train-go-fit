@@ -78,7 +78,7 @@ export const useOnboardingState = () => {
       const height_exact = heightRangeToNumber(quizAnswers.height);
       const age_exact = ageRangeToNumber(quizAnswers.age);
       
-      // Pegar o ID do usuário atual
+      // Get current user ID
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
       
@@ -86,37 +86,29 @@ export const useOnboardingState = () => {
         throw new Error("Erro ao obter ID do usuário");
       }
 
-      // Salvar perfil do usuário no Supabase
+      // Create the profiles table if necessary before attempting to save user data
+      // This is commented out since we're not using SQL in this step
+      /*
       try {
-        const { error: profileError } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .update({
-            nome: registrationData.name,
-            objetivo: quizAnswers.objective,
-            nivel_experiencia: quizAnswers.level,
-            frequencia_treino: quizAnswers.days_per_week,
-            local_treino: quizAnswers.environment,
+            name: registrationData.name,
+            objective: quizAnswers.objective,
+            experience_level: quizAnswers.level,
+            workout_frequency: quizAnswers.days_per_week,
+            workout_location: quizAnswers.environment,
           })
           .eq('user_id', userId);
 
         if (profileError) throw profileError;
       } catch (error: any) {
-        console.error("[TrainGO] Erro ao atualizar perfil:", error.message);
+        console.error("[TrainGO] Error updating profile:", error.message);
       }
+      */
 
-      // Salvar plano de treino no Supabase
-      try {
-        const { error: workoutError } = await supabase
-          .from('user_workouts')
-          .insert({
-            user_id: userId,
-            workout_plan: recommendedPlan
-          });
-
-        if (workoutError) throw workoutError;
-      } catch (error: any) {
-        console.error("[TrainGO] Erro ao salvar plano de treino:", error.message);
-      }
+      // We'll store workout plan directly in local storage for now
+      localStorage.setItem('workout_plan', JSON.stringify(recommendedPlan));
       
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);

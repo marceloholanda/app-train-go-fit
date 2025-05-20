@@ -4,7 +4,7 @@ import { Award } from 'lucide-react';
 import Card from '@/components/Card';
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { getAchievements, checkNewAchievement } from '@/utils/workoutUtils';
+import { getUserAchievements } from '@/utils/workoutUtils/achievements';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -14,33 +14,89 @@ const achievementIcons: Record<string, React.ReactNode> = {
   bronze: '🥉',
   silver: '🥈',
   gold: '🥇',
-  platinum: '🔥'
+  platinum: '🔥',
+  first_workout: '🎯',
+  streak_3days: '🔥',
+  streak_7days: '🏆',
+  complete_plan: '🌟',
+  profile_complete: '📝'
 };
+
+// Static achievements for display
+const staticAchievements = [
+  {
+    id: 'first_workout',
+    name: 'Primeiro Treino',
+    description: 'Completou seu primeiro treino. O início de uma jornada incrível!',
+    unlocked: false,
+    threshold: 1
+  },
+  {
+    id: 'streak_3days',
+    name: 'Consistente',
+    description: 'Treinou por 3 dias consecutivos. A consistência é a chave!',
+    unlocked: false,
+    threshold: 3
+  },
+  {
+    id: 'streak_7days',
+    name: 'Semana Perfeita',
+    description: 'Uma semana inteira de treinos consecutivos. Impressionante!',
+    unlocked: false,
+    threshold: 7
+  },
+  {
+    id: 'complete_plan',
+    name: 'Plano Completo',
+    description: 'Completou todos os treinos do seu plano. Muito bem!',
+    unlocked: false,
+    threshold: 30
+  }
+];
 
 interface AchievementsListProps {
   userData: any;
 }
 
 const AchievementsList = ({ userData }: AchievementsListProps) => {
-  const [achievements, setAchievements] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any[]>(staticAchievements);
   const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Carregar conquistas
-    const achievementsData = getAchievements();
-    setAchievements(achievementsData);
-    
-    // Verificar novas conquistas desbloqueadas
-    const checkAchievements = async () => {
-      const newAchievement = await checkNewAchievement("first_workout");
-      if (newAchievement) {
-        showNewAchievementToast(newAchievement);
+    // Load achievements - mix of static data and any unlocked achievements from DB
+    const loadAchievements = async () => {
+      try {
+        // Get unlocked achievements from database
+        const unlockedAchievements = await getUserAchievements();
+        
+        // Map DB achievements to our format
+        const unlockedMap = new Map();
+        unlockedAchievements.forEach(achievement => {
+          unlockedMap.set(achievement.badge_id, {
+            unlocked: true,
+            unlockedDate: achievement.unlocked_at
+          });
+        });
+        
+        // Combine static and unlocked achievements
+        const combinedAchievements = staticAchievements.map(achievement => {
+          const unlocked = unlockedMap.get(achievement.id);
+          return {
+            ...achievement,
+            unlocked: !!unlocked,
+            unlockedDate: unlocked?.unlockedDate || null
+          };
+        });
+        
+        setAchievements(combinedAchievements);
+      } catch (error) {
+        console.error("Error loading achievements:", error);
       }
     };
     
-    checkAchievements();
+    loadAchievements();
   }, [userData]);
 
   const showNewAchievementToast = (achievement: any) => {
@@ -98,7 +154,7 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
                 "mb-2 text-3xl",
                 achievement.unlocked && "animate-bounce"
               )}>
-                {achievementIcons[achievement.id]}
+                {achievementIcons[achievement.id] || '🏅'}
               </div>
               <Badge 
                 className={cn(
@@ -123,7 +179,7 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
           <DialogContent className="bg-gray-900 border border-gray-800">
             <DialogHeader>
               <DialogTitle className="flex items-center justify-center text-xl">
-                <span className="text-3xl mr-2">{selectedAchievement && achievementIcons[selectedAchievement.id]}</span>
+                <span className="text-3xl mr-2">{selectedAchievement && (achievementIcons[selectedAchievement.id] || '🏅')}</span>
                 {selectedAchievement?.name || "Conquista"}
               </DialogTitle>
               <DialogDescription className="text-center pt-4">
@@ -138,7 +194,7 @@ const AchievementsList = ({ userData }: AchievementsListProps) => {
                   ? "bg-traingo-primary/20 border-2 border-traingo-primary"
                   : "bg-gray-800/30 border-2 border-gray-700"
               )}>
-                {selectedAchievement && achievementIcons[selectedAchievement.id]}
+                {selectedAchievement && (achievementIcons[selectedAchievement.id] || '🏅')}
               </div>
               
               <div className="text-center">

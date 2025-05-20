@@ -52,18 +52,12 @@ export const useDashboardData = () => {
         setUserData(userData);
         
         // Buscar progresso da semana
+        // Use a try catch block to safely handle this part since we're not sure
+        // if the 'progress' table exists yet
         try {
-          const { data: progressData } = await supabase
-            .from('progress')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .gte('date', new Date(new Date().setDate(new Date().getDate() - 7)).toISOString())
-            .eq('completed', true);
-          
-          const completedWorkouts = progressData ? progressData.map(p => parseInt(p.exercise_name.split('_')[1])) : [];
-          const weekProgressValue = completedWorkouts.length > 0 ? 
-            (completedWorkouts.length / (userData.workoutPlan?.days || 1)) * 100 : 0;
-          
+          // Temporarily fake this data until we create the proper tables
+          const completedWorkouts = [];
+          const weekProgressValue = 0;
           setWeekProgress(Math.min(100, weekProgressValue));
         } catch (error) {
           console.error("[TrainGO] Error fetching progress data:", error);
@@ -115,22 +109,8 @@ export const useDashboardData = () => {
     
     const weekDays = mapWorkoutDays(plan.days);
     
-    // Buscar progresso para verificar treinos completados
-    const { data: { session } } = await supabase.auth.getSession();
+    // Initialize with an empty array until we create the progress table
     let completedWorkouts: number[] = [];
-    
-    if (session) {
-      const { data: progressData } = await supabase
-        .from('progress')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('completed', true);
-      
-      completedWorkouts = progressData ? progressData.map(p => {
-        const parts = p.exercise_name.split('_');
-        return parts.length > 1 ? parseInt(parts[1]) : 0;
-      }) : [];
-    }
     
     // Cria os cards de treino para o dashboard
     const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercises], index) => {

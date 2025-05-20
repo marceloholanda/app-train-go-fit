@@ -26,7 +26,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
     navigate(`/exercise/${workoutId}`);
   };
 
-  const toggleWorkoutCompletion = (e: React.MouseEvent, workoutId: number, currentStatus: 'completed' | 'pending') => {
+  const toggleWorkoutCompletion = async (e: React.MouseEvent, workoutId: number, currentStatus: 'completed' | 'pending') => {
     e.stopPropagation();
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
     const newCompleted = newStatus === 'completed';
@@ -39,8 +39,8 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
     ));
     
     // Atualiza o progresso da semana
-    const newProgress = updateWorkoutProgress(workoutId, newCompleted);
-    setWeekProgress(newProgress);
+    const newProgress = await updateWorkoutProgress(workoutId, newCompleted);
+    setWeekProgress(prev => newProgress);
     
     toast({
       title: newCompleted ? "Treino concluído!" : "Treino desmarcado",
