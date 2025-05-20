@@ -74,7 +74,6 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
       toast({
         title: "Erro ao atualizar perfil",
         description: "Não foi possível atualizar seu perfil. Tente novamente.",
-        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);

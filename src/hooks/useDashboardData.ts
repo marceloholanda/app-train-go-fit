@@ -40,7 +40,6 @@ export const useDashboardData = () => {
           toast({
             title: "Erro ao carregar dados",
             description: "Não foi possível carregar seu perfil.",
-            variant: "destructive",
           });
           navigate('/login');
           return;
@@ -80,7 +79,6 @@ export const useDashboardData = () => {
           toast({
             title: "Plano não encontrado",
             description: "Não foi possível encontrar seu plano de treino.",
-            variant: "destructive",
           });
         }
       } catch (error) {
@@ -88,7 +86,6 @@ export const useDashboardData = () => {
         toast({
           title: "Erro ao carregar dados",
           description: "Não foi possível carregar seu perfil.",
-          variant: "destructive",
         });
       } finally {
         setIsLoading(false);
