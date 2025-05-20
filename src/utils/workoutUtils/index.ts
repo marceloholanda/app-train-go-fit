@@ -17,11 +17,11 @@ export {
 export * from './streaks';
 export * from './workoutTracking';
 export * from './weeklyProgress';
-// Rename the export from progressTracking to avoid conflict with history.ts
+// Export from progressTracking module
 export { 
   getUserProgress,
   recordExerciseCompletion,
   removeExerciseCompletion,
   recordWorkoutCompletion,
-  getWorkoutDatesForMonth as getWorkoutDatesForMonthFromSupabase
+  getWorkoutDatesForMonth 
 } from './progressTracking';
