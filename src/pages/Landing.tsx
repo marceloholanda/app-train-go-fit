@@ -41,11 +41,11 @@ const Landing = () => {
           </p>
           
           <div className="flex flex-col items-center justify-center">
-            <PrimaryButton 
-              onClick={() => navigate('/onboarding')}
-            >
-              Começar Agora
-            </PrimaryButton>
+            <Link to="/onboarding">
+              <PrimaryButton>
+                Começar Agora
+              </PrimaryButton>
+            </Link>
           </div>
         </div>
       </section>
