@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
@@ -16,8 +16,12 @@ const Index = () => {
     }
   }, [currentUser, navigate]);
   
-  // Return null while effect handles navigation
-  return null;
+  // Return loading indicator while redirecting
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 };
 
 export default Index;

@@ -82,12 +82,11 @@ const Landing = () => {
           </div>
           
           <div className="mt-12 text-center">
-            <PrimaryButton 
-              onClick={() => navigate('/onboarding')}
-              className="mx-auto"
-            >
-              Descubra Seu Perfil
-            </PrimaryButton>
+            <Link to="/onboarding">
+              <PrimaryButton className="mx-auto">
+                Descubra Seu Perfil
+              </PrimaryButton>
+            </Link>
           </div>
         </div>
       </section>
