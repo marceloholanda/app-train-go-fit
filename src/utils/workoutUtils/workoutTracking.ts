@@ -1,13 +1,22 @@
 
 import { getWorkoutName } from './history';
 import { supabase } from '@/integrations/supabase/client';
+import { recordExerciseCompletion, removeExerciseCompletion } from './progressTracking';
 
 /**
  * Atualiza o progresso de treino do usuário
  */
 export const updateWorkoutProgress = async (workoutId: number, completed: boolean): Promise<number> => {
   try {
-    // Obter o usuário atual do localStorage para atualizações locais
+    // Obter o usuário atual para atualizações no Supabase
+    const { currentUser } = await import('@/contexts/AuthContext').then(module => module.useAuth());
+    
+    if (!currentUser?.id) {
+      console.error("Usuário não autenticado");
+      return 0;
+    }
+    
+    // Obter o usuário atual do localStorage para fins de exibição na interface
     const userData = localStorage.getItem('traingo-user');
     if (!userData) return 0;
     
@@ -18,8 +27,12 @@ export const updateWorkoutProgress = async (workoutId: number, completed: boolea
       user.workoutProgress = { completedWorkouts: [], lastWeekProgress: 0 };
     }
     
-    // Atualiza o status do treino localmente
+    // Busca o nome do treino
+    const workoutName = getWorkoutName(user, workoutId);
+    
+    // Atualiza o status do treino no Supabase
     if (completed) {
+      // Adiciona o treino à lista de completados, se não estiver lá
       if (!user.workoutProgress.completedWorkouts.includes(workoutId)) {
         user.workoutProgress.completedWorkouts.push(workoutId);
         
@@ -27,9 +40,6 @@ export const updateWorkoutProgress = async (workoutId: number, completed: boolea
         if (!user.workoutHistory) {
           user.workoutHistory = [];
         }
-        
-        // Busca o nome do treino
-        const workoutName = getWorkoutName(user, workoutId);
           
         // Salva a data atual como data do treino
         const todayDate = new Date().toISOString().split('T')[0];
@@ -46,20 +56,72 @@ export const updateWorkoutProgress = async (workoutId: number, completed: boolea
             nome: workoutName
           });
         }
+        
+        // Registra o treino completo no Supabase
+        // Buscar exercícios deste treino
+        let exercises = [];
+        if (user.workoutPlan?.plan) {
+          const dayKey = `dia${workoutId}`;
+          exercises = user.workoutPlan.plan[dayKey] || [];
+        }
+        
+        // Se há exercícios específicos deste treino, registra cada um
+        if (exercises.length > 0) {
+          for (const exercise of exercises) {
+            await recordExerciseCompletion(
+              currentUser.id,
+              exercise.id || workoutId,
+              exercise.nome,
+              exercise.muscle_group
+            );
+          }
+        } else {
+          // Caso não tenha detalhes dos exercícios, registra apenas o treino
+          await recordExerciseCompletion(
+            currentUser.id,
+            workoutId,
+            workoutName || `Treino ${workoutId}`,
+            null
+          );
+        }
       }
     } else {
+      // Remove o treino da lista de completados
       user.workoutProgress.completedWorkouts = user.workoutProgress.completedWorkouts.filter(
         (id: number) => id !== workoutId
       );
       
-      // Se desfez a conclusão, remove o registro do histórico para o treino atual
+      // Remove o registro do histórico para o treino atual
       if (user.workoutHistory) {
         const todayDate = new Date().toISOString().split('T')[0];
-        // Busca o nome do treino
-        const workoutName = getWorkoutName(user, workoutId);
           
         user.workoutHistory = user.workoutHistory.filter(
           (entry: {date: string, nome: string}) => !(entry.date === todayDate && entry.nome === workoutName)
+        );
+      }
+      
+      // Remover o registro de conclusão do treino no Supabase
+      let exercises = [];
+      if (user.workoutPlan?.plan) {
+        const dayKey = `dia${workoutId}`;
+        exercises = user.workoutPlan.plan[dayKey] || [];
+      }
+      
+      // Se há exercícios específicos deste treino, remove cada um
+      if (exercises.length > 0) {
+        for (const exercise of exercises) {
+          await removeExerciseCompletion(
+            currentUser.id,
+            exercise.id || workoutId,
+            exercise.nome
+          );
+        }
+      } else {
+        // Caso não tenha detalhes dos exercícios, remove apenas o treino
+        await removeExerciseCompletion(
+          currentUser.id,
+          workoutId,
+          workoutName || `Treino ${workoutId}`
         );
       }
     }
@@ -71,67 +133,8 @@ export const updateWorkoutProgress = async (workoutId: number, completed: boolea
     
     user.workoutProgress.lastWeekProgress = progress;
     
-    // Salva os dados atualizados no localStorage
+    // Salva os dados atualizados no localStorage para manter a consistência da UI
     localStorage.setItem('traingo-user', JSON.stringify(user));
-    
-    // Atualiza o progresso no Supabase
-    try {
-      const { currentUser } = await import('@/contexts/AuthContext').then(module => module.useAuth());
-      
-      if (currentUser?.id) {
-        // Buscar registro atual de progresso
-        const { data: progressData, error: fetchError } = await supabase
-          .from('progress')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .order('workout_date', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-          
-        if (fetchError) {
-          console.error("Erro ao buscar progresso no Supabase:", fetchError);
-        } else {
-          const todayDate = new Date().toISOString().split('T')[0];
-          
-          // Determinar quais exercícios foram completados
-          const completedExercises = user.workoutProgress.completedWorkouts.map((id: number) => ({
-            id,
-            completed_at: todayDate
-          }));
-          
-          // Se já existe um registro para hoje, atualiza
-          if (progressData) {
-            const { error: updateError } = await supabase
-              .from('progress')
-              .update({
-                completed_exercises: completedExercises,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', progressData.id);
-              
-            if (updateError) {
-              console.error("Erro ao atualizar progresso no Supabase:", updateError);
-            }
-          } else {
-            // Senão, cria um novo registro
-            const { error: insertError } = await supabase
-              .from('progress')
-              .insert([{
-                user_id: currentUser.id,
-                workout_date: todayDate,
-                completed_exercises: completedExercises,
-                streak: user.workoutProgress.streak || 0
-              }]);
-              
-            if (insertError) {
-              console.error("Erro ao inserir progresso no Supabase:", insertError);
-            }
-          }
-        }
-      }
-    } catch (supabaseError) {
-      console.error("Erro ao sincronizar progresso com Supabase:", supabaseError);
-    }
     
     return progress;
   } catch (error) {

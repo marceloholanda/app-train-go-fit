@@ -12,3 +12,4 @@ export * from './achievements';
 export * from './streaks';
 export * from './workoutTracking';
 export * from './weeklyProgress';
+export * from './progressTracking';

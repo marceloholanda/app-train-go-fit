@@ -3,11 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Flame, Flag } from 'lucide-react';
 import Card from '@/components/Card';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { getWorkoutDatesForMonth } from '@/utils/workoutUtils';
-import { getWorkoutsThisWeek } from '@/utils/workoutUtils/weeklyProgress';
-import { getWorkoutStreaks, getExpectedWorkoutDays } from '@/utils/workoutUtils';
+import { getUserProgress, getWorkoutDatesForMonth } from '@/utils/workoutUtils/progressTracking';
 import { useToast } from '@/hooks/use-toast';
 import { ptBR } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface WorkoutCalendarProps {
   userData: any;
@@ -19,46 +18,81 @@ const WorkoutCalendar = ({ userData }: WorkoutCalendarProps) => {
   const [missedDates, setMissedDates] = useState<string[]>([]);
   const [weekProgress, setWeekProgress] = useState({ completed: 0, total: 0 });
   const [streaks, setStreaks] = useState({ current: 0, longest: 0 });
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
-    refreshCalendarData(new Date());
-    
-    // Carregar dados de progresso semanal
-    const weekStats = getWorkoutsThisWeek();
-    setWeekProgress(weekStats);
-    
-    // Carregar dados de streaks
-    const streakStats = getWorkoutStreaks();
-    setStreaks(streakStats);
-  }, [userData]);
+    if (currentUser?.id) {
+      refreshCalendarData(new Date());
+      
+      // Carregar dados de streaks
+      loadStreakData();
+    }
+  }, [userData, currentUser]);
 
-  const refreshCalendarData = (selectedDate: Date) => {
-    const month = selectedDate.getMonth();
-    const year = selectedDate.getFullYear();
-    const dates = getWorkoutDatesForMonth(month, year);
-    setWorkoutDates(dates);
-    
-    // Obter dias esperados de treino que foram perdidos
-    const expectedDays = getExpectedWorkoutDays();
-    const missed = expectedDays
-      .filter(day => day.missed)
-      .map(day => day.date);
-    setMissedDates(missed);
+  const loadStreakData = async () => {
+    try {
+      if (!currentUser?.id) return;
+      
+      // Buscar progresso do usuário incluindo streaks
+      const progress = await getUserProgress(currentUser.id);
+      
+      setStreaks({
+        current: progress.currentStreak,
+        longest: progress.longestStreak
+      });
+      
+      // Calcular progresso semanal com base na semana atual
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay()); // Domingo como início da semana
+      
+      const daysThisWeek = userData?.profile?.days_per_week 
+        ? parseInt(userData.profile.days_per_week) 
+        : 3;
+        
+      // Contar quantos dias foram completados esta semana
+      const completedThisWeek = progress.workoutDates.filter(date => {
+        const workoutDate = new Date(date);
+        return workoutDate >= startOfWeek && workoutDate <= today;
+      }).length;
+      
+      setWeekProgress({
+        completed: completedThisWeek,
+        total: daysThisWeek
+      });
+      
+    } catch (error) {
+      console.error("Erro ao carregar dados de streak:", error);
+    }
+  };
+
+  const refreshCalendarData = async (selectedDate: Date) => {
+    try {
+      if (!currentUser?.id) return;
+      
+      const month = selectedDate.getMonth();
+      const year = selectedDate.getFullYear();
+      
+      // Buscar datas de treino do mês selecionado
+      const dates = await getWorkoutDatesForMonth(currentUser.id, month, year);
+      setWorkoutDates(dates);
+      
+      // No futuro, podemos implementar a lógica para mostrar dias esperados que foram perdidos
+      setMissedDates([]);
+    } catch (error) {
+      console.error("Erro ao carregar dados do calendário:", error);
+      toast({
+        title: "Erro ao carregar calendário",
+        description: "Não foi possível carregar seu histórico de treinos.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleMonthChange = (newDate: Date) => {
     setDate(newDate);
     refreshCalendarData(newDate);
-  };
-
-  const getModifierStyles = (date: Date) => {
-    const dateString = date.toISOString().split('T')[0];
-    if (workoutDates.includes(dateString)) {
-      return "bg-traingo-primary text-black";
-    } else if (missedDates.includes(dateString)) {
-      return "bg-gray-500/30 text-gray-400 line-through";
-    }
-    return "";
   };
 
   return (
