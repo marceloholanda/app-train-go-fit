@@ -52,10 +52,10 @@ export const getRecommendedWorkoutPlan = async (preferences: {
     // Adapt the plan to user preferences
     const adaptedPlan = planAdaptation.adaptPlan(basePlan, preferences);
     
-    // Generate a personalized message
+    // Generate a personalized message - Fixed by passing the quizAnswers object
     const message = generatePersonalizedMessage(
-      preferences.objetivo,
-      preferences.nivel
+      quizAnswers,
+      adaptedPlan
     );
     
     // Return the complete workout plan with message
