@@ -11,7 +11,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +20,7 @@ const Register = () => {
     // Simple validation
     if (password !== confirmPassword) {
       toast({
-        title: "Error",
+        title: "Erro",
         description: "As senhas não coincidem",
         variant: "destructive",
       });
@@ -29,7 +29,7 @@ const Register = () => {
     
     if (password.length < 6) {
       toast({
-        title: "Error",
+        title: "Erro",
         description: "A senha deve ter pelo menos 6 caracteres",
         variant: "destructive",
       });
@@ -38,30 +38,41 @@ const Register = () => {
     
     try {
       setIsLoading(true);
-      // In a real app, we would register the user first
-      // For now, just simulate registration and auto-login
       
-      // Mock registration
-      const user = { email, id: 'new-user-id' };
-      localStorage.setItem('traingo-user', JSON.stringify(user));
+      // Chamada de registro e login automático com Supabase
+      await signup(email, password);
       
-      // Auto login the user
-      await login(email, password);
-      
-      // Redirect to onboarding after successful registration
+      // Após o registro bem-sucedido, redirecionar para onboarding
       navigate('/onboarding');
       
       toast({
         title: "Sucesso!",
         description: "Conta criada com sucesso",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
-      toast({
-        title: "Erro",
-        description: "Falha ao criar conta. Tente novamente.",
-        variant: "destructive",
-      });
+      
+      // Tratamento específico de erros comuns
+      if (error.message?.includes('email already exists')) {
+        toast({
+          title: "E-mail já cadastrado",
+          description: "Este e-mail já possui uma conta. Tente fazer login.",
+          variant: "destructive",
+        });
+      } else if (error.message?.includes('password')) {
+        toast({
+          title: "Senha inválida", 
+          description: "Sua senha deve ter pelo menos 6 caracteres.",
+          variant: "destructive",
+        });
+      } else {
+        // Erro genérico
+        toast({
+          title: "Erro",
+          description: "Falha ao criar conta. Tente novamente.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
