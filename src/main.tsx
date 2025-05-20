@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from './contexts/AuthContext'
+import React from 'react'
 
 // Register service worker
 if ('serviceWorker' in navigator) {
@@ -18,10 +19,21 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(
-  <Router>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </Router>
+const container = document.getElementById("root");
+
+// Make sure root element exists
+if (!container) {
+  throw new Error("Root element not found");
+}
+
+const root = createRoot(container);
+
+root.render(
+  <React.StrictMode>
+    <Router>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </Router>
+  </React.StrictMode>
 );
