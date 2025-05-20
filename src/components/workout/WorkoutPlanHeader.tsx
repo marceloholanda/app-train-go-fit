@@ -15,7 +15,7 @@ const WorkoutPlanHeader: React.FC<WorkoutPlanHeaderProps> = ({ plan }) => {
         <Dumbbell className="h-6 w-6 text-traingo-primary" />
         <div>
           <CardTitle>{plan.name}</CardTitle>
-          <CardDescription>{plan.description}</CardDescription>
+          {plan.description && <CardDescription>{plan.description}</CardDescription>}
         </div>
       </div>
     </CardHeader>

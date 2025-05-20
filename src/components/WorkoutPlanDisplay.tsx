@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { WorkoutPlan } from '@/data/workoutPlans';
+import { WorkoutPlan } from '@/types/workout';
 import { Card, CardContent } from '@/components/ui/card';
 import WorkoutPlanHeader from './workout/WorkoutPlanHeader';
 import WorkoutPlanTags from './workout/WorkoutPlanTags';
@@ -23,7 +23,7 @@ const WorkoutPlanDisplay: React.FC<WorkoutPlanDisplayProps> = ({ plan, personali
         <Card className="bg-traingo-gray border border-gray-700">
           <WorkoutPlanHeader plan={plan} />
           <CardContent>
-            <WorkoutPlanTags tags={plan.tags} daysPerWeek={plan.days} />
+            {plan.tags && <WorkoutPlanTags tags={plan.tags} daysPerWeek={plan.days} />}
             <WorkoutDaysList plan={plan} />
           </CardContent>
         </Card>
