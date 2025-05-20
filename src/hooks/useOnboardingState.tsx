@@ -81,25 +81,27 @@ export const useOnboardingState = () => {
       }
       
       // 2. Criar perfil no Supabase
-      const { data: profileData, error: profileError } = await supabase
+      const profileData = {
+        user_id: user.id,
+        name: registrationData.name,
+        email: registrationData.email,
+        objective: quizAnswers.objective,
+        level: quizAnswers.level,
+        days_per_week: quizAnswers.days_per_week,
+        environment: quizAnswers.environment,
+        age: quizAnswers.age,
+        weight: quizAnswers.weight,
+        height: quizAnswers.height,
+        age_exact: age_exact,
+        weight_exact: weight_exact,
+        height_exact: height_exact,
+        motivation_type: quizAnswers.motivation_type,
+        training_barrier: quizAnswers.training_barrier
+      };
+
+      const { data: profileResult, error: profileError } = await supabase
         .from('profiles')
-        .insert([{
-          user_id: user.id,
-          name: registrationData.name,
-          email: registrationData.email,
-          objective: quizAnswers.objective,
-          level: quizAnswers.level,
-          days_per_week: quizAnswers.days_per_week,
-          environment: quizAnswers.environment,
-          age: quizAnswers.age,
-          weight: quizAnswers.weight,
-          height: quizAnswers.height,
-          age_exact: age_exact,
-          weight_exact: weight_exact,
-          height_exact: height_exact,
-          motivation_type: quizAnswers.motivation_type,
-          training_barrier: quizAnswers.training_barrier
-        }])
+        .insert([profileData])
         .select()
         .single();
       
@@ -108,12 +110,14 @@ export const useOnboardingState = () => {
       }
       
       // 3. Inserir o plano de treino na tabela user_workouts
+      const workoutData = {
+        user_id: user.id,
+        data: recommendedPlan
+      };
+      
       const { error: workoutError } = await supabase
         .from('user_workouts')
-        .insert([{
-          user_id: user.id,
-          data: recommendedPlan
-        }]);
+        .insert([workoutData]);
       
       if (workoutError) {
         throw workoutError;
@@ -121,14 +125,16 @@ export const useOnboardingState = () => {
       
       // 4. Inicializar o progresso do usuário na tabela progress
       const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const progressData = {
+        user_id: user.id,
+        workout_date: today,
+        completed_exercises: [] as any[],
+        streak: 0
+      };
+      
       const { error: progressError } = await supabase
         .from('progress')
-        .insert([{
-          user_id: user.id,
-          workout_date: today,
-          completed_exercises: [],
-          streak: 0
-        }]);
+        .insert([progressData]);
       
       if (progressError) {
         throw progressError;

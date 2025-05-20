@@ -92,7 +92,7 @@ export const useProfile = () => {
 
       if (error) throw error;
 
-      setProfile(prev => prev ? { ...prev, ...data } : data);
+      setProfile(prev => prev ? { ...prev, ...data } : data as UserProfile);
       
       toast({
         title: 'Perfil atualizado',
@@ -123,15 +123,20 @@ export const useProfile = () => {
     }
 
     try {
+      const newProfile = {
+        ...profileData,
+        user_id: currentUser.id
+      };
+      
       const { data, error } = await supabase
         .from('profiles')
-        .insert([{ ...profileData, user_id: currentUser.id }])
+        .insert([newProfile])
         .select()
         .single();
 
       if (error) throw error;
 
-      setProfile(data);
+      setProfile(data as UserProfile);
       
       toast({
         title: 'Perfil criado',

@@ -65,7 +65,7 @@ const Dashboard = () => {
           console.log("Progresso carregado do Supabase:", progressData);
           
           // Calcular o progresso semanal baseado nos exercícios completados
-          if (progressData.completed_exercises) {
+          if (progressData.completed_exercises && workoutData?.data) {
             const completedCount = progressData.completed_exercises.length || 0;
             const totalWorkouts = workoutData?.data?.days || 0;
             const weeklyProgress = totalWorkouts > 0 ? (completedCount / totalWorkouts) * 100 : 0;
