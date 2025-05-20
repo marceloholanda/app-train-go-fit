@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
@@ -15,12 +15,13 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Landing from './pages/Landing';
 import BottomNav from './components/layout/BottomNav';
 import AuthLayout from './layouts/AuthLayout';
+import Index from './pages/Index';
 
 const App = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  // Verificar se acabamos de completar o onboarding
+  // Check if onboarding was completed
   useEffect(() => {
     const completedOnboarding = localStorage.getItem('onboarding-completed');
     if (completedOnboarding === 'true' && currentUser) {
@@ -33,8 +34,10 @@ const App = () => {
   return (
     <div className="bg-background text-foreground">
       <Routes>
+        {/* Root path uses Index component to handle redirects */}
+        <Route path="/" element={<Index />} />
+        
         {/* Public pages */}
-        <Route path="/" element={<Landing />} />
         <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/register" element={currentUser ? <Navigate to="/dashboard" /> : <Register />} />

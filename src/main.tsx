@@ -20,7 +20,10 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(
+const root = createRoot(document.getElementById("root")!);
+
+// Ensure proper nesting order: BrowserRouter -> AuthProvider -> App
+root.render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
