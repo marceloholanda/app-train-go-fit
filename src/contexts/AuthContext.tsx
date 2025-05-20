@@ -49,8 +49,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       console.log("[TrainGO] Login successful for:", email);
+      toast.success("Login realizado com sucesso!");
     } catch (error: any) {
       console.error('[TrainGO] Login error:', error.message);
+      toast.error("Falha no login", {
+        description: error.message
+      });
       throw error;
     }
   };
@@ -73,8 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       console.log("[TrainGO] Signup successful for:", email);
+      toast.success("Conta criada com sucesso!");
     } catch (error: any) {
       console.error('[TrainGO] Signup error:', error.message);
+      toast.error("Falha no cadastro", {
+        description: error.message
+      });
       throw error;
     }
   };
@@ -89,8 +97,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       
       console.log("[TrainGO] Successfully logged out");
+      toast.success("Logout realizado com sucesso!");
     } catch (error: any) {
       console.error('[TrainGO] Logout error:', error.message);
+      toast.error("Falha ao sair", {
+        description: error.message
+      });
       throw error;
     }
   };
