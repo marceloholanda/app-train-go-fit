@@ -35,11 +35,8 @@ export const getRecommendedWorkoutPlan = async (preferences: {
     };
     
     // Find the best base plan for user preferences
-    const basePlan = planFinder.findPlanForPreferences(
-      preferences.objetivo,
-      preferences.nivel,
-      preferences.frequencia,
-      preferences.local
+    const basePlan = planFinder.findBestWorkoutPlan(
+      quizAnswers
     );
     
     if (!basePlan) {
