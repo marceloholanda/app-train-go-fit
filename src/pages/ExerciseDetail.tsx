@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Exercise } from '@/types/workout';
@@ -27,17 +26,21 @@ const ExerciseDetail = () => {
   } = useWorkoutData(id);
   
   const {
-    isPremium,
-    isVideoModalOpen,
-    setIsVideoModalOpen,
-    isReplaceModalOpen,
-    setIsReplaceModalOpen,
-    isAddExerciseModalOpen,
-    setIsAddExerciseModalOpen,
     selectedExerciseIndex,
+    isVideoModalOpen,
+    isReplaceModalOpen,
+    isAddExerciseModalOpen,
+    isImageModalOpen,
     showPremiumWelcome,
+    isPremium,
     handleOpenVideoModal,
     handleOpenReplaceModal,
+    handleOpenImageModal,
+    handleCloseVideoModal,
+    handleCloseReplaceModal,
+    handleCloseImageModal,
+    handleOpenAddExerciseModal,
+    handleCloseAddExerciseModal,
     handleClosePremiumWelcome,
     checkPremiumStatus
   } = useExerciseModals();
@@ -192,7 +195,8 @@ const ExerciseDetail = () => {
           handleExerciseToggle={handleExerciseToggle}
           handleOpenVideoModal={handleOpenVideoModal}
           handleOpenReplaceModal={handleOpenReplaceModal}
-          handleAddExerciseModal={() => setIsAddExerciseModalOpen(true)}
+          handleOpenImageModal={handleOpenImageModal}
+          handleAddExerciseModal={handleOpenAddExerciseModal}
         />
         
         {/* Upgrade card for free users */}
@@ -207,10 +211,12 @@ const ExerciseDetail = () => {
         isVideoModalOpen={isVideoModalOpen}
         isReplaceModalOpen={isReplaceModalOpen}
         isAddExerciseModalOpen={isAddExerciseModalOpen}
+        isImageModalOpen={isImageModalOpen}
         showPremiumWelcome={showPremiumWelcome}
-        onCloseVideoModal={() => setIsVideoModalOpen(false)}
-        onCloseReplaceModal={() => setIsReplaceModalOpen(false)}
-        onCloseAddExerciseModal={() => setIsAddExerciseModalOpen(false)}
+        onCloseVideoModal={handleCloseVideoModal}
+        onCloseReplaceModal={handleCloseReplaceModal}
+        onCloseAddExerciseModal={handleCloseAddExerciseModal}
+        onCloseImageModal={handleCloseImageModal}
         onClosePremiumWelcome={handleClosePremiumWelcome}
         onReplaceExercise={handleReplaceExercise}
         onAddExercises={handleAddExercises}

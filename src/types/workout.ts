@@ -4,6 +4,7 @@ export interface Exercise {
   reps: string;
   gif_url?: string;
   video_url?: string;
+  descricao?: string;
   substituicoes?: Exercise[];
   completed?: boolean;
 }
