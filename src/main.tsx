@@ -28,6 +28,7 @@ if (!container) {
 
 const root = createRoot(container);
 
+// Make sure BrowserRouter is the outermost wrapper for all components using react-router
 root.render(
   <React.StrictMode>
     <BrowserRouter>
