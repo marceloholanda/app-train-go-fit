@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Flame, Flag } from 'lucide-react';
 import Card from '@/components/Card';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { getUserProgress, getWorkoutDatesForMonthFromSupabase } from '@/utils/workoutUtils/progressTracking';
+import { getUserProgress, getWorkoutDatesForMonth as getWorkoutDatesForMonthFromSupabase } from '@/utils/workoutUtils/progressTracking';
 import { useToast } from '@/hooks/use-toast';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
