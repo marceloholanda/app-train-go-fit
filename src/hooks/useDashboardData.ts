@@ -1,8 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName } from '@/utils/workoutUtils';
+import { mapWorkoutDays } from '@/utils/workoutUtils/dayMapping';
+import { getWorkoutIcon } from '@/utils/workoutUtils/iconGeneration';
+import { generateWorkoutName } from '@/utils/workoutUtils/nameGeneration';
 import { WorkoutPlan } from '@/types/workout';
 import { WorkoutDisplay } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,7 +129,7 @@ export const useDashboardData = () => {
     const completedWorkouts = user.workoutProgress?.completedWorkouts || [];
     const weekDays = mapWorkoutDays(plan.days);
     
-    // Cria os cards de treino para o dashboard
+    // Cria os cards de treino para o dashboard - modified to handle type issues
     const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercises], index) => {
       const dayNumber = index + 1;
       const workoutStatus: 'completed' | 'pending' = completedWorkouts.includes(dayNumber) ? 'completed' : 'pending';
