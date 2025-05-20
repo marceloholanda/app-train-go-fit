@@ -1,6 +1,6 @@
 
-import { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import PrimaryButton from '@/components/PrimaryButton';
@@ -8,15 +8,16 @@ import { ChevronRight, Dumbbell, Zap, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Landing = () => {
-  const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   
-  // Check if user is already authenticated
-  useEffect(() => {
-    if (currentUser) {
-      navigate('/dashboard');
-    }
-  }, [currentUser, navigate]);
+  // Show loading indicator while auth state is being determined
+  if (loading || currentUser) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
