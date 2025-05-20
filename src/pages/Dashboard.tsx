@@ -94,12 +94,11 @@ const Dashboard = () => {
     );
   }
 
-  // Calculate total workouts correctly
-  // Fix: Handle the workouts array properly to determine total count
+  // Calculate total workouts correctly based on the workouts data structure
   const totalWorkouts = Array.isArray(workouts) 
     ? workouts.length 
-    : (workouts && typeof workouts === 'object' && 'days' in workouts) 
-      ? (workouts.days as number) 
+    : (workouts && typeof workouts === 'object' && workouts !== null)
+      ? ('days' in workouts ? (workouts as any).days : 3)
       : (userData?.workoutPlan?.days || 3);
 
   return (
