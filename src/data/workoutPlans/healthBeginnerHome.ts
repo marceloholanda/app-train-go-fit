@@ -9,25 +9,27 @@ export const healthBeginnerHome: WorkoutPlan = {
   description: "Plano leve para melhorar sua saúde e disposição diária",
   plan: {
     dia1: [
-      { nome: "Alongamento dinâmico", reps: "5 minutos" },
-      { nome: "Caminhada no lugar", reps: "5 minutos" },
-      { nome: "Agachamento livre", reps: "3x10" },
-      { nome: "Flexão na parede", reps: "3x10" },
-      { nome: "Rotação de tronco", reps: "3x10 (cada lado)" }
+      { name: "Alongamento dinâmico", nome: "Alongamento dinâmico", reps: "5 minutos", sets: 1 },
+      { name: "Caminhada no lugar", nome: "Caminhada no lugar", reps: "5 minutos", sets: 1 },
+      { name: "Agachamento livre", nome: "Agachamento livre", reps: "3x10", sets: 3 },
+      { name: "Flexão na parede", nome: "Flexão na parede", reps: "3x10", sets: 3 },
+      { name: "Rotação de tronco", nome: "Rotação de tronco", reps: "3x10 (cada lado)", sets: 3 }
     ],
     dia2: [
-      { nome: "Mobilidade articular", reps: "5 minutos" },
-      { nome: "Marcha estacionária", reps: "5 minutos" },
-      { nome: "Ponte de glúteos", reps: "3x12" },
-      { nome: "Remada em pé com elástico", reps: "3x12" },
-      { nome: "Gato-vaca", reps: "3x10" }
+      { name: "Mobilidade articular", nome: "Mobilidade articular", reps: "5 minutos", sets: 1 },
+      { name: "Marcha estacionária", nome: "Marcha estacionária", reps: "5 minutos", sets: 1 },
+      { name: "Ponte de glúteos", nome: "Ponte de glúteos", reps: "3x12", sets: 3 },
+      { name: "Remada em pé com elástico", nome: "Remada em pé com elástico", reps: "3x12", sets: 3 },
+      { name: "Gato-vaca", nome: "Gato-vaca", reps: "3x10", sets: 3 }
     ],
     dia3: [
-      { nome: "Respiração profunda", reps: "3 minutos" },
-      { nome: "Elevação de calcanhar", reps: "3x15" },
-      { nome: "Abdução de quadril", reps: "3x12 (cada lado)" },
-      { nome: "Superman", reps: "3x10" },
-      { nome: "Alongamento passivo", reps: "5 minutos" }
+      { name: "Respiração profunda", nome: "Respiração profunda", reps: "3 minutos", sets: 1 },
+      { name: "Elevação de calcanhar", nome: "Elevação de calcanhar", reps: "3x15", sets: 3 },
+      { name: "Abdução de quadril", nome: "Abdução de quadril", reps: "3x12 (cada lado)", sets: 3 },
+      { name: "Superman", nome: "Superman", reps: "3x10", sets: 3 },
+      { name: "Alongamento passivo", nome: "Alongamento passivo", reps: "5 minutos", sets: 1 }
     ]
-  }
+  },
+  level: "beginner",
+  goal: "health_energy"
 };

@@ -18,11 +18,11 @@ export interface QuizAnswers {
   environment: string;
   days_per_week: string;
   // Add additional fields that appear in QuizData.ts
-  age: string;
-  weight: string;
-  height: string;
-  motivation_type: string;
-  training_barrier: string;
+  age?: string;
+  weight?: string;
+  height?: string;
+  motivation_type?: string;
+  training_barrier?: string;
 }
 
 /**

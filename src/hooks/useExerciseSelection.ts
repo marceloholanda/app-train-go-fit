@@ -1,7 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Exercise } from '@/types/workout';
 import { availableExercises } from '@/data/availableExercises';
+import { standardizeExercise } from '@/utils/exerciseFormatter';
 
 export const useExerciseSelection = () => {
   const [activeTab, setActiveTab] = useState<string>("Peito");
@@ -9,9 +10,9 @@ export const useExerciseSelection = () => {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
 
   // Filtrar exercícios com base na busca
-  const getFilteredExercises = () => {
+  const getFilteredExercises = useCallback(() => {
     if (!searchTerm.trim()) {
-      return availableExercises[activeTab];
+      return availableExercises[activeTab].map(standardizeExercise);
     }
     
     const normalizedSearch = searchTerm.toLowerCase();
@@ -23,29 +24,34 @@ export const useExerciseSelection = () => {
         .filter(ex => 
           (ex.nome?.toLowerCase() || "").includes(normalizedSearch) ||
           (ex.name?.toLowerCase() || "").includes(normalizedSearch)
-        );
+        )
+        .map(standardizeExercise);
     }
     
     // Se estiver em uma aba específica, filtrar apenas nesse grupo muscular
-    return availableExercises[activeTab].filter(ex => 
-      (ex.nome?.toLowerCase() || "").includes(normalizedSearch) ||
-      (ex.name?.toLowerCase() || "").includes(normalizedSearch)
-    );
-  };
+    return availableExercises[activeTab]
+      .filter(ex => 
+        (ex.nome?.toLowerCase() || "").includes(normalizedSearch) ||
+        (ex.name?.toLowerCase() || "").includes(normalizedSearch)
+      )
+      .map(standardizeExercise);
+  }, [searchTerm, activeTab]);
 
-  const toggleExerciseSelection = (exercise: Exercise) => {
-    const isSelected = selectedExercises.some(ex => 
-      (ex.nome === exercise.nome) || (ex.name === exercise.name)
-    );
-    
-    if (isSelected) {
-      setSelectedExercises(selectedExercises.filter(ex => 
-        (ex.nome !== exercise.nome) && (ex.name !== exercise.name)
-      ));
-    } else {
-      setSelectedExercises([...selectedExercises, exercise]);
-    }
-  };
+  const toggleExerciseSelection = useCallback((exercise: Exercise) => {
+    setSelectedExercises(prev => {
+      const isSelected = prev.some(ex => 
+        (ex.nome === exercise.nome) || (ex.name === exercise.name)
+      );
+      
+      if (isSelected) {
+        return prev.filter(ex => 
+          (ex.nome !== exercise.nome) && (ex.name !== exercise.name)
+        );
+      } else {
+        return [...prev, standardizeExercise(exercise)];
+      }
+    });
+  }, []);
 
   return {
     activeTab,

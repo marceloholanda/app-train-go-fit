@@ -9,23 +9,25 @@ export const muscleIntermediateGym: WorkoutPlan = {
   description: "Plano para praticantes de nível intermediário focados em ganho muscular",
   plan: {
     dia1: [
-      { nome: "Supino reto", reps: "4x10" },
-      { nome: "Crucifixo", reps: "3x12" },
-      { nome: "Tríceps corda", reps: "3x12" },
-      { nome: "Tríceps francês", reps: "3x12" }
+      { name: "Supino reto", nome: "Supino reto", reps: "4x10", sets: 4 },
+      { name: "Crucifixo", nome: "Crucifixo", reps: "3x12", sets: 3 },
+      { name: "Tríceps corda", nome: "Tríceps corda", reps: "3x12", sets: 3 },
+      { name: "Tríceps francês", nome: "Tríceps francês", reps: "3x12", sets: 3 }
     ],
     dia2: [
-      { nome: "Agachamento livre", reps: "4x10" },
-      { nome: "Leg press 45°", reps: "4x12" },
-      { nome: "Stiff", reps: "4x10" },
-      { nome: "Panturrilha em pé", reps: "3x15" }
+      { name: "Agachamento livre", nome: "Agachamento livre", reps: "4x10", sets: 4 },
+      { name: "Leg press 45°", nome: "Leg press 45°", reps: "4x12", sets: 4 },
+      { name: "Stiff", nome: "Stiff", reps: "4x10", sets: 4 },
+      { name: "Panturrilha em pé", nome: "Panturrilha em pé", reps: "3x15", sets: 3 }
     ],
     dia3: [
-      { nome: "Puxada aberta", reps: "4x10" },
-      { nome: "Remada baixa", reps: "4x10" },
-      { nome: "Remada cavalinho", reps: "3x12" },
-      { nome: "Rosca scott", reps: "3x12" },
-      { nome: "Abdominal infra", reps: "3x15" }
+      { name: "Puxada aberta", nome: "Puxada aberta", reps: "4x10", sets: 4 },
+      { name: "Remada baixa", nome: "Remada baixa", reps: "4x10", sets: 4 },
+      { name: "Remada cavalinho", nome: "Remada cavalinho", reps: "3x12", sets: 3 },
+      { name: "Rosca scott", nome: "Rosca scott", reps: "3x12", sets: 3 },
+      { name: "Abdominal infra", nome: "Abdominal infra", reps: "3x15", sets: 3 }
     ]
-  }
+  },
+  level: "intermediate",
+  goal: "gain_muscle"
 };
