@@ -35,6 +35,7 @@ const App = () => {
       <Routes>
         {/* Páginas públicas */}
         <Route path="/" element={<Index />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={currentUser ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/register" element={currentUser ? <Navigate to="/onboarding" /> : <Register />} />
         <Route path="/onboarding" element={<Onboarding />} />
