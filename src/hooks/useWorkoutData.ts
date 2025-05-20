@@ -1,260 +1,116 @@
 
 import { useState, useEffect } from 'react';
-import { Exercise } from '@/types/workout';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { updateWorkoutProgress, trackExerciseCompletion, getExercisesState } from '@/utils/workoutUtils';
-import { checkNewAchievement } from '@/utils/workoutUtils/achievements';
 import { supabase } from '@/integrations/supabase/client';
+import { Exercise, WorkoutDay } from '@/types/workout';
+import { toast } from "@/hooks/use-toast";
 
-export const useWorkoutData = (id: string | undefined) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const [workoutDay, setWorkoutDay] = useState<string>('');
+export const useWorkoutData = (workoutId: string | number) => {
+  const [loading, setLoading] = useState(true);
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [userLevel, setUserLevel] = useState<string>('beginner');
+  const [exercisesState, setExercisesState] = useState<boolean[]>([]);
+  const [dayName, setDayName] = useState('');
+  const [dayIndex, setDayIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadWorkoutData = async () => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      
       try {
-        setIsLoading(true);
-        
-        // Verificar autenticação
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user || !id) {
-          navigate('/dashboard');
+        if (!session) {
+          setError('Sessão não encontrada');
           return;
         }
         
-        const userId = session.user.id;
+        // Buscar plano de treino do usuário
+        const { data: userData, error: userError } = await supabase
+          .from('user_workouts')
+          .select('workout_plan')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
         
-        // Get user level from profiles
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('nivel_experiencia')
-            .eq('id', userId)
-            .single();
-            
-          if (profile && profile.nivel_experiencia) {
-            setUserLevel(profile.nivel_experiencia);
-          }
-        } catch (error) {
-          console.error('Error fetching user level:', error);
+        if (userError) throw userError;
+        if (!userData || !userData.workout_plan) {
+          setError('Plano de treino não encontrado');
+          return;
         }
         
-        // Try to get workout plan from Supabase
-        try {
-          const { data: userWorkoutData } = await supabase
-            .from('user_workouts')
-            .select('workout_plan')
-            .eq('user_id', userId)
-            .single();
-            
-          if (!userWorkoutData || !userWorkoutData.workout_plan) {
-            throw new Error('No workout plan found');
-          }
+        // Parse workout plan
+        const workoutPlan = userData.workout_plan;
+        
+        // Find day by ID
+        const dayId = parseInt(String(workoutId));
+        if (isNaN(dayId)) {
+          setError('ID de treino inválido');
+          return;
+        }
+        
+        // Safety check for the type of workout_plan
+        if (typeof workoutPlan === 'object' && workoutPlan !== null) {
+          const days = workoutPlan.days || [];
+          const foundDay = Array.isArray(days) ? 
+            days.find((day: any) => day.id === dayId) : null;
           
-          const workoutPlan = userWorkoutData.workout_plan;
-          
-          // Encontrar o dia de treino baseado no ID
-          const dayNumber = parseInt(id);
-          const dayKey = `dia${dayNumber}`;
-          const dayExercises = workoutPlan.plan?.[dayKey];
-          
-          if (!dayExercises) {
-            toast({
-              title: "Treino não encontrado",
-              description: "Este treino não existe no seu plano atual.",
-              variant: "destructive",
-            });
-            navigate('/dashboard');
+          if (!foundDay) {
+            setError('Dia de treino não encontrado');
             return;
           }
           
-          // Check if workout is completed today
-          const today = new Date().toISOString().split('T')[0];
+          setDayName(foundDay.name || `Dia ${dayId}`);
+          setDayIndex(dayId);
+          setExercises(foundDay.exercises || []);
+          
+          // Get completion state for exercises
           const { data: progressData } = await supabase
             .from('progress')
             .select('*')
-            .eq('user_id', userId)
-            .eq('date', today)
-            .eq('exercise_name', `day_${dayNumber}`)
-            .eq('completed', true)
-            .maybeSingle();
+            .eq('user_id', session.user.id)
+            .eq('date', new Date().toISOString().split('T')[0])
+            .like('exercise_name', `day${dayId}_ex%`);
+          
+          if (progressData && progressData.length > 0) {
+            // Create a map of exercise index to completion state
+            const completionState = progressData.reduce((acc: {[key: string]: boolean}, curr) => {
+              const exIndex = parseInt(curr.exercise_name.split('_ex')[1]);
+              acc[exIndex] = curr.completed;
+              return acc;
+            }, {});
             
-          setIsCompleted(!!progressData);
-          setWorkoutDay(`Dia ${dayNumber}`);
-          
-          // Initialize all exercises as not completed
-          setExercises(dayExercises.map((ex: Exercise) => ({ ...ex, completed: false })));
-          
-        } catch (error) {
-          console.error('Error fetching workout plan from Supabase:', error);
-          
-          // Fallback to localStorage if Supabase fails
-          const workoutPlanJson = localStorage.getItem('workout_plan');
-          if (!workoutPlanJson) {
-            toast({
-              title: "Plano não encontrado",
-              description: "Não foi possível encontrar seu plano de treino.",
-              variant: "destructive",
-            });
-            navigate('/dashboard');
-            return;
+            // Apply completion state to exercises
+            const newExercisesState = foundDay.exercises.map((_: any, index: number) => 
+              completionState[index] || false
+            );
+            
+            setExercisesState(newExercisesState);
+          } else {
+            // Initialize all as incomplete
+            setExercisesState(new Array(foundDay.exercises.length).fill(false));
           }
-          
-          const workoutPlan = JSON.parse(workoutPlanJson);
-          
-          // Encontrar o dia de treino baseado no ID
-          const dayNumber = parseInt(id);
-          const dayKey = `dia${dayNumber}`;
-          const dayExercises = workoutPlan.plan?.[dayKey];
-          
-          if (!dayExercises) {
-            toast({
-              title: "Treino não encontrado",
-              description: "Este treino não existe no seu plano atual.",
-              variant: "destructive",
-            });
-            navigate('/dashboard');
-            return;
-          }
-          
-          // Set default state
-          setIsCompleted(false);
-          setWorkoutDay(`Dia ${dayNumber}`);
-          
-          // Initialize all exercises as not completed
-          setExercises(dayExercises.map((ex: Exercise) => ({ ...ex, completed: false })));
+        } else {
+          setError('Formato de plano de treino inválido');
         }
-          
-      } catch (error) {
-        console.error('Erro ao carregar treino:', error);
-        toast({
-          title: "Erro ao carregar treino",
-          description: "Ocorreu um erro ao carregar os detalhes do treino.",
-          variant: "destructive",
-        });
-        navigate('/dashboard');
+      } catch (err: any) {
+        console.error('Error fetching workout data:', err);
+        setError(err.message || 'Erro ao carregar dados do treino');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
-    loadWorkoutData();
-  }, [id, navigate, toast]);
-
-  const handleExerciseToggle = async (index: number) => {
-    if (!id) return;
-    
-    const dayNumber = parseInt(id);
-    const updatedExercises = exercises.map((exercise, i) => 
-      i === index ? { ...exercise, completed: !exercise.completed } : exercise
-    );
-    
-    setExercises(updatedExercises);
-    
-    // Track exercise completion in Supabase
-    try {
-      await trackExerciseCompletion(
-        dayNumber,
-        index,
-        updatedExercises[index].completed
-      );
-    } catch (error) {
-      console.error('Error tracking exercise completion:', error);
-    }
-    
-    // Check if all exercises are completed
-    const allCompleted = updatedExercises.every(ex => ex.completed);
-    if (allCompleted && !isCompleted) {
-      await markWorkoutAsCompleted();
-    } else if (!allCompleted && isCompleted) {
-      await markWorkoutAsPending();
-    }
-  };
-
-  const markWorkoutAsCompleted = async () => {
-    if (!id) return;
-    
-    setIsCompleted(true);
-    
-    try {
-      const progress = await updateWorkoutProgress(parseInt(id), true);
-      
-      toast({
-        title: "Treino concluído!",
-        description: "Parabéns! Seu progresso foi atualizado.",
-      });
-      
-      return progress;
-    } catch (error) {
-      console.error('Error marking workout as completed:', error);
-      return 0;
-    }
-  };
-  
-  const markWorkoutAsPending = async () => {
-    if (!id) return;
-    
-    setIsCompleted(false);
-    
-    try {
-      return await updateWorkoutProgress(parseInt(id), false);
-    } catch (error) {
-      console.error('Error marking workout as pending:', error);
-      return 0;
-    }
-  };
-  
-  const handleToggleWorkout = async () => {
-    if (!id) return;
-    
-    const newStatus = !isCompleted;
-    setIsCompleted(newStatus);
-    
-    // Update status of all exercises
-    const updatedExercises = exercises.map(exercise => ({ 
-      ...exercise, 
-      completed: newStatus 
-    }));
-    
-    setExercises(updatedExercises);
-    
-    try {
-      const progress = await updateWorkoutProgress(parseInt(id), newStatus);
-      
-      if (newStatus) {
-        toast({
-          title: "Treino concluído!",
-          description: "Parabéns! Seu progresso foi atualizado.",
-        });
-      } else {
-        toast({
-          title: "Treino desmarcado",
-          description: "O treino foi marcado como pendente.",
-        });
-      }
-      
-      return progress;
-    } catch (error) {
-      console.error('Error toggling workout status:', error);
-      return 0;
-    }
-  };
+    fetchData();
+  }, [workoutId]);
 
   return {
-    workoutDay,
+    loading,
     exercises,
-    isLoading,
-    isCompleted,
-    setExercises,
-    handleExerciseToggle,
-    handleToggleWorkout,
-    userLevel
+    exercisesState,
+    setExercisesState,
+    dayName,
+    dayIndex,
+    error
   };
 };
+
+export default useWorkoutData;

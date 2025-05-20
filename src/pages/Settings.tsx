@@ -1,123 +1,105 @@
-
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from "@/hooks/use-toast";
-import { isPremiumUser, resetPremiumWelcomeStatus } from '@/utils/userUtils';
-import SubscriptionManagementModal from '@/components/premium/SubscriptionManagementModal';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Componentes refatorados
-import SettingsHeader from '@/components/settings/SettingsHeader';
-import AccountSettings from '@/components/settings/AccountSettings';
-import SubscriptionSection from '@/components/settings/SubscriptionSection';
-import PrivacySection from '@/components/settings/PrivacySection';
-import ContactSection from '@/components/settings/ContactSection';
-import DangerZoneSection from '@/components/settings/DangerZoneSection';
-import LogoutButton from '@/components/settings/LogoutButton';
+import { updateUserName } from '@/utils/userUtils';
+import { toast } from "@/hooks/use-toast";
+import { isPremiumUser } from '@/utils/userUtils';
 
 const Settings = () => {
+  const { currentUser, logout } = useAuth();
+  const [name, setName] = useState(currentUser?.user_metadata?.name || '');
+  const [isPremium, setIsPremium] = useState(false);
+  const [userIsPremium, setUserIsPremium] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { logout } = useAuth();
-  const [notifications, setNotifications] = useState(true);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  
-  const isPremium = isPremiumUser();
 
-  const handleToggleNotifications = () => {
-    setNotifications(prev => !prev);
-    toast({
-      title: notifications ? "Notificações desativadas" : "Notificações ativadas",
-    });
-  };
-
-  const handleChangePassword = () => {
-    toast({
-      title: "Recurso em desenvolvimento",
-      description: "A alteração de senha estará disponível em breve.",
-    });
-  };
-
-  const handleChangeLanguage = () => {
-    toast({
-      title: "Recurso em desenvolvimento",
-      description: "A troca de idioma estará disponível em breve.",
-    });
-  };
-
-  const handleDeleteAccount = () => {
-    if (!showDeleteConfirm) {
-      setShowDeleteConfirm(true);
+  const handleUpdateName = async () => {
+    if (name.trim() === '') {
+      toast({
+        title: "Erro",
+        description: "O nome não pode estar vazio.",
+        variant: "destructive"
+      });
       return;
     }
-    
-    localStorage.removeItem('traingo-user');
-    resetPremiumWelcomeStatus();
-    toast({
-      title: "Conta excluída",
-      description: "Todos os seus dados foram removidos.",
-    });
-    navigate('/');
-  };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      resetPremiumWelcomeStatus();
-      
+    const success = await updateUserName(name);
+    if (success) {
       toast({
-        title: "Logout realizado",
-        description: "Você saiu da sua conta.",
+        title: "Nome atualizado!",
+        description: "Seu nome foi atualizado com sucesso."
       });
-    } catch (error) {
-      console.error('[TrainGO] Error during logout:', error);
+    } else {
       toast({
-        title: "Erro ao sair",
-        description: "Não foi possível finalizar o logout. Tente novamente.",
-        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível atualizar o nome.",
+        variant: "destructive"
       });
     }
   };
-  
-  const openSubscriptionModal = () => {
-    setShowSubscriptionModal(true);
-  };
+
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      try {
+        const premium = await isPremiumUser();
+        setUserIsPremium(premium);
+      } catch (error) {
+        console.error("Error checking premium status:", error);
+        setUserIsPremium(false);
+      }
+    };
+    
+    checkPremiumStatus();
+  }, []);
 
   return (
-    <div className="min-h-screen pb-16">
-      <SettingsHeader />
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Configurações</h1>
 
-      <div className="p-6 space-y-6">
-        <AccountSettings 
-          notifications={notifications}
-          onToggleNotifications={handleToggleNotifications}
-          onChangePassword={handleChangePassword}
-          onChangeLanguage={handleChangeLanguage}
+      {/* Update Name */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+          Nome:
+        </label>
+        <input
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="name"
+          type="text"
+          placeholder="Seu nome"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
         />
-
-        <SubscriptionSection 
-          isPremium={isPremium}
-          onOpenSubscriptionModal={openSubscriptionModal}
-        />
-
-        <PrivacySection />
-        
-        <ContactSection />
-
-        <DangerZoneSection 
-          showDeleteConfirm={showDeleteConfirm}
-          onDeleteAccount={handleDeleteAccount}
-          onCancelDelete={() => setShowDeleteConfirm(false)}
-        />
-
-        <LogoutButton onLogout={handleLogout} />
+        <button 
+          className="bg-traingo-primary hover:bg-traingo-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2"
+          onClick={handleUpdateName}
+        >
+          Atualizar Nome
+        </button>
       </div>
-      
-      <SubscriptionManagementModal 
-        isOpen={showSubscriptionModal} 
-        onClose={() => setShowSubscriptionModal(false)} 
-      />
+
+      {/* Premium Status */}
+      <div className="mb-4">
+        <p className="block text-gray-700 text-sm font-bold mb-2">
+          Status Premium: {userIsPremium ? 'Ativo' : 'Inativo'}
+        </p>
+        {!userIsPremium && (
+          <button 
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            onClick={() => navigate('/upgrade')}
+          >
+            Assinar Premium
+          </button>
+        )}
+      </div>
+
+      {/* Logout */}
+      <div>
+        <button 
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          onClick={logout}
+        >
+          Sair
+        </button>
+      </div>
     </div>
   );
 };

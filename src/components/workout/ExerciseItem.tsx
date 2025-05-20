@@ -34,8 +34,13 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
   
   useEffect(() => {
     const checkPremiumStatus = async () => {
-      const premium = await isPremiumUser();
-      setUserIsPremium(premium);
+      try {
+        const premium = await isPremiumUser();
+        setUserIsPremium(premium);
+      } catch (error) {
+        console.error("Error checking premium status:", error);
+        setUserIsPremium(false);
+      }
     };
     
     checkPremiumStatus();

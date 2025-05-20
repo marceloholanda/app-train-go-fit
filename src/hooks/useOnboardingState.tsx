@@ -1,152 +1,146 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from "@/hooks/use-toast";
-import { findBestWorkoutPlan, generatePersonalizedMessage, QuizAnswers } from '@/utils/workoutRecommendation';
-import { WorkoutPlan } from '@/data/workoutPlans';
-import { useAuth } from '@/contexts/AuthContext';
-import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber, saveUserData } from '@/utils/userUtils';
-import { quizQuestions } from '@/components/quiz/QuizData';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from "@/hooks/use-toast";
+import { getRecommendedWorkoutPlan } from '@/utils/workoutRecommendation';
+import { generateWorkoutPlanType } from '@/utils/workoutRecommendation/types';
+
+// Define a proper JSON type that Supabase can accept
+type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
+type Json = JsonValue;
+
+export interface OnboardingFormData {
+  name: string;
+  goal: string;
+  experience: string;
+  frequency: string;
+  location: string;
+}
 
 export const useOnboardingState = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { signup, currentUser } = useAuth();
-
-  // State variables
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Partial<QuizAnswers>>({});
-  const [registrationData, setRegistrationData] = useState({
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState<OnboardingFormData>({
     name: '',
-    email: '',
-    password: '',
+    goal: '',
+    experience: '',
+    frequency: '',
+    location: '',
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
-  const [personalizedMessage, setPersonalizedMessage] = useState('');
-  const [showResults, setShowResults] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [workoutPlan, setWorkoutPlan] = useState<any>(null);
 
-  // Quiz navigation handlers
-  const handleOptionSelect = (questionId: keyof QuizAnswers, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
-    // Automatic advance to next question unless it's the last one
-    if (currentStep < quizQuestions.length - 1) {
-      setTimeout(() => {
-        setCurrentStep(prev => prev + 1);
-      }, 500);
-    } else {
-      setCurrentStep(quizQuestions.length); // Go to registration form
-    }
-  };
+  const nextStep = useCallback(() => {
+    setStep(prev => prev + 1);
+  }, []);
 
-  const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setRegistrationData(prev => ({ ...prev, [name]: value }));
-  };
+  const prevStep = useCallback(() => {
+    setStep(prev => prev - 1);
+  }, []);
 
-  const handlePreviousStep = () => {
-    setCurrentStep(prev => Math.max(0, prev - 1));
-  };
+  const updateFormData = useCallback((data: Partial<OnboardingFormData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...data
+    }));
+  }, []);
 
-  // Form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const generateWorkoutPlan = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      // Verificamos que todas as perguntas foram respondidas
-      const quizAnswers = answers as QuizAnswers;
-      
-      if (Object.keys(quizAnswers).length !== quizQuestions.length) {
-        throw new Error("Por favor, responda todas as perguntas do quiz");
-      }
-
-      // Registro do usuário no Supabase
-      await signup(registrationData.email, registrationData.password, {
-        name: registrationData.name
+      const plan = await getRecommendedWorkoutPlan({
+        objetivo: formData.goal,
+        nivel: formData.experience,
+        frequencia: formData.frequency,
+        local: formData.location
       });
+      
+      setWorkoutPlan(plan);
+      return plan;
+    } catch (err) {
+      console.error('Error generating workout plan:', err);
+      setError('Não foi possível gerar o plano de treino. Tente novamente.');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [formData]);
 
-      // Encontrar o plano de treino mais adequado
-      const recommendedPlan = findBestWorkoutPlan(quizAnswers);
-      const message = generatePersonalizedMessage(quizAnswers, recommendedPlan);
-      
-      console.log("[TrainGO] Recommended workout plan:", recommendedPlan);
-      
-      // Convert weight and height ranges to approximate numbers for IMC calculation
-      const weight_exact = weightRangeToNumber(quizAnswers.weight);
-      const height_exact = heightRangeToNumber(quizAnswers.height);
-      const age_exact = ageRangeToNumber(quizAnswers.age);
-      
-      // Get current user ID
+  const saveUserProfile = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
       const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-      
-      if (!userId) {
-        throw new Error("Erro ao obter ID do usuário");
+      if (!session) {
+        throw new Error('No active session found');
       }
-
-      // Create profile entry for the new user
-      try {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: userId,
-            nome: registrationData.name,
-            objetivo: quizAnswers.objective,
-            nivel_experiencia: quizAnswers.level,
-            frequencia_treino: quizAnswers.days_per_week,
-            local_treino: quizAnswers.environment,
-          });
-
-        if (profileError) throw profileError;
+      
+      // Save profile data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: session.user.id,
+          nome: formData.name,
+          objetivo: formData.goal,
+          nivel_experiencia: formData.experience,
+          frequencia_treino: formData.frequency,
+          local_treino: formData.location
+        });
+      
+      if (profileError) throw profileError;
+      
+      // Save workout plan if available
+      if (workoutPlan) {
+        // Convert workout plan to a format that can be stored as JSON
+        const workoutPlanJson = JSON.parse(JSON.stringify(workoutPlan)) as Json;
         
-        // Create workout plan for the user
         const { error: workoutError } = await supabase
           .from('user_workouts')
-          .insert({
-            user_id: userId,
-            workout_plan: recommendedPlan
+          .upsert({
+            user_id: session.user.id,
+            workout_plan: workoutPlanJson
           });
-          
+        
         if (workoutError) throw workoutError;
-      } catch (error: any) {
-        console.error("[TrainGO] Error creating user profile or workout plan:", error.message);
       }
-
-      setWorkoutPlan(recommendedPlan);
-      setPersonalizedMessage(message);
+      
+      // Mark onboarding as completed
+      localStorage.setItem('onboarding-completed', 'true');
+      
+      // Navigate to dashboard
+      navigate('/dashboard');
       
       toast({
-        title: "Cadastro concluído!",
-        description: "Seu plano de treino foi criado com sucesso.",
+        title: "Perfil criado com sucesso!",
+        description: "Bem-vindo(a) ao TrainGO. Seu plano de treino está pronto."
       });
-
-      setShowResults(true);
-    } catch (error: any) {
-      console.error("[TrainGO] Erro no cadastro:", error);
-      toast({
-        title: "Erro no cadastro",
-        description: error.message || "Não foi possível concluir o cadastro. Tente novamente.",
-        variant: "destructive",
-      });
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error saving user profile:', err);
+      setError(err.message || 'Não foi possível salvar seu perfil. Tente novamente.');
+      return false;
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
-  };
+  }, [formData, workoutPlan, navigate]);
 
   return {
-    currentStep,
-    answers,
-    registrationData,
-    isSubmitting,
+    step,
+    formData,
+    loading,
+    error,
     workoutPlan,
-    personalizedMessage,
-    showResults,
-    quizQuestions,
-    handleOptionSelect,
-    handleRegistrationChange,
-    handlePreviousStep,
-    handleSubmit
+    nextStep,
+    prevStep,
+    updateFormData,
+    generateWorkoutPlan,
+    saveUserProfile
   };
 };
+
+export default useOnboardingState;

@@ -58,7 +58,19 @@ export const updateWorkoutProgress = async (workoutId: number, completed: boolea
       .eq('user_id', userId)
       .single();
     
-    const totalWorkoutDays = userWorkout?.workout_plan?.days || 7;
+    let totalWorkoutDays = 7; // Default value
+    
+    if (userWorkout?.workout_plan) {
+      const workoutPlan = userWorkout.workout_plan;
+      // Safely access the days property
+      if (typeof workoutPlan === 'object' && workoutPlan !== null && 'days' in workoutPlan) {
+        const days = (workoutPlan as any).days;
+        if (Array.isArray(days)) {
+          totalWorkoutDays = days.length || 7;
+        }
+      }
+    }
+    
     const completedDays = weekProgress?.length || 0;
     const progressPercentage = Math.min(100, (completedDays / totalWorkoutDays) * 100);
     
