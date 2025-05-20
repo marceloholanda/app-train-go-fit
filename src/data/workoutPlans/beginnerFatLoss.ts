@@ -28,5 +28,5 @@ export const beginnerFatLoss: WorkoutPlan = {
     ]
   },
   level: "beginner",
-  goal: "lose_fat",
+  goal: "lose_fat"
 };

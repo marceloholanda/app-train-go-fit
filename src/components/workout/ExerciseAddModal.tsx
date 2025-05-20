@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -20,41 +19,41 @@ import Card from '@/components/Card';
 // Lista de exercícios disponíveis organizados por grupo muscular
 const availableExercises: Record<string, Exercise[]> = {
   "Peito": [
-    { nome: "Supino reto com barra", reps: "4x10-12", gif_url: "/assets/gifs/supino-reto.gif" },
-    { nome: "Supino inclinado com halteres", reps: "3x10-12", gif_url: "/assets/gifs/supino-inclinado.gif" },
-    { nome: "Crucifixo na máquina", reps: "3x12-15", gif_url: "/assets/gifs/crucifixo.gif" },
-    { nome: "Flexão de braço", reps: "3x até falha", gif_url: "/assets/gifs/flexao.gif" },
+    { name: "Supino reto com barra", nome: "Supino reto com barra", reps: "4x10-12", sets: 4, gif_url: "/assets/gifs/supino-reto.gif" },
+    { name: "Supino inclinado com halteres", nome: "Supino inclinado com halteres", reps: "3x10-12", sets: 3, gif_url: "/assets/gifs/supino-inclinado.gif" },
+    { name: "Crucifixo na máquina", nome: "Crucifixo na máquina", reps: "3x12-15", sets: 3, gif_url: "/assets/gifs/crucifixo.gif" },
+    { name: "Flexão de braço", nome: "Flexão de braço", reps: "3x até falha", sets: 3, gif_url: "/assets/gifs/flexao.gif" },
   ],
   "Costas": [
-    { nome: "Puxada frontal", reps: "4x10-12", gif_url: "/assets/gifs/puxada-frontal.gif" },
-    { nome: "Remada curvada", reps: "4x10-12", gif_url: "/assets/gifs/remada-curvada.gif" },
-    { nome: "Remada unilateral com haltere", reps: "3x10-12 (cada lado)", gif_url: "/assets/gifs/remada-unilateral.gif" },
-    { nome: "Pull-up (barra fixa)", reps: "3x até falha", gif_url: "/assets/gifs/pull-up.gif" },
+    { name: "Puxada frontal", nome: "Puxada frontal", reps: "4x10-12", sets: 4, gif_url: "/assets/gifs/puxada-frontal.gif" },
+    { name: "Remada curvada", nome: "Remada curvada", reps: "4x10-12", sets: 4, gif_url: "/assets/gifs/remada-curvada.gif" },
+    { name: "Remada unilateral com haltere", nome: "Remada unilateral com haltere", reps: "3x10-12 (cada lado)", sets: 3, gif_url: "/assets/gifs/remada-unilateral.gif" },
+    { name: "Pull-up (barra fixa)", nome: "Pull-up (barra fixa)", reps: "3x até falha", sets: 3, gif_url: "/assets/gifs/pull-up.gif" },
   ],
   "Pernas": [
-    { nome: "Agachamento livre", reps: "4x8-12", gif_url: "/assets/gifs/agachamento.gif" },
-    { nome: "Leg press 45°", reps: "4x10-15", gif_url: "/assets/gifs/leg-press.gif" },
-    { nome: "Cadeira extensora", reps: "3x12-15", gif_url: "/assets/gifs/cadeira-extensora.gif" },
-    { nome: "Cadeira flexora", reps: "3x12-15", gif_url: "/assets/gifs/cadeira-flexora.gif" },
-    { nome: "Elevação pélvica", reps: "3x15-20", gif_url: "/assets/gifs/elevacao-pelvica.gif" },
+    { name: "Agachamento livre", nome: "Agachamento livre", reps: "4x8-12", sets: 4, gif_url: "/assets/gifs/agachamento.gif" },
+    { name: "Leg press 45°", nome: "Leg press 45°", reps: "4x10-15", sets: 4, gif_url: "/assets/gifs/leg-press.gif" },
+    { name: "Cadeira extensora", nome: "Cadeira extensora", reps: "3x12-15", sets: 3, gif_url: "/assets/gifs/cadeira-extensora.gif" },
+    { name: "Cadeira flexora", nome: "Cadeira flexora", reps: "3x12-15", sets: 3, gif_url: "/assets/gifs/cadeira-flexora.gif" },
+    { name: "Elevação pélvica", nome: "Elevação pélvica", reps: "3x15-20", sets: 3, gif_url: "/assets/gifs/elevacao-pelvica.gif" },
   ],
   "Ombros": [
-    { nome: "Desenvolvimento com halteres", reps: "4x10-12", gif_url: "/assets/gifs/desenvolvimento.gif" },
-    { nome: "Elevação lateral", reps: "3x12-15", gif_url: "/assets/gifs/elevacao-lateral.gif" },
-    { nome: "Elevação frontal", reps: "3x12-15", gif_url: "/assets/gifs/elevacao-frontal.gif" },
-    { nome: "Face pull", reps: "3x15-20", gif_url: "/assets/gifs/face-pull.gif" },
+    { name: "Desenvolvimento com halteres", nome: "Desenvolvimento com halteres", reps: "4x10-12", sets: 4, gif_url: "/assets/gifs/desenvolvimento.gif" },
+    { name: "Elevação lateral", nome: "Elevação lateral", reps: "3x12-15", sets: 3, gif_url: "/assets/gifs/elevacao-lateral.gif" },
+    { name: "Elevação frontal", nome: "Elevação frontal", reps: "3x12-15", sets: 3, gif_url: "/assets/gifs/elevacao-frontal.gif" },
+    { name: "Face pull", nome: "Face pull", reps: "3x15-20", sets: 3, gif_url: "/assets/gifs/face-pull.gif" },
   ],
   "Braços": [
-    { nome: "Rosca direta com barra", reps: "3x10-12", gif_url: "/assets/gifs/rosca-direta.gif" },
-    { nome: "Rosca alternada com halteres", reps: "3x10-12", gif_url: "/assets/gifs/rosca-alternada.gif" },
-    { nome: "Tríceps corda", reps: "3x12-15", gif_url: "/assets/gifs/triceps-corda.gif" },
-    { nome: "Tríceps francês", reps: "3x10-12", gif_url: "/assets/gifs/triceps-frances.gif" },
+    { name: "Rosca direta com barra", nome: "Rosca direta com barra", reps: "3x10-12", sets: 3, gif_url: "/assets/gifs/rosca-direta.gif" },
+    { name: "Rosca alternada com halteres", nome: "Rosca alternada com halteres", reps: "3x10-12", sets: 3, gif_url: "/assets/gifs/rosca-alternada.gif" },
+    { name: "Tríceps corda", nome: "Tríceps corda", reps: "3x12-15", sets: 3, gif_url: "/assets/gifs/triceps-corda.gif" },
+    { name: "Tríceps francês", nome: "Tríceps francês", reps: "3x10-12", sets: 3, gif_url: "/assets/gifs/triceps-frances.gif" },
   ],
   "Abdômen": [
-    { nome: "Crunch abdominal", reps: "3x15-20", gif_url: "/assets/gifs/crunch.gif" },
-    { nome: "Prancha frontal", reps: "3x30-60s", gif_url: "/assets/gifs/prancha.gif" },
-    { nome: "Elevação de pernas", reps: "3x12-15", gif_url: "/assets/gifs/elevacao-pernas.gif" },
-    { nome: "Russian twist", reps: "3x20 (alternados)", gif_url: "/assets/gifs/russian-twist.gif" },
+    { name: "Crunch abdominal", nome: "Crunch abdominal", reps: "3x15-20", sets: 3, gif_url: "/assets/gifs/crunch.gif" },
+    { name: "Prancha frontal", nome: "Prancha frontal", reps: "3x30-60s", sets: 3, gif_url: "/assets/gifs/prancha.gif" },
+    { name: "Elevação de pernas", nome: "Elevação de pernas", reps: "3x12-15", sets: 3, gif_url: "/assets/gifs/elevacao-pernas.gif" },
+    { name: "Russian twist", nome: "Russian twist", reps: "3x20 (alternados)", sets: 3, gif_url: "/assets/gifs/russian-twist.gif" },
   ],
 };
 
