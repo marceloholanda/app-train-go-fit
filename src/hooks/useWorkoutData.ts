@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Exercise, WorkoutDay } from '@/types/workout';
+import { Exercise, WorkoutPlan } from '@/types/workout';
 import { toast } from "@/hooks/use-toast";
+import { standardizeExercise } from '@/utils/exerciseFormatter';
 
 export const useWorkoutData = (workoutId: string | number) => {
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ export const useWorkoutData = (workoutId: string | number) => {
         }
         
         // Parse workout plan
-        const workoutPlan = userData.workout_plan;
+        const workoutPlan = userData.workout_plan as WorkoutPlan;
         
         // Find day by ID
         const dayId = parseInt(String(workoutId));
@@ -50,13 +51,18 @@ export const useWorkoutData = (workoutId: string | number) => {
         if (typeof workoutPlan === 'object' && workoutPlan !== null) {
           let foundDay = null;
           
-          // Check if workoutPlan has 'days' array (new format)
-          if (Array.isArray(workoutPlan.days)) {
-            foundDay = workoutPlan.days.find((day: any) => day.id === dayId);
+          // Check if workoutPlan has 'days' property (new format)
+          if ('days' in workoutPlan && typeof workoutPlan.days === 'number') {
+            // For array-based days format in newer plans
+            if (Array.isArray(workoutPlan.days)) {
+              foundDay = workoutPlan.days.find((day: any) => day.id === dayId);
+            } 
           } 
+          
           // Otherwise use the plan object (old format)
-          else if (workoutPlan.plan && typeof workoutPlan.plan === 'object') {
-            const exercises = workoutPlan.plan[dayId];
+          if (!foundDay && 'plan' in workoutPlan && typeof workoutPlan.plan === 'object') {
+            const dayKey = String(dayId);
+            const exercises = workoutPlan.plan[dayKey];
             if (exercises) {
               foundDay = {
                 id: dayId,
@@ -73,7 +79,13 @@ export const useWorkoutData = (workoutId: string | number) => {
           
           setDayName(foundDay.name || `Dia ${dayId}`);
           setDayIndex(dayId);
-          setExercises(foundDay.exercises || []);
+          
+          // Ensure all exercises have nome property by standardizing them
+          const standardizedExercises = (foundDay.exercises || []).map((ex: any) => 
+            standardizeExercise(ex as Partial<Exercise>)
+          );
+          
+          setExercises(standardizedExercises);
           
           // Get completion state for exercises
           const { data: progressData } = await supabase
@@ -92,14 +104,14 @@ export const useWorkoutData = (workoutId: string | number) => {
             }, {});
             
             // Apply completion state to exercises
-            const newExercisesState = foundDay.exercises.map((_: any, index: number) => 
+            const newExercisesState = standardizedExercises.map((_: any, index: number) => 
               completionState[index] || false
             );
             
             setExercisesState(newExercisesState);
           } else {
             // Initialize all as incomplete
-            setExercisesState(new Array(foundDay.exercises.length).fill(false));
+            setExercisesState(new Array(standardizedExercises.length).fill(false));
           }
         } else {
           setError('Formato de plano de treino inválido');

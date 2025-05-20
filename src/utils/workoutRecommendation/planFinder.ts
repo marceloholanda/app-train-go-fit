@@ -21,6 +21,59 @@ import { fatLossIntermediateHome } from '@/data/workoutPlans/fatLossIntermediate
 import { fatLossAdvancedGym } from '@/data/workoutPlans/fatLossAdvancedGym';
 
 /**
+ * Find a workout plan based on the user's preferences
+ */
+export function findPlanForPreferences(
+  objetivo: string,
+  nivel: string,
+  frequencia: string,
+  local: string
+): WorkoutPlan | null {
+  // Map input values to our internal representations
+  const objective = mapObjective(objetivo);
+  const level = mapLevel(nivel);
+  const environment = mapEnvironment(local);
+  const daysPerWeek = mapFrequency(frequencia);
+  
+  // Build a basic set of answers
+  const answers: QuizAnswers = {
+    objective,
+    level,
+    environment,
+    days_per_week: String(daysPerWeek)
+  };
+  
+  // Use the existing function to find the best plan
+  return findBestWorkoutPlan(answers);
+}
+
+// Helper functions to map Portuguese inputs to internal values
+function mapObjective(objetivo: string): string {
+  const mapping: Record<string, string> = {
+    'ganhar_massa': 'gain_muscle',
+    'perder_peso': 'lose_weight',
+    'manter_forma': 'maintain',
+    'saude': 'health_energy'
+  };
+  return mapping[objetivo] || objetivo;
+}
+
+function mapLevel(nivel: string): string {
+  const mapping: Record<string, string> = {
+    'iniciante': 'beginner',
+    'intermediario': 'intermediate',
+    'avancado': 'advanced'
+  };
+  return mapping[nivel] || nivel;
+}
+
+function mapFrequency(frequencia: string): number {
+  // Convert string frequency like "3x" to number 3
+  const number = parseInt(frequencia.replace('x', ''), 10);
+  return isNaN(number) ? 3 : number;
+}
+
+/**
  * Find the best workout plan based on user answers
  */
 export const findBestWorkoutPlan = (answers: QuizAnswers): WorkoutPlan => {

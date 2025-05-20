@@ -44,8 +44,7 @@ export const getRecommendedWorkoutPlan = async (preferences: {
     // Generate a personalized message
     const message = generatePersonalizedMessage(
       preferences.objetivo,
-      preferences.nivel,
-      preferences.local
+      preferences.nivel
     );
     
     // Return the complete workout plan with message

@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName } from '@/utils/workoutUtils';
-import { WorkoutPlan } from '@/types/workout';
+import { WorkoutPlan, Exercise } from '@/types/workout';
 import { WorkoutDisplay } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { getUserData } from '@/utils/userUtils';
+import { standardizeExercise } from '@/utils/exerciseFormatter';
 
 export const useDashboardData = () => {
   const navigate = useNavigate();
@@ -146,9 +147,14 @@ export const useDashboardData = () => {
     }
     
     // Cria os cards de treino para o dashboard
-    const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercises], index) => {
+    const workoutItems: WorkoutDisplay[] = Object.entries(plan.plan).map(([dayId, exercisesRaw], index) => {
       const dayNumber = index + 1;
       const workoutStatus: 'completed' | 'pending' = completedWorkouts.includes(dayNumber) ? 'completed' : 'pending';
+      
+      // Ensure exercises always have nome property by standardizing them
+      const exercises = exercisesRaw.map(ex => {
+        return standardizeExercise(ex as Partial<Exercise>);
+      });
       
       const workoutItem: WorkoutDisplay = {
         id: dayNumber,

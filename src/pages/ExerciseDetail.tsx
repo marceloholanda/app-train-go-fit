@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
@@ -10,6 +11,7 @@ import ExerciseImageModal from '@/components/workout/ExerciseImageModal';
 import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
 import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
 import { useWorkoutData } from '@/hooks/useWorkoutData';
+import { useExerciseMedia } from '@/hooks/useExerciseMedia';
 
 const ExerciseDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +26,7 @@ const ExerciseDetail: React.FC = () => {
     error 
   } = useWorkoutData(id || 0);
   
+  const { getImageUrl } = useExerciseMedia();
   const [userIsPremium, setUserIsPremium] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
@@ -145,6 +148,8 @@ const ExerciseDetail: React.FC = () => {
             isOpen={isImageModalOpen}
             onClose={() => setIsImageModalOpen(false)}
             exerciseName={exercises[selectedExerciseIndex]?.nome || ""}
+            imageUrl={getImageUrl(exercises[selectedExerciseIndex])}
+            description={exercises[selectedExerciseIndex]?.descricao}
           />
 
           {/* Modal de Vídeo */}
