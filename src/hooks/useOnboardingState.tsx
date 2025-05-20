@@ -5,13 +5,14 @@ import { useToast } from "@/hooks/use-toast";
 import { findBestWorkoutPlan, generatePersonalizedMessage, QuizAnswers } from '@/utils/workoutRecommendation';
 import { WorkoutPlan } from '@/data/workoutPlans';
 import { useAuth } from '@/contexts/AuthContext';
-import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
+import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber, saveUserData } from '@/utils/userUtils';
 import { quizQuestions } from '@/components/quiz/QuizData';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useOnboardingState = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { signup, currentUser } = useAuth();
 
   // State variables
   const [currentStep, setCurrentStep] = useState(0);
@@ -54,15 +55,17 @@ export const useOnboardingState = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulação de cadastro
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
       // Verificamos que todas as perguntas foram respondidas
       const quizAnswers = answers as QuizAnswers;
       
       if (Object.keys(quizAnswers).length !== quizQuestions.length) {
         throw new Error("Por favor, responda todas as perguntas do quiz");
       }
+
+      // Registro do usuário no Supabase
+      await signup(registrationData.email, registrationData.password, {
+        name: registrationData.name
+      });
 
       // Encontrar o plano de treino mais adequado
       const recommendedPlan = findBestWorkoutPlan(quizAnswers);
@@ -75,28 +78,37 @@ export const useOnboardingState = () => {
       const height_exact = heightRangeToNumber(quizAnswers.height);
       const age_exact = ageRangeToNumber(quizAnswers.age);
       
-      // Salvar o plano de treino no localStorage
-      const userData = {
-        ...registrationData,
-        id: 'mock-user-id', // ID para autenticação
-        profile: {
-          ...quizAnswers,
-          weight_exact,
-          height_exact,
-          age_exact
-        },
-        workoutPlan: recommendedPlan,
-        workoutProgress: {
-          completedWorkouts: [],
-          lastWeekProgress: 0
-        }
-      };
-
-      localStorage.setItem('traingo-user', JSON.stringify(userData));
+      // Pegar o ID do usuário atual
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
       
-      // Fazer login automático após cadastro
-      console.log("[TrainGO] Autologin after registration with:", registrationData.email);
-      await login(registrationData.email, registrationData.password);
+      if (!userId) {
+        throw new Error("Erro ao obter ID do usuário");
+      }
+
+      // Salvar perfil do usuário no Supabase
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          nome: registrationData.name,
+          objetivo: quizAnswers.objective,
+          nivel_experiencia: quizAnswers.level,
+          frequencia_treino: quizAnswers.days_per_week,
+          local_treino: quizAnswers.environment,
+        })
+        .eq('user_id', userId);
+
+      if (profileError) throw profileError;
+
+      // Salvar plano de treino no Supabase
+      const { error: workoutError } = await supabase
+        .from('user_workouts')
+        .insert({
+          user_id: userId,
+          workout_plan: recommendedPlan
+        });
+
+      if (workoutError) throw workoutError;
       
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);
@@ -107,11 +119,11 @@ export const useOnboardingState = () => {
       });
 
       setShowResults(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error("[TrainGO] Erro no cadastro:", error);
       toast({
         title: "Erro no cadastro",
-        description: "Não foi possível concluir o cadastro. Tente novamente.",
+        description: error.message || "Não foi possível concluir o cadastro. Tente novamente.",
         variant: "destructive",
       });
     } finally {

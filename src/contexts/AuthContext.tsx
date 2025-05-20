@@ -2,19 +2,27 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { User, Session } from '@supabase/supabase-js';
+import { useToast } from "@/hooks/use-toast";
 
 // Define the Auth context type
 interface AuthContextType {
-  currentUser: any | null;
+  currentUser: User | null;
+  session: Session | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  signup: (email: string, password: string, userData: any) => Promise<void>;
+  loading: boolean;
 }
 
 // Create the Auth context with default values
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
+  session: null,
   login: async () => {},
-  logout: async () => {}
+  logout: async () => {},
+  signup: async () => {},
+  loading: true,
 });
 
 // Custom hook to use the Auth context
@@ -24,94 +32,117 @@ export function useAuth() {
 
 // Auth Provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Mock login function (simulação enquanto não usamos Supabase Auth)
+  // Login function using Supabase
   const login = async (email: string, password: string) => {
     try {
       console.log("[TrainGO] Attempting to login:", email);
       
-      // Check if user exists in localStorage (from onboarding)
-      const existingUserData = localStorage.getItem('traingo-user');
-      
-      if (existingUserData) {
-        const userData = JSON.parse(existingUserData);
-        // If the email matches, use that user data
-        if (userData.email === email) {
-          console.log("[TrainGO] Found existing user data, using it");
-          setCurrentUser(userData);
-          return;
-        }
-      }
-      
-      // Otherwise create a new basic user
-      const user = { 
-        email, 
-        id: 'mock-user-id',
-        name: email.split('@')[0] 
-      };
-      
-      console.log("[TrainGO] Creating new user:", user.name);
-      
-      // Store in localStorage as a simple auth mechanism
-      localStorage.setItem('traingo-user', JSON.stringify(user));
-      setCurrentUser(user);
-    } catch (error) {
-      console.error('[TrainGO] Login error:', error);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      console.log("[TrainGO] Login successful for:", email);
+      return data;
+    } catch (error: any) {
+      console.error('[TrainGO] Login error:', error.message);
       throw error;
     }
   };
 
-  // Mock logout function
+  // Signup function using Supabase
+  const signup = async (email: string, password: string, userData: any) => {
+    try {
+      console.log("[TrainGO] Attempting to sign up:", email);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: userData.name,
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      console.log("[TrainGO] Signup successful for:", email);
+      return data;
+    } catch (error: any) {
+      console.error('[TrainGO] Signup error:', error.message);
+      throw error;
+    }
+  };
+
+  // Logout function using Supabase
   const logout = async () => {
     try {
       console.log("[TrainGO] Logging out user");
-      localStorage.removeItem('traingo-user');
-      setCurrentUser(null);
       
-      // Redirecionar para a página de login após logout
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
+      console.log("[TrainGO] Successfully logged out");
       console.log("[TrainGO] Redirecting to login page after logout");
       navigate('/login');
-    } catch (error) {
-      console.error('[TrainGO] Logout error:', error);
+    } catch (error: any) {
+      console.error('[TrainGO] Logout error:', error.message);
       throw error;
     }
   };
 
-  // Check for existing user session on initial load
+  // Check for existing session on initial load and set up auth state change listener
   useEffect(() => {
-    const checkAuthState = () => {
-      try {
-        console.log("[TrainGO] Checking auth state...");
-        const userData = localStorage.getItem('traingo-user');
-        if (userData) {
-          console.log("[TrainGO] Found user data in localStorage");
-          setCurrentUser(JSON.parse(userData));
-        } else {
-          console.log("[TrainGO] No user data found in localStorage");
-        }
-      } catch (error) {
-        console.error('[TrainGO] Auth state check error:', error);
-      } finally {
+    // First set up the auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log("[TrainGO] Auth state changed:", event);
+        setSession(currentSession);
+        setCurrentUser(currentSession?.user ?? null);
         setLoading(false);
       }
-    };
+    );
 
-    checkAuthState();
+    // Then check for an existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("[TrainGO] Got existing session:", currentSession ? "Yes" : "No");
+      setSession(currentSession);
+      setCurrentUser(currentSession?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Define the value object to be provided to consumers
   const value = {
     currentUser,
+    session,
     login,
-    logout
+    logout,
+    signup,
+    loading
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {!loading ? children : (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };

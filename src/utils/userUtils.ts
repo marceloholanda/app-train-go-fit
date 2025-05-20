@@ -1,13 +1,26 @@
+
+import { supabase } from '@/integrations/supabase/client';
+
 /**
  * Verifica se o usuário tem plano premium
  */
-export const isPremiumUser = (): boolean => {
+export const isPremiumUser = async (userId?: string): Promise<boolean> => {
   try {
-    const userData = localStorage.getItem('traingo-user');
-    if (!userData) return false;
+    if (!userId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id;
+    }
     
-    const user = JSON.parse(userData);
-    return user.plan === 'premium';
+    if (!userId) return false;
+    
+    // Buscar perfil do usuário no Supabase
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plano')
+      .eq('user_id', userId)
+      .single();
+
+    return profile?.plano === 'premium';
   } catch (error) {
     console.error('Erro ao verificar status premium:', error);
     return false;
@@ -15,16 +28,101 @@ export const isPremiumUser = (): boolean => {
 };
 
 /**
- * Salva os dados do usuário no localStorage
+ * Salva os dados do usuário no Supabase
  */
-export const saveUserData = (userData: any): void => {
+export const saveUserData = async (userData: any): Promise<void> => {
   try {
-    localStorage.setItem('traingo-user', JSON.stringify(userData));
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
     
-    // Dispara um evento para notificar outros componentes sobre a alteração dos dados
-    window.dispatchEvent(new Event('storage'));
+    if (!userId) {
+      console.error('Usuário não autenticado');
+      return;
+    }
+    
+    // Atualiza o perfil do usuário
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        nome: userData.name,
+        objetivo: userData.profile?.objective,
+        nivel_experiencia: userData.profile?.level,
+        frequencia_treino: userData.profile?.days_per_week,
+        local_treino: userData.profile?.environment,
+      })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    
+    // Se houver um plano de treino, salve-o também
+    if (userData.workoutPlan) {
+      // Verificar se já existe um plano de treino
+      const { data: existingPlan } = await supabase
+        .from('user_workouts')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+      
+      if (existingPlan) {
+        // Atualizar plano existente
+        await supabase
+          .from('user_workouts')
+          .update({ workout_plan: userData.workoutPlan })
+          .eq('id', existingPlan.id);
+      } else {
+        // Inserir novo plano
+        await supabase
+          .from('user_workouts')
+          .insert({
+            user_id: userId,
+            workout_plan: userData.workoutPlan
+          });
+      }
+    }
   } catch (error) {
     console.error('Erro ao salvar dados do usuário:', error);
+  }
+};
+
+/**
+ * Busca dados do usuário do Supabase
+ */
+export const getUserData = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    if (!userId) return null;
+    
+    // Buscar perfil do usuário
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    // Buscar plano de treino do usuário
+    const { data: workoutPlan } = await supabase
+      .from('user_workouts')
+      .select('workout_plan')
+      .eq('user_id', userId)
+      .single();
+    
+    return {
+      id: userId,
+      email: session?.user?.email,
+      name: profile?.nome || session?.user?.email?.split('@')[0],
+      profile: {
+        objective: profile?.objetivo,
+        level: profile?.nivel_experiencia,
+        days_per_week: profile?.frequencia_treino,
+        environment: profile?.local_treino,
+      },
+      workoutPlan: workoutPlan?.workout_plan,
+    };
+  } catch (error) {
+    console.error('Erro ao buscar dados do usuário:', error);
+    return null;
   }
 };
 
@@ -115,9 +213,20 @@ export const heightRangeToNumber = (heightRange: string): number => {
 /**
  * Verifica se o usuário já viu a mensagem de boas-vindas premium
  */
-export const hasSeenPremiumWelcome = (): boolean => {
+export const hasSeenPremiumWelcome = async (): Promise<boolean> => {
   try {
-    return localStorage.getItem('traingo-premium-welcome-seen') === 'true';
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    if (!userId) return false;
+    
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('premium_welcome_seen')
+      .eq('user_id', userId)
+      .single();
+
+    return !!profile?.premium_welcome_seen;
   } catch (error) {
     console.error('Erro ao verificar status de boas-vindas premium:', error);
     return false;
@@ -127,9 +236,17 @@ export const hasSeenPremiumWelcome = (): boolean => {
 /**
  * Marca que o usuário já viu a mensagem de boas-vindas premium
  */
-export const markPremiumWelcomeSeen = (): void => {
+export const markPremiumWelcomeSeen = async (): Promise<void> => {
   try {
-    localStorage.setItem('traingo-premium-welcome-seen', 'true');
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    if (!userId) return;
+    
+    await supabase
+      .from('profiles')
+      .update({ premium_welcome_seen: true })
+      .eq('user_id', userId);
   } catch (error) {
     console.error('Erro ao marcar boas-vindas premium como visto:', error);
   }
@@ -137,11 +254,18 @@ export const markPremiumWelcomeSeen = (): void => {
 
 /**
  * Reseta o status de visualização da mensagem de boas-vindas premium
- * Útil para testes ou após logout
  */
-export const resetPremiumWelcomeStatus = (): void => {
+export const resetPremiumWelcomeStatus = async (): Promise<void> => {
   try {
-    localStorage.removeItem('traingo-premium-welcome-seen');
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    if (!userId) return;
+    
+    await supabase
+      .from('profiles')
+      .update({ premium_welcome_seen: false })
+      .eq('user_id', userId);
   } catch (error) {
     console.error('Erro ao resetar status de boas-vindas premium:', error);
   }
