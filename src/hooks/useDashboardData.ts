@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -151,16 +150,22 @@ export const useDashboardData = () => {
       const dayNumber = index + 1;
       const workoutStatus: 'completed' | 'pending' = completedWorkouts.includes(dayNumber) ? 'completed' : 'pending';
       
-      // Ensure exercises always have nome property by standardizing them
-      const standardizedExercises = standardizeExercises(exercisesRaw as any);
+      // Fully standardize exercises to ensure they all have nome property
+      const exercises = standardizeExercises(exercisesRaw as any);
+      
+      // Cast exercises to have required nome property for the workout utils functions
+      const exercisesWithRequiredNome = exercises.map(ex => ({
+        ...ex,
+        nome: ex.nome || ex.name
+      }));
       
       const workoutItem: WorkoutDisplay = {
         id: dayNumber,
-        name: generateWorkoutName(dayNumber, standardizedExercises),
+        name: generateWorkoutName(dayNumber, exercisesWithRequiredNome),
         day: weekDays[index] || `Dia ${dayNumber}`,
         status: workoutStatus,
-        exercises: standardizedExercises.length,
-        icon: getWorkoutIcon(standardizedExercises)
+        exercises: exercises.length,
+        icon: getWorkoutIcon(exercisesWithRequiredNome)
       };
       console.log(`[TrainGO] Workout day ${dayNumber} processed:`, workoutItem.name);
       return workoutItem;
