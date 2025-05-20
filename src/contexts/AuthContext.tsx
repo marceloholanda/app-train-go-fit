@@ -50,17 +50,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Cadastro com Supabase Auth - modificado para autenticar imediatamente
+  // Cadastro com Supabase Auth - ATUALIZADO para não requerer confirmação de e-mail
   const signup = async (email: string, password: string) => {
     try {
       console.log("[TrainGO] Signing up with Supabase:", email);
       
       // Configuração para cadastro sem confirmação de e-mail
+      // Removemos o emailRedirectTo já que a confirmação está desativada no Supabase
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
-          emailRedirectTo: window.location.origin,
           data: {
             confirmed: true
           }

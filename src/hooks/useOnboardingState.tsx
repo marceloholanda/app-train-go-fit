@@ -144,6 +144,7 @@ export const useOnboardingState = () => {
 
         setShowResults(true);
       } catch (authError: any) {
+        // Fix: Removed reference to toast.toasts
         // Tratamento de erros específicos do Supabase
         if (authError.message?.includes('email already exists')) {
           toast({
@@ -170,13 +171,12 @@ export const useOnboardingState = () => {
     } catch (error: any) {
       console.error("[TrainGO] Erro no cadastro:", error);
       // Esta mensagem só será exibida se não houver tratamento específico acima
-      if (!toast.toasts.length) {
-        toast({
-          title: "Erro no cadastro",
-          description: error.message || "Não foi possível concluir o cadastro. Tente novamente.",
-          variant: "destructive",
-        });
-      }
+      // Fix: Removed reference to toast.toasts to avoid build error
+      toast({
+        title: "Erro no cadastro",
+        description: error.message || "Não foi possível concluir o cadastro. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
