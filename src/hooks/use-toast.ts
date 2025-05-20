@@ -1,24 +1,36 @@
 
-import { toast as sonnerToast } from "sonner";
+// src/hooks/use-toast.ts
+import { toast } from "sonner";
 
-type ToastProps = {
-  title?: string;
+interface ToastOptions {
   description?: string;
+  action?: React.ReactNode;
   duration?: number;
-};
+  position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center";
+}
 
-// This hook function wraps the toast to provide our custom API
-export const useToast = () => {
-  const toast = ({ title, description, duration }: ToastProps) => {
-    // Map our API to sonner's API
-    return sonnerToast(title || "", {
-      description,
-      duration,
-    });
+interface Toast {
+  success: (title: string, options?: ToastOptions) => void;
+  error: (title: string, options?: ToastOptions) => void;
+  warning: (title: string, options?: ToastOptions) => void;
+  info: (title: string, options?: ToastOptions) => void;
+}
+
+export function useToast(): Toast {
+  return {
+    success: (title: string, options?: ToastOptions) => {
+      toast.success(title, options);
+    },
+    error: (title: string, options?: ToastOptions) => {
+      toast.error(title, options);
+    },
+    warning: (title: string, options?: ToastOptions) => {
+      toast.warning(title, options);
+    },
+    info: (title: string, options?: ToastOptions) => {
+      toast.info(title, options);
+    },
   };
+}
 
-  return { toast };
-};
-
-// Re-export sonner toast with the same API for direct usage
-export { sonnerToast as toast };
+export { toast };

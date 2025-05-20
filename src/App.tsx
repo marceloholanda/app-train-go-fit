@@ -19,13 +19,9 @@ import Index from './pages/Index';
 const App = () => {
   const { currentUser, loading } = useAuth();
 
-  // Show loading indicator while auth state is being determined
+  // Simplified loading state since AuthProvider already handles this
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return null;
   }
 
   return (

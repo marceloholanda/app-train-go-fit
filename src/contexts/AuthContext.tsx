@@ -88,9 +88,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       
       console.log("[TrainGO] Successfully logged out");
-      
-      // Note: Navigate to login page will happen via route protection
-      // rather than programmatic navigation
     } catch (error: any) {
       console.error('[TrainGO] Logout error:', error.message);
       throw error;
@@ -134,11 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading ? children : (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="w-8 h-8 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
+      {children}
     </AuthContext.Provider>
   );
 };
