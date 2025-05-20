@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName } from '@/utils/workoutUtils';
+import { mapWorkoutDays, getWorkoutIcon, generateWorkoutNameFromExercises } from '@/utils/workoutUtils';
 import { WorkoutPlan } from '@/types/workout';
 import { WorkoutDisplay } from '@/types/dashboard';
 
@@ -90,7 +90,7 @@ export const useDashboardData = () => {
       
       const workoutItem: WorkoutDisplay = {
         id: dayNumber,
-        name: generateWorkoutName(dayNumber, exercises),
+        name: generateWorkoutNameFromExercises(dayNumber, exercises),
         day: weekDays[index] || `Dia ${dayNumber}`,
         status: workoutStatus,
         exercises: exercises.length,

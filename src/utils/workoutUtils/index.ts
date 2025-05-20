@@ -1,7 +1,10 @@
 
 // Re-export todas as funções principais
-export * from './mapping';
-export * from './nameGeneration';
+export * from './mapping'; // exporta generateWorkoutNameFromExercises (e seu alias generateWorkoutName)
+// Não re-exportamos nameGeneration diretamente para evitar conflito
+import * as nameGenUtils from './nameGeneration';
+export { nameGenUtils }; // Exportamos como namespace para evitar conflitos
+
 export * from './iconGeneration';
 export * from './dayMapping';
 export * from './workoutTracking';

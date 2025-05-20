@@ -1,12 +1,12 @@
 
-import { generateWorkoutName } from './mapping';
+import { generateWorkoutNameFromExercises } from './mapping';
 
 /**
  * Obtém o nome do treino com base no ID
  */
 export const getWorkoutName = (user: any, workoutId: number): string => {
   return user.workoutPlan?.plan?.[`dia${workoutId}`] 
-    ? generateWorkoutName(workoutId, user.workoutPlan.plan[`dia${workoutId}`])
+    ? generateWorkoutNameFromExercises(workoutId, user.workoutPlan.plan[`dia${workoutId}`])
     : `Treino ${workoutId}`;
 };
 
@@ -33,3 +33,4 @@ export const getWorkoutDatesForMonth = (month: number, year: number): string[] =
     return [];
   }
 };
+
