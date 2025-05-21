@@ -24,12 +24,12 @@ export {
   getExpectedWorkoutDays
 } from './scheduleTracking';
 
+// Now properly handle the streak functions from both files
 // Export functions from streakCalculation.ts 
 export * from './streakCalculation';
 
 // Export functions from streaks.ts with explicit exports to avoid conflicts
 export {
-  calculateStreak,
   getStreakData,
   getWorkoutStreaks as getWorkoutStreaksData
 } from './streaks';
@@ -52,4 +52,3 @@ export {
 
 // Export the workout dates function explicitly
 export { getWorkoutDatesForMonth } from './history';
-
