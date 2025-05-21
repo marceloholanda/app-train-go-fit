@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { Exercise } from '@/types/workout';
-import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
-import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
-import ExerciseAddModal from '@/components/workout/ExerciseAddModal';
-import ExerciseImageModal from '@/components/workout/ExerciseImageModal';
+import ExerciseVideoModal from '@/components/workout/modals/ExerciseVideoModal';
+import ExerciseReplaceModal from '@/components/workout/modals/ExerciseReplaceModal';
+import ExerciseAddModal from '@/components/workout/modals/ExerciseAddModal';
+import ExerciseImageModal from '@/components/workout/modals/ExerciseImageModal';
 import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
 import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
 import { getExerciseImageUrl } from '@/utils/workoutRecommendation/exerciseImages';
+import { useExerciseModalProps } from '@/hooks/useExerciseModalProps';
 
 interface ExerciseModalsProps {
   selectedExerciseIndex: number;
@@ -44,31 +45,8 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
   onReplaceExercise,
   onAddExercises
 }) => {
-  // Função para obter o URL do vídeo (da propriedade do exercício ou do mapeamento)
-  const getVideoUrl = (exercise: Exercise | undefined): string => {
-    if (!exercise) return '';
-    
-    // Usar o URL do vídeo do exercício, se disponível
-    if (exercise.video_url) return exercise.video_url;
-    
-    // Caso contrário, procurar no mapeamento
-    return getExerciseVideoUrl(exercise.nome) || '';
-  };
-
-  const selectedExercise = selectedExerciseIndex !== -1 ? visibleExercises[selectedExerciseIndex] : undefined;
-
-  // Convert string substitutes to Exercise objects if needed
-  const alternativeExercises: Exercise[] = selectedExercise?.substitutes 
-    ? selectedExercise.substitutes.map(sub => {
-        // If already an Exercise object, return as is
-        if (typeof sub === 'object') return sub as Exercise;
-        // If it's a string, convert to simple Exercise object
-        return { 
-          nome: String(sub),
-          reps: selectedExercise.reps || '3x10'
-        };
-      })
-    : [];
+  const { selectedExercise, alternativeExercises, videoUrl, imageUrl } = 
+    useExerciseModalProps(selectedExerciseIndex, visibleExercises);
 
   return (
     <>
@@ -79,7 +57,7 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             isOpen={isVideoModalOpen}
             onClose={onCloseVideoModal}
             exerciseName={selectedExercise?.nome || ""}
-            videoUrl={getVideoUrl(selectedExercise)}
+            videoUrl={videoUrl}
             isPremium={isPremium}
           />
 
@@ -96,7 +74,7 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             isOpen={isImageModalOpen}
             onClose={onCloseImageModal}
             exerciseName={selectedExercise?.nome || ""}
-            imageUrl={getExerciseImageUrl(selectedExercise?.nome || "")}
+            imageUrl={imageUrl}
             description={selectedExercise?.instructions}
           />
         </>
