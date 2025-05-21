@@ -55,7 +55,7 @@ export {
 // Export the workout dates function explicitly
 export { getWorkoutDatesForMonth } from './history';
 
-// Explicit export for achievement functions - fix the issue by explicitly importing these functions
+// Explicit export for achievement functions
 export {
   checkAchievements,
   checkNewAchievement,
