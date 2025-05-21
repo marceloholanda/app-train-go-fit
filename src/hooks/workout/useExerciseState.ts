@@ -35,7 +35,7 @@ export const useExerciseState = (
         await supabase
           .from('progress')
           .update({
-            exercises: updatedExercises as unknown as Json
+            exercises: updatedExercises as any
           })
           .eq('id', existingProgress.id);
       }
@@ -76,7 +76,7 @@ export const useExerciseState = (
         await supabase
           .from('progress')
           .update({
-            exercises: exercises as unknown as Json,
+            exercises: exercises as any,
             completed_date: today.toISOString().split('T')[0]
           })
           .eq('id', existingProgress.id);
@@ -87,7 +87,7 @@ export const useExerciseState = (
           .insert({
             user_id: userId,
             workout_day: parseInt(workoutDayId),
-            exercises: exercises as unknown as Json,
+            exercises: exercises as any,
             completed_date: today.toISOString().split('T')[0]
           });
       }
