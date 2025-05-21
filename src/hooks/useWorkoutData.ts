@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { Json } from '@/integrations/supabase/types';
 
 export const useWorkoutData = (id: string | undefined) => {
   const navigate = useNavigate();
@@ -134,7 +135,8 @@ export const useWorkoutData = (id: string | undefined) => {
         await supabase
           .from('progress')
           .update({
-            exercises: updatedExercises
+            // Convert Exercise[] to Json before sending to Supabase
+            exercises: updatedExercises as unknown as Json
           })
           .eq('id', existingProgress.id);
       }
@@ -175,7 +177,8 @@ export const useWorkoutData = (id: string | undefined) => {
         await supabase
           .from('progress')
           .update({
-            exercises: exercises,
+            // Convert Exercise[] to Json before sending to Supabase
+            exercises: exercises as unknown as Json,
             completed_date: today.toISOString().split('T')[0]
           })
           .eq('id', existingProgress.id);
@@ -186,7 +189,8 @@ export const useWorkoutData = (id: string | undefined) => {
           .insert({
             user_id: currentUser.id,
             workout_day: parseInt(id),
-            exercises: exercises,
+            // Convert Exercise[] to Json before sending to Supabase
+            exercises: exercises as unknown as Json,
             completed_date: today.toISOString().split('T')[0]
           });
       }

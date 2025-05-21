@@ -4,14 +4,12 @@
 import {
   mapWorkoutDays,
   getWorkoutIcon,
-  generateWorkoutName,
+  generateWorkoutNameFromGroups as generateWorkoutName,
   getWorkoutProgress,
-  getWorkoutName,
-  generateWorkoutNameFromExercises,
-  getWorkoutDatesForMonth,
+  getScheduledWorkoutDays as getWorkoutDatesForMonth,
   checkAchievements,
-  unlockAchievement,
   getAchievements,
+  unlockAchievement,
   calculateStreak,
   getStreakData,
   updateWorkoutProgress,
@@ -23,8 +21,6 @@ export {
   getWorkoutIcon,
   generateWorkoutName,
   getWorkoutProgress,
-  getWorkoutName,
-  generateWorkoutNameFromExercises,
   getWorkoutDatesForMonth,
   checkAchievements,
   unlockAchievement,
@@ -34,3 +30,4 @@ export {
   updateWorkoutProgress,
   getWeeklyProgress,
 };
+

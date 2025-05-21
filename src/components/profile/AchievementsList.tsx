@@ -20,7 +20,7 @@ const AchievementsList = ({ userData }: { userData: any }) => {
       try {
         setIsLoading(true);
         const userAchievements = await checkAchievements(currentUser.id);
-        setAchievements(userAchievements || []);
+        setAchievements(userAchievements);
       } catch (error) {
         console.error('Erro ao carregar conquistas:', error);
         toast({

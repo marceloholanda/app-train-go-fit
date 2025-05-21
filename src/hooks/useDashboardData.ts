@@ -1,12 +1,16 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName } from '@/utils/workoutUtils';
+import { 
+  mapWorkoutDays, 
+  getWorkoutIcon, 
+  generateWorkoutNameFromGroups
+} from '@/utils/workoutUtils';
 import { WorkoutPlan, WorkoutPlanSupabase } from '@/types/workout';
 import { WorkoutDisplay } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { Json } from '@/integrations/supabase/types';
 
 export const useDashboardData = () => {
   const navigate = useNavigate();
@@ -131,7 +135,10 @@ export const useDashboardData = () => {
       level: workoutPlanData.level,
       environment: workoutPlanData.environment,
       objective: workoutPlanData.objective,
-      tags: Array.isArray(workoutPlanData.tags) ? workoutPlanData.tags : [],
+      // Convert JSON array to string array using map
+      tags: Array.isArray(workoutPlanData.tags) ? 
+        (workoutPlanData.tags as any[]).map((tag: any) => String(tag)) : 
+        [],
       plan: workoutPlanData.plan as Record<string, any>
     };
     
@@ -149,9 +156,15 @@ export const useDashboardData = () => {
       const dayNumber = index + 1;
       const workoutStatus: 'completed' | 'pending' = completedWorkouts.includes(dayNumber) ? 'completed' : 'pending';
       
+      // Make sure the type is compatible with generateWorkoutName
+      const workoutExercises = exercises.map((ex: any) => ({
+        nome: ex.nome, 
+        reps: ex.reps || '3x12'  // Provide a default value if reps is missing
+      }));
+      
       const workoutItem: WorkoutDisplay = {
         id: dayNumber,
-        name: generateWorkoutName(dayNumber, exercises),
+        name: generateWorkoutNameFromGroups(dayNumber, workoutExercises),
         day: weekDays[index] || `Dia ${dayNumber}`,
         status: workoutStatus,
         exercises: exercises.length,

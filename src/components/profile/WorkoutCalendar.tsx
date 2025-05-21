@@ -1,8 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Flame, Flag } from 'lucide-react';
 import Card from '@/components/Card';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { getWorkoutDatesForMonth } from '@/utils/workoutUtils';
+import { 
+  getWorkoutDatesForMonth, 
+  getWorkoutStreaks,
+  getScheduledWorkoutDays
+} from '@/utils/workoutUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ptBR } from 'date-fns/locale';
@@ -30,13 +35,16 @@ const WorkoutCalendar = ({ userData }: WorkoutCalendarProps) => {
       const year = date.getFullYear();
       
       try {
-        // Obter datas de treino
+        // Obter datas de treino com ID do usuário
         const dates = await getWorkoutDatesForMonth(month, year, currentUser.id);
         setWorkoutDates(dates);
         
         // Configurar progresso semanal e streaks com dados estáticos por enquanto
         setWeekProgress({ completed: 2, total: 3 });
-        setStreaks({ current: 2, longest: 5 });
+        
+        // Get streak data
+        const streakData = await getWorkoutStreaks(currentUser.id);
+        setStreaks(streakData);
         
         // Datas perdidas (simuladas)
         setMissedDates(['2023-05-15', '2023-05-22']);
