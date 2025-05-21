@@ -7,20 +7,16 @@ import { WorkoutPlan } from '@/data/workoutPlans';
 import { useAuth } from '@/contexts/AuthContext';
 import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
 import { quizQuestions } from '@/components/quiz/QuizData';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useOnboardingState = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { currentUser } = useAuth();
 
   // State variables
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<QuizAnswers>>({});
-  const [registrationData, setRegistrationData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
   const [personalizedMessage, setPersonalizedMessage] = useState('');
@@ -34,14 +30,7 @@ export const useOnboardingState = () => {
       setTimeout(() => {
         setCurrentStep(prev => prev + 1);
       }, 500);
-    } else {
-      setCurrentStep(quizQuestions.length); // Go to registration form
     }
-  };
-
-  const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setRegistrationData(prev => ({ ...prev, [name]: value }));
   };
 
   const handlePreviousStep = () => {
@@ -49,14 +38,22 @@ export const useOnboardingState = () => {
   };
 
   // Form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null) => {
+    if (e) e.preventDefault();
+    
+    if (!currentUser) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para continuar.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
-      // Simulação de cadastro
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
       // Verificamos que todas as perguntas foram respondidas
       const quizAnswers = answers as QuizAnswers;
       
@@ -75,43 +72,94 @@ export const useOnboardingState = () => {
       const height_exact = heightRangeToNumber(quizAnswers.height);
       const age_exact = ageRangeToNumber(quizAnswers.age);
       
-      // Salvar o plano de treino no localStorage
-      const userData = {
-        ...registrationData,
-        id: 'mock-user-id', // ID para autenticação
-        profile: {
+      // Atualizar perfil do usuário no Supabase
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
           ...quizAnswers,
           weight_exact,
           height_exact,
-          age_exact
-        },
-        workoutPlan: recommendedPlan,
-        workoutProgress: {
-          completedWorkouts: [],
-          lastWeekProgress: 0
+          age_exact,
+          updated_at: new Date()
+        })
+        .eq('id', currentUser.id);
+        
+      if (profileError) throw profileError;
+      
+      // Verificar se já existe um plano de treino
+      const { data: existingPlan, error: planCheckError } = await supabase
+        .from('user_workouts')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+        
+      if (planCheckError && planCheckError.code !== 'PGRST116') {
+        throw planCheckError;
+      }
+      
+      if (existingPlan) {
+        // Atualizar plano existente
+        const { error: planUpdateError } = await supabase
+          .from('user_workouts')
+          .update({
+            plan_id: recommendedPlan.id,
+            name: recommendedPlan.name,
+            description: recommendedPlan.description || '',
+            days: recommendedPlan.days,
+            level: recommendedPlan.level,
+            environment: recommendedPlan.environment,
+            objective: recommendedPlan.objective,
+            tags: recommendedPlan.tags || [],
+            plan: recommendedPlan.plan,
+            updated_at: new Date()
+          })
+          .eq('id', existingPlan.id);
+          
+        if (planUpdateError) throw planUpdateError;
+      } else {
+        // Criar novo plano
+        const { error: planInsertError } = await supabase
+          .from('user_workouts')
+          .insert({
+            user_id: currentUser.id,
+            plan_id: recommendedPlan.id,
+            name: recommendedPlan.name,
+            description: recommendedPlan.description || '',
+            days: recommendedPlan.days,
+            level: recommendedPlan.level,
+            environment: recommendedPlan.environment,
+            objective: recommendedPlan.objective,
+            tags: recommendedPlan.tags || [],
+            plan: recommendedPlan.plan
+          });
+          
+        if (planInsertError) throw planInsertError;
+      }
+      
+      // Atualizar metadados do usuário para marcar onboarding como concluído
+      await supabase.auth.updateUser({
+        data: {
+          onboarded: true
         }
-      };
+      });
 
-      localStorage.setItem('traingo-user', JSON.stringify(userData));
-      
-      // Fazer login automático após cadastro
-      console.log("[TrainGO] Autologin after registration with:", registrationData.email);
-      await login(registrationData.email, registrationData.password);
-      
       setWorkoutPlan(recommendedPlan);
       setPersonalizedMessage(message);
       
       toast({
-        title: "Cadastro concluído!",
+        title: "Perfil criado!",
         description: "Seu plano de treino foi criado com sucesso.",
       });
 
       setShowResults(true);
-    } catch (error) {
-      console.error("[TrainGO] Erro no cadastro:", error);
+      
+      // Quando o onboarding for concluído, redirecionar para o dashboard
+      localStorage.setItem('onboarding-completed', 'true');
+    } catch (error: any) {
+      console.error("[TrainGO] Erro no onboarding:", error);
       toast({
-        title: "Erro no cadastro",
-        description: "Não foi possível concluir o cadastro. Tente novamente.",
+        title: "Erro",
+        description: error.message || "Não foi possível completar o onboarding. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -122,14 +170,12 @@ export const useOnboardingState = () => {
   return {
     currentStep,
     answers,
-    registrationData,
     isSubmitting,
     workoutPlan,
     personalizedMessage,
     showResults,
     quizQuestions,
     handleOptionSelect,
-    handleRegistrationChange,
     handlePreviousStep,
     handleSubmit
   };

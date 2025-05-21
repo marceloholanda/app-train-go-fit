@@ -5,10 +5,13 @@ import { useToast } from "@/hooks/use-toast";
 import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName } from '@/utils/workoutUtils';
 import { WorkoutPlan } from '@/types/workout';
 import { WorkoutDisplay } from '@/types/dashboard';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useDashboardData = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,37 +19,85 @@ export const useDashboardData = () => {
   const [workouts, setWorkouts] = useState<WorkoutDisplay[]>([]);
 
   useEffect(() => {
-    // Carregar dados do usuário e plano de treino
-    const loadUserData = () => {
+    // Carregar dados do usuário e plano de treino do Supabase
+    const loadUserData = async () => {
+      if (!currentUser) {
+        navigate('/login');
+        return;
+      }
+      
       try {
         setIsLoading(true);
-        const user = localStorage.getItem('traingo-user');
-        console.log("[TrainGO] Loading user data from localStorage:", user ? "Found" : "Not found");
         
-        if (user) {
-          const parsedUser = JSON.parse(user);
-          console.log("[TrainGO] User data loaded:", parsedUser.name);
-          console.log("[TrainGO] Workout plan:", parsedUser.workoutPlan ? "Found" : "Not found");
-          console.log("[TrainGO] Full user data:", parsedUser); // Log completo para debug
+        // Buscar perfil do usuário
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
           
-          setUserData(parsedUser);
+        if (profileError) throw profileError;
+        
+        // Buscar plano de treino do usuário
+        const { data: workoutPlan, error: workoutPlanError } = await supabase
+          .from('user_workouts')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
           
-          // Processar o plano de treino
-          if (parsedUser.workoutPlan) {
-            console.log("[TrainGO] Processing workout plan with ID:", parsedUser.workoutPlan.id);
-            console.log("[TrainGO] Plan structure:", Object.keys(parsedUser.workoutPlan.plan));
-            processWorkoutPlan(parsedUser);
-          } else {
-            console.error("[TrainGO] No workout plan found in user data");
-            toast({
-              title: "Plano não encontrado",
-              description: "Não foi possível encontrar seu plano de treino.",
-              variant: "destructive",
-            });
+        if (workoutPlanError && workoutPlanError.code !== 'PGRST116') {
+          throw workoutPlanError;
+        }
+        
+        // Buscar estatísticas do usuário
+        const { data: stats, error: statsError } = await supabase
+          .from('stats')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+          
+        if (statsError && statsError.code !== 'PGRST116') {
+          throw statsError;
+        }
+        
+        // Buscar treinos concluídos
+        const { data: completedWorkouts, error: completedWorkoutsError } = await supabase
+          .from('progress')
+          .select('workout_day')
+          .eq('user_id', currentUser.id);
+          
+        if (completedWorkoutsError) throw completedWorkoutsError;
+        
+        const completed = completedWorkouts?.map(item => item.workout_day) || [];
+        
+        // Montar objeto com os dados do usuário
+        const user = {
+          ...currentUser,
+          profile,
+          workoutPlan,
+          stats,
+          workoutProgress: {
+            completedWorkouts: completed,
+            lastWeekProgress: stats?.week_progress || 0
           }
+        };
+        
+        console.log("[TrainGO] User data loaded:", user.email);
+        console.log("[TrainGO] Workout plan:", workoutPlan ? "Found" : "Not found");
+        
+        setUserData(user);
+        
+        // Processar o plano de treino
+        if (workoutPlan) {
+          processWorkoutPlan(workoutPlan, completed);
+          setWeekProgress(stats?.week_progress || 0);
         } else {
-          console.error("[TrainGO] No user data found in localStorage");
-          navigate('/login');
+          console.error("[TrainGO] No workout plan found for user");
+          toast({
+            title: "Plano não encontrado",
+            description: "Não foi possível encontrar seu plano de treino.",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error('[TrainGO] Erro ao carregar dados do usuário:', error);
@@ -61,18 +112,28 @@ export const useDashboardData = () => {
     };
 
     loadUserData();
-  }, [navigate, toast]);
+  }, [navigate, toast, currentUser]);
   
   // Processa o plano de treino e prepara os dados para exibição
-  const processWorkoutPlan = (user: any) => {
-    if (!user.workoutPlan) {
-      console.error("[TrainGO] No workout plan in user data");
+  const processWorkoutPlan = (workoutPlanData: any, completedWorkouts: number[]) => {
+    if (!workoutPlanData) {
+      console.error("[TrainGO] No workout plan data provided");
       setWorkouts([]);
-      setWeekProgress(0);
       return;
     }
     
-    const plan: WorkoutPlan = user.workoutPlan;
+    const plan: WorkoutPlan = {
+      id: workoutPlanData.plan_id,
+      name: workoutPlanData.name,
+      description: workoutPlanData.description,
+      days: workoutPlanData.days,
+      level: workoutPlanData.level,
+      environment: workoutPlanData.environment,
+      objective: workoutPlanData.objective,
+      tags: workoutPlanData.tags,
+      plan: workoutPlanData.plan
+    };
+    
     console.log("[TrainGO] Processing workout plan:", plan.name);
     console.log("[TrainGO] Plan details:", {
       days: plan.days,
@@ -80,7 +141,6 @@ export const useDashboardData = () => {
       tags: plan.tags
     });
     
-    const completedWorkouts = user.workoutProgress?.completedWorkouts || [];
     const weekDays = mapWorkoutDays(plan.days);
     
     // Cria os cards de treino para o dashboard
@@ -102,19 +162,75 @@ export const useDashboardData = () => {
     
     console.log("[TrainGO] Total workout items:", workoutItems.length);
     setWorkouts(workoutItems);
+  };
+
+  const updateWorkoutStatus = async (workoutId: number, status: 'completed' | 'pending') => {
+    if (!currentUser) return;
     
-    // Atualiza o progresso da semana
-    const progress = user.workoutProgress?.lastWeekProgress || 0;
-    setWeekProgress(progress);
+    try {
+      if (status === 'completed') {
+        // Adicionar novo registro de treino concluído
+        const today = new Date();
+        const { error } = await supabase
+          .from('progress')
+          .insert({
+            user_id: currentUser.id,
+            workout_day: workoutId,
+            completed_date: today.toISOString().split('T')[0]
+          });
+          
+        if (error) throw error;
+      } else {
+        // Remover registro de treino concluído
+        const { error } = await supabase
+          .from('progress')
+          .delete()
+          .eq('user_id', currentUser.id)
+          .eq('workout_day', workoutId);
+          
+        if (error) throw error;
+      }
+      
+      // Atualizar a lista local de treinos
+      const updatedWorkouts = workouts.map(workout => 
+        workout.id === workoutId
+          ? { ...workout, status }
+          : workout
+      );
+      
+      setWorkouts(updatedWorkouts);
+      
+      // Calcular novo progresso semanal
+      const completed = updatedWorkouts.filter(w => w.status === 'completed').length;
+      const total = updatedWorkouts.length;
+      const newProgress = total > 0 ? (completed / total) * 100 : 0;
+      
+      // Atualizar progresso na tabela stats
+      await supabase
+        .from('stats')
+        .update({ 
+          week_progress: newProgress,
+          updated_at: new Date()
+        })
+        .eq('user_id', currentUser.id);
+      
+      setWeekProgress(newProgress);
+    } catch (error) {
+      console.error('[TrainGO] Erro ao atualizar status do treino:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do treino.",
+        variant: "destructive",
+      });
+    }
   };
 
   return {
     userData,
     isLoading,
     weekProgress,
-    setWeekProgress,
     workouts,
-    setWorkouts,
+    updateWorkoutStatus
   };
 };
 

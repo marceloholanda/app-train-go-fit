@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -26,7 +26,6 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // Simulação de login
       await login(formData.email, formData.password);
       
       toast({
@@ -36,11 +35,8 @@ const Login = () => {
       
       navigate('/dashboard');
     } catch (error) {
-      toast({
-        title: "Falha no login",
-        description: "Email ou senha incorretos.",
-        variant: "destructive",
-      });
+      // Error is handled in the login function
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -81,9 +77,9 @@ const Login = () => {
                 <label htmlFor="password" className="block text-sm font-medium">
                   Senha
                 </label>
-                <a href="#" className="text-sm text-traingo-primary hover:underline">
+                <Link to="/forgot-password" className="text-sm text-traingo-primary hover:underline">
                   Esqueci minha senha
-                </a>
+                </Link>
               </div>
               <input
                 id="password"
@@ -97,7 +93,7 @@ const Login = () => {
               />
             </div>
             
-            <Button type="submit" fullWidth isLoading={isLoading}>
+            <Button type="submit" fullWidth isLoading={isLoading || authLoading}>
               Entrar
             </Button>
           </form>
@@ -105,7 +101,7 @@ const Login = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-400">
               Não tem uma conta?{' '}
-              <Link to="/onboarding" className="text-traingo-primary hover:underline">
+              <Link to="/register" className="text-traingo-primary hover:underline">
                 Criar Agora
               </Link>
             </p>

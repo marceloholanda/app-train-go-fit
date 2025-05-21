@@ -1,12 +1,15 @@
+
 import { useState, useEffect } from 'react';
 import { Exercise } from '@/types/workout';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { updateWorkoutProgress } from '@/utils/workoutUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useWorkoutData = (id: string | undefined) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   
   const [workoutDay, setWorkoutDay] = useState<string>('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -15,18 +18,34 @@ export const useWorkoutData = (id: string | undefined) => {
   const [userLevel, setUserLevel] = useState<string>('beginner');
 
   useEffect(() => {
-    const loadWorkoutData = () => {
+    const loadWorkoutData = async () => {
+      if (!currentUser || !id) {
+        navigate('/dashboard');
+        return;
+      }
+      
       try {
         setIsLoading(true);
         
-        const userData = localStorage.getItem('traingo-user');
-        if (!userData || !id) {
-          navigate('/dashboard');
-          return;
+        // Buscar perfil do usuário para obter nível
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('level')
+          .eq('id', currentUser.id)
+          .single();
+          
+        if (profile && profile.level) {
+          setUserLevel(profile.level);
         }
         
-        const user = JSON.parse(userData);
-        const workoutPlan = user.workoutPlan;
+        // Buscar plano de treino do usuário
+        const { data: workoutPlan, error: workoutPlanError } = await supabase
+          .from('user_workouts')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+          
+        if (workoutPlanError) throw workoutPlanError;
         
         if (!workoutPlan) {
           toast({
@@ -37,11 +56,14 @@ export const useWorkoutData = (id: string | undefined) => {
           navigate('/dashboard');
           return;
         }
-
-        // Obter o nível do usuário para determinar o limite de exercícios
-        if (user.quizAnswers && user.quizAnswers.level) {
-          setUserLevel(user.quizAnswers.level);
-        }
+        
+        // Buscar se o treino está concluído
+        const { data: progress } = await supabase
+          .from('progress')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .eq('workout_day', parseInt(id))
+          .maybeSingle();
         
         // Encontrar o dia de treino baseado no ID
         const dayNumber = parseInt(id);
@@ -58,21 +80,21 @@ export const useWorkoutData = (id: string | undefined) => {
           return;
         }
         
-        // Verificar se o treino está concluído
-        const completedWorkouts = user.workoutProgress?.completedWorkouts || [];
-        const completed = completedWorkouts.includes(dayNumber);
-        setIsCompleted(completed);
-        
-        // Preparar dados para exibição
+        setIsCompleted(!!progress);
         setWorkoutDay(`Dia ${dayNumber}`);
         
         // Carregar status de conclusão individual dos exercícios (se salvo)
-        const savedExercises = user[`exercises_day${dayNumber}`] || dayExercises.map((ex: Exercise) => ({ 
-          ...ex, 
-          completed: false
-        }));
+        let exercisesWithStatus;
+        if (progress && progress.exercises) {
+          exercisesWithStatus = progress.exercises;
+        } else {
+          exercisesWithStatus = dayExercises.map((ex: Exercise) => ({ 
+            ...ex, 
+            completed: false
+          }));
+        }
         
-        setExercises(savedExercises);
+        setExercises(exercisesWithStatus);
       } catch (error) {
         console.error('Erro ao carregar treino:', error);
         toast({
@@ -87,90 +109,128 @@ export const useWorkoutData = (id: string | undefined) => {
     };
     
     loadWorkoutData();
-  }, [id, navigate, toast]);
+  }, [id, navigate, toast, currentUser]);
 
-  const handleExerciseToggle = (index: number) => {
+  const handleExerciseToggle = async (index: number) => {
+    if (!currentUser || !id) return;
+    
     const updatedExercises = exercises.map((exercise, i) => 
       i === index ? { ...exercise, completed: !exercise.completed } : exercise
     );
     
     setExercises(updatedExercises);
     
-    // Salvar estado dos exercícios
     try {
-      const userData = localStorage.getItem('traingo-user');
-      if (userData && id) {
-        const user = JSON.parse(userData);
-        user[`exercises_day${id}`] = updatedExercises;
-        localStorage.setItem('traingo-user', JSON.stringify(user));
+      // Buscar registro existente
+      const { data: existingProgress } = await supabase
+        .from('progress')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('workout_day', parseInt(id))
+        .maybeSingle();
+        
+      if (existingProgress) {
+        // Atualizar registro existente
+        await supabase
+          .from('progress')
+          .update({
+            exercises: updatedExercises
+          })
+          .eq('id', existingProgress.id);
+      }
+      
+      // Verificar se todos exercícios estão concluídos
+      const allCompleted = updatedExercises.every(ex => ex.completed);
+      if (allCompleted && !isCompleted) {
+        markWorkoutAsCompleted();
+      } else if (!allCompleted && isCompleted) {
+        markWorkoutAsPending();
       }
     } catch (error) {
       console.error('Erro ao salvar estado dos exercícios:', error);
-    }
-    
-    // Verificar se todos exercícios estão concluídos
-    const allCompleted = updatedExercises.every(ex => ex.completed);
-    if (allCompleted && !isCompleted) {
-      markWorkoutAsCompleted();
-    } else if (!allCompleted && isCompleted) {
-      markWorkoutAsPending();
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar seu progresso.",
+        variant: "destructive",
+      });
     }
   };
 
-  const markWorkoutAsCompleted = () => {
-    if (!id) return;
+  const markWorkoutAsCompleted = async () => {
+    if (!currentUser || !id) return;
     
-    setIsCompleted(true);
-    updateWorkoutProgress(parseInt(id), true);
-    
-    toast({
-      title: "Treino concluído!",
-      description: "Parabéns! Seu progresso foi atualizado.",
-    });
+    try {
+      const today = new Date();
+      
+      // Verificar se já existe um registro para este treino
+      const { data: existingProgress } = await supabase
+        .from('progress')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('workout_day', parseInt(id))
+        .maybeSingle();
+        
+      if (existingProgress) {
+        // Atualizar registro existente
+        await supabase
+          .from('progress')
+          .update({
+            exercises: exercises,
+            completed_date: today.toISOString().split('T')[0]
+          })
+          .eq('id', existingProgress.id);
+      } else {
+        // Criar novo registro
+        await supabase
+          .from('progress')
+          .insert({
+            user_id: currentUser.id,
+            workout_day: parseInt(id),
+            exercises: exercises,
+            completed_date: today.toISOString().split('T')[0]
+          });
+      }
+      
+      setIsCompleted(true);
+      
+      toast({
+        title: "Treino concluído!",
+        description: "Parabéns! Seu progresso foi atualizado.",
+      });
+    } catch (error) {
+      console.error('Erro ao marcar treino como concluído:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar seu progresso.",
+        variant: "destructive",
+      });
+    }
   };
   
-  const markWorkoutAsPending = () => {
-    if (!id) return;
+  const markWorkoutAsPending = async () => {
+    if (!currentUser || !id) return;
     
-    setIsCompleted(false);
-    updateWorkoutProgress(parseInt(id), false);
+    try {
+      // Remover registro de treino concluído
+      await supabase
+        .from('progress')
+        .delete()
+        .eq('user_id', currentUser.id)
+        .eq('workout_day', parseInt(id));
+        
+      setIsCompleted(false);
+    } catch (error) {
+      console.error('Erro ao marcar treino como pendente:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar seu progresso.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleToggleWorkout = () => {
-    if (!id) return;
-    
-    const newStatus = !isCompleted;
-    setIsCompleted(newStatus);
-    
-    // Atualizar status de todos os exercícios
-    const updatedExercises = exercises.map(exercise => ({ 
-      ...exercise, 
-      completed: newStatus 
-    }));
-    
-    setExercises(updatedExercises);
-    
-    // Salvar estado dos exercícios
-    try {
-      const userData = localStorage.getItem('traingo-user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        user[`exercises_day${id}`] = updatedExercises;
-        localStorage.setItem('traingo-user', JSON.stringify(user));
-      }
-    } catch (error) {
-      console.error('Erro ao salvar estado dos exercícios:', error);
-    }
-    
-    // Atualizar progresso
-    updateWorkoutProgress(parseInt(id), newStatus);
-    
-    toast({
-      title: newStatus ? "Treino concluído!" : "Treino desmarcado",
-      description: newStatus 
-        ? "Parabéns! Seu progresso foi atualizado."
-        : "O treino foi marcado como pendente.",
-    });
+    isCompleted ? markWorkoutAsPending() : markWorkoutAsCompleted();
   };
 
   return {
