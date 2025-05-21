@@ -16,12 +16,20 @@ import Index from './pages/Index';
 import NotFound from './pages/NotFound';
 import { Toaster } from '@/components/ui/toaster';
 import BottomNav from './components/layout/BottomNav';
+import { useState, useEffect } from 'react';
 
 const App = () => {
   const { currentUser, isLoading } = useAuth();
+  const [showNav, setShowNav] = useState(false);
 
-  // Condicional para renderização do BottomNav para mostrar apenas nas páginas autenticadas
-  const shouldShowBottomNav = currentUser && !isLoading;
+  // Ensure BottomNav is only rendered after checking auth state
+  useEffect(() => {
+    if (!isLoading && currentUser) {
+      setShowNav(true);
+    } else {
+      setShowNav(false);
+    }
+  }, [currentUser, isLoading]);
 
   return (
     <div className="bg-background text-foreground">
@@ -68,8 +76,8 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       
-      {/* Só mostrar a navegação inferior quando o usuário estiver logado */}
-      {shouldShowBottomNav && <BottomNav />}
+      {/* Só mostrar a navegação inferior quando o usuário estiver logado e carregado */}
+      {showNav && <BottomNav />}
       
       <Toaster />
     </div>
