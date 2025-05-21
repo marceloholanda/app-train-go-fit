@@ -3,13 +3,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Atualiza o status de treino (concluído/pendente)
+ * Retorna o novo progresso semanal como número
  */
-export const updateWorkoutProgress = async (workoutDay: number, isCompleted: boolean) => {
+export const updateWorkoutProgress = async (workoutDay: number, isCompleted: boolean): Promise<number> => {
   try {
     const { data: session } = await supabase.auth.getSession();
     if (!session.session?.user) {
       console.error("[TrainGO] User not authenticated");
-      return false;
+      return 0;
     }
     
     const userId = session.session.user.id;
@@ -28,7 +29,7 @@ export const updateWorkoutProgress = async (workoutDay: number, isCompleted: boo
         
       if (error) {
         console.error('[TrainGO] Error updating workout progress:', error);
-        return false;
+        return 0;
       }
     } else {
       // Remover treino concluído
@@ -40,7 +41,7 @@ export const updateWorkoutProgress = async (workoutDay: number, isCompleted: boo
         
       if (error) {
         console.error('[TrainGO] Error updating workout progress:', error);
-        return false;
+        return 0;
       }
     }
     
@@ -65,14 +66,16 @@ export const updateWorkoutProgress = async (workoutDay: number, isCompleted: boo
         .from('stats')
         .update({ 
           week_progress: weekProgress,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
         .eq('user_id', userId);
+        
+      return weekProgress;
     }
     
-    return true;
+    return 0;
   } catch (error) {
     console.error('[TrainGO] Error updating workout progress:', error);
-    return false;
+    return 0;
   }
 };

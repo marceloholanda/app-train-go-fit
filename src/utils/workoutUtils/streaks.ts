@@ -1,12 +1,68 @@
 
-// Re-exporte as funções dos arquivos separados para manter compatibilidade
-export * from './streakCalculation';
-export * from './userLevel';
-export * from './scheduleTracking';
-// Importar diretamente do arquivo levelTracking para evitar conflitos de namespace
-export {
-  saveUnlockedLevel,
-  getUnlockedLevels,
-  shouldShowLevelOnboarding,
-  isFirstAccessOfMonth
-} from './levelTracking';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  totalWorkouts: number;
+  lastWorkoutDate?: string;
+}
+
+/**
+ * Calcula a sequência atual de treinos do usuário
+ */
+export const calculateStreak = async (userId: string): Promise<number> => {
+  try {
+    const { data, error } = await supabase
+      .from('stats')
+      .select('current_streak')
+      .eq('user_id', userId)
+      .single();
+      
+    if (error) {
+      console.error('Erro ao calcular streak:', error);
+      return 0;
+    }
+    
+    return data?.current_streak || 0;
+  } catch (error) {
+    console.error('Erro ao calcular streak:', error);
+    return 0;
+  }
+};
+
+/**
+ * Obtém os dados de sequência do usuário
+ */
+export const getStreakData = async (userId: string): Promise<StreakData> => {
+  try {
+    const { data, error } = await supabase
+      .from('stats')
+      .select('current_streak, longest_streak, total_workouts, last_workout_date')
+      .eq('user_id', userId)
+      .single();
+      
+    if (error) {
+      console.error('Erro ao obter dados de sequência:', error);
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        totalWorkouts: 0
+      };
+    }
+    
+    return {
+      currentStreak: data.current_streak || 0,
+      longestStreak: data.longest_streak || 0,
+      totalWorkouts: data.total_workouts || 0,
+      lastWorkoutDate: data.last_workout_date
+    };
+  } catch (error) {
+    console.error('Erro ao obter dados de sequência:', error);
+    return {
+      currentStreak: 0,
+      longestStreak: 0,
+      totalWorkouts: 0
+    };
+  }
+};

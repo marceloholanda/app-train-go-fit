@@ -19,7 +19,7 @@ export const getWorkoutName = async (userId: string, workoutId: number): Promise
     
     const dayKey = `dia${workoutId}`;
     if (workout.plan && workout.plan[dayKey]) {
-      return generateWorkoutName(workoutId, workout.plan[dayKey]);
+      return generateWorkoutNameFromExercises(workoutId, workout.plan[dayKey]);
     }
     
     return `Treino ${workoutId}`;
@@ -31,8 +31,9 @@ export const getWorkoutName = async (userId: string, workoutId: number): Promise
 
 /**
  * Gera um nome para o treino com base nos exercícios
+ * Renomeada para evitar conflito de exportação
  */
-export const generateWorkoutName = (dayNumber: number, exercises: any[]): string => {
+export const generateWorkoutNameFromExercises = (dayNumber: number, exercises: any[]): string => {
   // Implementação simplificada
   if (!exercises || exercises.length === 0) {
     return `Treino ${dayNumber}`;
