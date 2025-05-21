@@ -26,7 +26,8 @@ const WorkoutPlanResult = ({ workoutPlan, personalizedMessage }: WorkoutPlanResu
 
   const goToDashboard = () => {
     console.log("[TrainGO] Navegando para o dashboard com plano:", workoutPlan);
-    navigate('/dashboard');
+    // Navegar para o dashboard após o onboarding
+    navigate('/dashboard', { replace: true });
   }
 
   return (

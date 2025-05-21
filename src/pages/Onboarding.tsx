@@ -1,12 +1,18 @@
 
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 import OnboardingLayout from '@/components/onboarding/OnboardingLayout';
 import WorkoutPlanResult from '@/components/onboarding/WorkoutPlanResult';
 import Quiz from '@/components/quiz/Quiz';
 import RegistrationForm from '@/components/quiz/RegistrationForm';
 import { quizQuestions } from '@/components/quiz/QuizData';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Onboarding = () => {
+  const navigate = useNavigate();
+  const { currentUser, isLoading } = useAuth();
+
   const {
     currentStep,
     answers,
@@ -20,6 +26,13 @@ const Onboarding = () => {
     handlePreviousStep,
     handleSubmit
   } = useOnboardingState();
+
+  // Se usuário não estiver autenticado, permitir continuar mesmo assim
+  // O sistema deve criar uma conta para o usuário no final do onboarding
+  useEffect(() => {
+    // Apenas para debug
+    console.log("[TrainGO] Onboarding: Auth state", { currentUser, isLoading });
+  }, [currentUser, isLoading]);
 
   const isLastQuestion = currentStep === quizQuestions.length;
 

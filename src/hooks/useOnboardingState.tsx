@@ -47,16 +47,6 @@ export const useOnboardingState = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null) => {
     if (e) e.preventDefault();
     
-    if (!currentUser) {
-      toast({
-        title: "Erro",
-        description: "Você precisa estar logado para continuar.",
-        variant: "destructive",
-      });
-      navigate('/login');
-      return;
-    }
-    
     setIsSubmitting(true);
 
     try {
@@ -73,6 +63,38 @@ export const useOnboardingState = () => {
       
       console.log("[TrainGO] Recommended workout plan:", recommendedPlan);
       
+      // Verificar se usuário está autenticado
+      let userId = currentUser?.id;
+      
+      // Se não estiver autenticado, criar uma conta com as informações do formulário
+      if (!userId) {
+        if (!registrationData.email || !registrationData.password) {
+          throw new Error("Por favor, preencha seu email e senha para continuar");
+        }
+        
+        // Criar novo usuário
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: registrationData.email,
+          password: registrationData.password,
+          options: {
+            data: {
+              name: registrationData.name || registrationData.email.split('@')[0],
+              onboarded: false
+            }
+          }
+        });
+        
+        if (authError) throw authError;
+        
+        userId = authData.user?.id;
+        
+        if (!userId) {
+          throw new Error("Não foi possível criar sua conta. Tente novamente.");
+        }
+      }
+      
+      // A partir daqui, temos certeza que userId existe
+      
       // Convert weight and height ranges to approximate numbers for IMC calculation
       const weight_exact = weightRangeToNumber(quizAnswers.weight);
       const height_exact = heightRangeToNumber(quizAnswers.height);
@@ -88,7 +110,7 @@ export const useOnboardingState = () => {
           age_exact,
           updated_at: new Date().toISOString()
         })
-        .eq('id', currentUser.id);
+        .eq('id', userId);
         
       if (profileError) throw profileError;
       
@@ -96,7 +118,7 @@ export const useOnboardingState = () => {
       const { data: existingPlan, error: planCheckError } = await supabase
         .from('user_workouts')
         .select('id')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .maybeSingle();
         
       if (planCheckError && planCheckError.code !== 'PGRST116') {
@@ -131,7 +153,7 @@ export const useOnboardingState = () => {
         const { error: planInsertError } = await supabase
           .from('user_workouts')
           .insert({
-            user_id: currentUser.id,
+            user_id: userId,
             plan_id: recommendedPlan.id,
             name: recommendedPlan.name,
             description: recommendedPlan.description || '',
@@ -163,8 +185,6 @@ export const useOnboardingState = () => {
 
       setShowResults(true);
       
-      // Quando o onboarding for concluído, redirecionar para o dashboard
-      localStorage.setItem('onboarding-completed', 'true');
     } catch (error: any) {
       console.error("[TrainGO] Erro no onboarding:", error);
       toast({
