@@ -4,9 +4,9 @@
 import {
   mapWorkoutDays,
   getWorkoutIcon,
-  generateWorkoutNameFromGroups as generateWorkoutName,
+  generateWorkoutNameFromGroups,
   getWorkoutProgress,
-  getScheduledWorkoutDays as getWorkoutDatesForMonth,
+  getScheduledWorkoutDays,
   checkAchievements,
   getAchievements,
   unlockAchievement,
@@ -14,20 +14,21 @@ import {
   getStreakData,
   updateWorkoutProgress,
   getWeeklyProgress,
+  getWorkoutStreaks,
 } from './workoutUtils/index';
 
 export {
   mapWorkoutDays,
   getWorkoutIcon,
-  generateWorkoutName,
+  generateWorkoutNameFromGroups,
   getWorkoutProgress,
-  getWorkoutDatesForMonth,
+  getScheduledWorkoutDays,
   checkAchievements,
-  unlockAchievement,
   getAchievements,
+  unlockAchievement,
   calculateStreak,
   getStreakData,
   updateWorkoutProgress,
   getWeeklyProgress,
+  getWorkoutStreaks,
 };
-

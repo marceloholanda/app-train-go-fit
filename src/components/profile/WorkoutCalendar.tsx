@@ -5,8 +5,7 @@ import Card from '@/components/Card';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { 
   getWorkoutDatesForMonth, 
-  getWorkoutStreaks,
-  getScheduledWorkoutDays
+  getWorkoutStreaks
 } from '@/utils/workoutUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';

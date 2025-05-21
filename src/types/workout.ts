@@ -1,58 +1,63 @@
-
-// Adicionar ou modificar apenas os tipos necessários
 import { Json } from '@/integrations/supabase/types';
-
-export interface Exercise {
-  id?: number;
-  nome: string;
-  series?: number;
-  reps?: string;
-  description?: string;
-  isCustom?: boolean;
-  target?: string;
-  gif_url?: string;
-  video_url?: string;
-  completed?: boolean; // Added for tracking completion status
-  substituicoes?: Exercise[]; // Added for exercise substitutions
-  descricao?: string; // Added for Portuguese descriptions
-}
 
 export interface WorkoutPlan {
   id: string;
   name: string;
   description?: string;
   days: number;
+  level: string;
+  environment: string;
+  objective: string;
+  plan: Record<string, any>;
   tags: string[];
-  plan: Record<string, Exercise[]>;
-  level?: string;
-  environment?: string;
-  objective?: string;
-  plan_id?: string; // Added for Supabase integration
 }
 
-// Para manter compatibilidade com o Supabase
 export interface WorkoutPlanSupabase {
-  id: string;
+  id?: string;
+  plan_id: string;
+  user_id: string;
   name: string;
   description?: string;
   days: number;
-  tags: Json;
-  plan: Json;
   level?: string;
   environment?: string;
   objective?: string;
-  plan_id?: string; // Added for consistency
+  plan: Json;
+  tags?: Json;
+  created_at?: string;
+  updated_at?: string;
 }
 
-// Added for achievements
+export interface Exercise {
+  nome: string;
+  reps?: string;
+  sets?: number;
+  rest?: number;
+  weight?: number | string;
+  video?: string;
+  image?: string;
+  instructions?: string;
+  substitutes?: string[];
+  equipment?: string;
+  muscle?: string;
+}
+
+export interface WorkoutDay {
+  day: number;
+  exercises: Exercise[];
+  completed?: boolean;
+}
+
 export interface Achievement {
   id: string;
   name: string;
-  description: string;
+  description?: string;
+  badge_id: string;
+  image_url?: string;
   unlocked_at: string;
+  user_id: string;
 }
 
-// Fixed types for workout stats
 export interface WorkoutStreaks {
   current: number;
   longest: number;
@@ -61,4 +66,27 @@ export interface WorkoutStreaks {
 export interface ExpectedWorkoutDay {
   date: string;
   missed: boolean;
+}
+
+// Tipos auxiliares para o componente de calendário
+export type WorkoutDate = string; // Formato YYYY-MM-DD
+
+export interface UserStats {
+  current_streak: number;
+  longest_streak: number;
+  total_workouts: number;
+  last_workout_date?: string;
+  week_progress?: number;
+  updated_at?: string;
+  user_id: string;
+}
+
+export interface WorkoutProgress {
+  id?: string;
+  user_id: string;
+  workout_day: number;
+  completed_date: string;
+  exercises?: Exercise[];
+  notes?: string;
+  created_at?: string;
 }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -132,9 +133,9 @@ export const useDashboardData = () => {
       name: workoutPlanData.name,
       description: workoutPlanData.description,
       days: workoutPlanData.days,
-      level: workoutPlanData.level,
-      environment: workoutPlanData.environment,
-      objective: workoutPlanData.objective,
+      level: workoutPlanData.level as string,
+      environment: workoutPlanData.environment as string,
+      objective: workoutPlanData.objective as string,
       // Convert JSON array to string array using map
       tags: Array.isArray(workoutPlanData.tags) ? 
         (workoutPlanData.tags as any[]).map((tag: any) => String(tag)) : 
@@ -156,10 +157,10 @@ export const useDashboardData = () => {
       const dayNumber = index + 1;
       const workoutStatus: 'completed' | 'pending' = completedWorkouts.includes(dayNumber) ? 'completed' : 'pending';
       
-      // Make sure the type is compatible with generateWorkoutName
+      // Convert exercises to the format needed by generateWorkoutNameFromGroups
       const workoutExercises = exercises.map((ex: any) => ({
-        nome: ex.nome, 
-        reps: ex.reps || '3x12'  // Provide a default value if reps is missing
+        nome: ex.nome || "", 
+        reps: ex.reps || "3x12"  // Ensure reps is always present
       }));
       
       const workoutItem: WorkoutDisplay = {

@@ -41,23 +41,12 @@ export {
   updateWorkoutProgress
 } from './workoutTracking';
 
-// Add missing exports for achievements functions
-export const unlockAchievement = async (userId: string, achievementId: string): Promise<boolean> => {
-  console.log(`Achievement unlocked for user ${userId}: ${achievementId}`);
-  return true;
-};
+// Get achievements function is already exported from achievements.ts
+export { getAchievements, unlockAchievement } from './achievements';
 
-export const getAchievements = async (userId: string) => {
-  return checkAchievements(userId);
-};
+// Re-export the getWorkoutStreaks function
+export { getWorkoutStreaks } from './streaks';
 
 // Add missing exports for expected workout days
-export const getExpectedWorkoutDays = getScheduledWorkoutDays;
+export { getExpectedWorkoutDays } from './scheduleTracking';
 
-// Add missing export for workout streaks
-export const getWorkoutStreaks = async (userId: string) => {
-  return {
-    current: 3,
-    longest: 7
-  };
-};
