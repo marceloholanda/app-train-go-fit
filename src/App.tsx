@@ -44,11 +44,8 @@ const App = () => {
         <Route path="/terms" element={<TermsOfUse />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         
-        {/* Página de onboarding (requer autenticação) */}
-        <Route 
-          path="/onboarding" 
-          element={isLoading ? <div>Carregando...</div> : currentUser ? <Onboarding /> : <Login />} 
-        />
+        {/* Página de onboarding (não requer autenticação prévia) */}
+        <Route path="/onboarding" element={<Onboarding />} />
         
         {/* Páginas protegidas */}
         <Route 

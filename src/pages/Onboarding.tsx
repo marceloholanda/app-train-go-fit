@@ -27,12 +27,20 @@ const Onboarding = () => {
     handleSubmit
   } = useOnboardingState();
 
-  // Se usuário não estiver autenticado, permitir continuar mesmo assim
-  // O sistema deve criar uma conta para o usuário no final do onboarding
+  // Debug logs
   useEffect(() => {
-    // Apenas para debug
     console.log("[TrainGO] Onboarding: Auth state", { currentUser, isLoading });
-  }, [currentUser, isLoading]);
+    console.log("[TrainGO] Onboarding: Current step", currentStep);
+    console.log("[TrainGO] Onboarding: Show results", showResults);
+  }, [currentUser, isLoading, currentStep, showResults]);
+
+  // Redirect to dashboard if user is already authenticated and has completed onboarding
+  useEffect(() => {
+    if (currentUser && !isLoading && currentUser.user_metadata?.onboarded) {
+      console.log("[TrainGO] Redirecionando para dashboard, usuário já fez onboarding");
+      navigate('/dashboard');
+    }
+  }, [currentUser, isLoading, navigate]);
 
   const isLastQuestion = currentStep === quizQuestions.length;
 

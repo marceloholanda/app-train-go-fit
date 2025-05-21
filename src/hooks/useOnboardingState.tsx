@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const useOnboardingState = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser } = useAuth();
+  const { currentUser, register } = useAuth();
 
   // State variables
   const [currentStep, setCurrentStep] = useState(0);
@@ -63,7 +63,6 @@ export const useOnboardingState = () => {
       
       console.log("[TrainGO] Recommended workout plan:", recommendedPlan);
       
-      // Verificar se usuário está autenticado
       let userId = currentUser?.id;
       
       // Se não estiver autenticado, criar uma conta com as informações do formulário
@@ -72,24 +71,26 @@ export const useOnboardingState = () => {
           throw new Error("Por favor, preencha seu email e senha para continuar");
         }
         
-        // Criar novo usuário
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: registrationData.email,
-          password: registrationData.password,
-          options: {
-            data: {
-              name: registrationData.name || registrationData.email.split('@')[0],
-              onboarded: false
-            }
+        console.log("[TrainGO] Registrando novo usuário:", registrationData.email);
+        
+        // Usar a função register do AuthContext para criar o usuário
+        try {
+          const newUser = await register(
+            registrationData.email,
+            registrationData.password,
+            registrationData.name || registrationData.email.split('@')[0]
+          );
+          
+          if (!newUser) {
+            throw new Error("Não foi possível criar sua conta. Tente novamente.");
           }
-        });
-        
-        if (authError) throw authError;
-        
-        userId = authData.user?.id;
-        
-        if (!userId) {
-          throw new Error("Não foi possível criar sua conta. Tente novamente.");
+          
+          userId = newUser.id;
+          
+          console.log("[TrainGO] Usuário registrado com sucesso:", userId);
+        } catch (error: any) {
+          console.error("[TrainGO] Erro ao registrar usuário:", error);
+          throw new Error("Erro ao criar conta: " + (error.message || "Tente novamente"));
         }
       }
       
@@ -112,7 +113,10 @@ export const useOnboardingState = () => {
         })
         .eq('id', userId);
         
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("[TrainGO] Erro ao atualizar perfil:", profileError);
+        throw profileError;
+      }
       
       // Verificar se já existe um plano de treino
       const { data: existingPlan, error: planCheckError } = await supabase
@@ -122,6 +126,7 @@ export const useOnboardingState = () => {
         .maybeSingle();
         
       if (planCheckError && planCheckError.code !== 'PGRST116') {
+        console.error("[TrainGO] Erro ao verificar plano existente:", planCheckError);
         throw planCheckError;
       }
       
@@ -131,6 +136,7 @@ export const useOnboardingState = () => {
       
       if (existingPlan) {
         // Atualizar plano existente
+        console.log("[TrainGO] Atualizando plano existente para usuário:", userId);
         const { error: planUpdateError } = await supabase
           .from('user_workouts')
           .update({
@@ -147,9 +153,13 @@ export const useOnboardingState = () => {
           })
           .eq('id', existingPlan.id);
           
-        if (planUpdateError) throw planUpdateError;
+        if (planUpdateError) {
+          console.error("[TrainGO] Erro ao atualizar plano:", planUpdateError);
+          throw planUpdateError;
+        }
       } else {
         // Criar novo plano
+        console.log("[TrainGO] Criando novo plano para usuário:", userId);
         const { error: planInsertError } = await supabase
           .from('user_workouts')
           .insert({
@@ -165,7 +175,10 @@ export const useOnboardingState = () => {
             plan: planJson
           });
           
-        if (planInsertError) throw planInsertError;
+        if (planInsertError) {
+          console.error("[TrainGO] Erro ao criar plano:", planInsertError);
+          throw planInsertError;
+        }
       }
       
       // Atualizar metadados do usuário para marcar onboarding como concluído
@@ -183,6 +196,7 @@ export const useOnboardingState = () => {
         description: "Seu plano de treino foi criado com sucesso.",
       });
 
+      // Exibir o plano de treino após o registro bem-sucedido
       setShowResults(true);
       
     } catch (error: any) {

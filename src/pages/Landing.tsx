@@ -18,6 +18,11 @@ const Landing = () => {
     }
   }, [currentUser, navigate]);
 
+  // Função para iniciar o onboarding
+  const startOnboarding = () => {
+    navigate('/onboarding');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -41,9 +46,7 @@ const Landing = () => {
           </p>
           
           <div className="flex flex-col items-center justify-center">
-            <PrimaryButton 
-              onClick={() => navigate('/onboarding')}
-            >
+            <PrimaryButton onClick={startOnboarding}>
               Começar Agora
             </PrimaryButton>
           </div>
@@ -83,7 +86,7 @@ const Landing = () => {
           
           <div className="mt-12 text-center">
             <PrimaryButton 
-              onClick={() => navigate('/onboarding')}
+              onClick={startOnboarding}
               className="mx-auto"
             >
               Descubra Seu Perfil
