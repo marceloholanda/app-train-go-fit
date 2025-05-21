@@ -7,6 +7,9 @@ export const healthBeginnerHome: WorkoutPlan = {
   tags: ["health_energy", "beginner", "home", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano leve para melhorar sua saúde e disposição diária",
+  level: "beginner",
+  environment: "home",
+  objective: "health_energy",
   plan: {
     dia1: [
       { nome: "Alongamento dinâmico", reps: "5 minutos" },

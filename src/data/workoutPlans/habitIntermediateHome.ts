@@ -7,6 +7,9 @@ export const habitIntermediateHome: WorkoutPlan = {
   tags: ["create_habit", "returning", "home", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano para quem está retornando aos treinos e quer criar consistência",
+  level: "returning",
+  environment: "home",
+  objective: "create_habit",
   plan: {
     dia1: [
       { nome: "Mobilidade articular", reps: "5 minutos" },

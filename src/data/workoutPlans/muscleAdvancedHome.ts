@@ -7,6 +7,9 @@ export const muscleAdvancedHome: WorkoutPlan = {
   tags: ["gain_muscle", "advanced", "home", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano desafiador para ganho muscular em ambiente doméstico",
+  level: "advanced",
+  environment: "home",
+  objective: "gain_muscle",
   plan: {
     dia1: [
       { nome: "Flexão declinada", reps: "4x12" },

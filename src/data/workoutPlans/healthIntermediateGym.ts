@@ -7,6 +7,9 @@ export const healthIntermediateGym: WorkoutPlan = {
   tags: ["health_energy", "returning", "gym", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano equilibrado para melhorar condicionamento e bem-estar geral",
+  level: "returning",
+  environment: "gym",
+  objective: "health_energy",
   plan: {
     dia1: [
       { nome: "Bicicleta ergométrica", reps: "10 minutos" },
