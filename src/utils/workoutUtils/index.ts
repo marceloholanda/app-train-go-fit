@@ -25,8 +25,11 @@ export {
 } from './scheduleTracking';
 
 // Now properly handle the streak functions from both files
-// Export functions from streakCalculation.ts 
-export * from './streakCalculation';
+// Export functions from streakCalculation.ts with explicit exports
+export { 
+  calculateStreak,
+  getWorkoutStreaks 
+} from './streakCalculation';
 
 // Export functions from streaks.ts with explicit exports to avoid conflicts
 export {

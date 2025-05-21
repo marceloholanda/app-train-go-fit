@@ -10,10 +10,9 @@ import {
   checkAchievements,
   getAchievements,
   unlockAchievement,
-  // Import calculateStreak from streakCalculation instead of streaks
-  calculateStreak, // This comes from streakCalculation.ts now
+  calculateStreak,
   getStreakData,
-  getWorkoutStreaksData as getWorkoutStreaks,
+  getWorkoutStreaksData,
   updateWorkoutProgress,
   getWeeklyProgress,
   getWorkoutsThisWeek,
@@ -31,7 +30,7 @@ export {
   unlockAchievement,
   calculateStreak,
   getStreakData,
-  getWorkoutStreaks,
+  getWorkoutStreaksData as getWorkoutStreaks,
   updateWorkoutProgress,
   getWeeklyProgress,
   getWorkoutsThisWeek,

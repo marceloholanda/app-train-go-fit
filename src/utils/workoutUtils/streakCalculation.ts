@@ -3,6 +3,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { WorkoutStreaks, ExpectedWorkoutDay } from '@/types/workout';
 
 /**
+ * Calcula a sequência atual de treinos do usuário
+ */
+export const calculateStreak = async (userId: string): Promise<number> => {
+  try {
+    const { data, error } = await supabase
+      .from('stats')
+      .select('current_streak')
+      .eq('user_id', userId)
+      .single();
+      
+    if (error) {
+      console.error('Erro ao calcular streak:', error);
+      return 0;
+    }
+    
+    return data?.current_streak || 0;
+  } catch (error) {
+    console.error('Erro ao calcular streak:', error);
+    return 0;
+  }
+};
+
+/**
  * Obtém os dados de streak do usuário
  */
 export const getWorkoutStreaks = async (userId?: string): Promise<WorkoutStreaks> => {
