@@ -38,7 +38,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
         : workout
     ));
     
-    // Atualiza o progresso da semana
+    // Atualiza o progresso da semana (função agora é síncrona)
     const newProgress = updateWorkoutProgress(workoutId, newCompleted);
     setWeekProgress(newProgress);
     

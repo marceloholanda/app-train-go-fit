@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { mapWorkoutDays, getWorkoutIcon, generateWorkoutName } from '@/utils/workoutUtils';
-import { WorkoutPlan } from '@/types/workout';
+import { WorkoutPlan, WorkoutPlanSupabase } from '@/types/workout';
 import { WorkoutDisplay } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -115,13 +115,14 @@ export const useDashboardData = () => {
   }, [navigate, toast, currentUser]);
   
   // Processa o plano de treino e prepara os dados para exibição
-  const processWorkoutPlan = (workoutPlanData: any, completedWorkouts: number[]) => {
+  const processWorkoutPlan = (workoutPlanData: WorkoutPlanSupabase, completedWorkouts: number[]) => {
     if (!workoutPlanData) {
       console.error("[TrainGO] No workout plan data provided");
       setWorkouts([]);
       return;
     }
     
+    // Converter do formato Supabase para o formato WorkoutPlan
     const plan: WorkoutPlan = {
       id: workoutPlanData.plan_id,
       name: workoutPlanData.name,
@@ -130,8 +131,8 @@ export const useDashboardData = () => {
       level: workoutPlanData.level,
       environment: workoutPlanData.environment,
       objective: workoutPlanData.objective,
-      tags: workoutPlanData.tags,
-      plan: workoutPlanData.plan
+      tags: Array.isArray(workoutPlanData.tags) ? workoutPlanData.tags : [],
+      plan: workoutPlanData.plan as Record<string, any>
     };
     
     console.log("[TrainGO] Processing workout plan:", plan.name);
@@ -210,7 +211,7 @@ export const useDashboardData = () => {
         .from('stats')
         .update({ 
           week_progress: newProgress,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
         .eq('user_id', currentUser.id);
       
@@ -230,6 +231,8 @@ export const useDashboardData = () => {
     isLoading,
     weekProgress,
     workouts,
+    setWorkProgress: setWeekProgress,
+    setWorkouts,
     updateWorkoutStatus
   };
 };

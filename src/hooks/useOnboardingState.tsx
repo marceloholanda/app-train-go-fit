@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { findBestWorkoutPlan, generatePersonalizedMessage, QuizAnswers } from '@/utils/workoutRecommendation';
-import { WorkoutPlan } from '@/data/workoutPlans';
+import { findBestWorkoutPlan, generatePersonalizedMessage } from '@/utils/workoutRecommendation';
+import { QuizAnswers } from '@/utils/workoutRecommendation/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { weightRangeToNumber, heightRangeToNumber, ageRangeToNumber } from '@/utils/userUtils';
 import { quizQuestions } from '@/components/quiz/QuizData';
@@ -18,9 +18,10 @@ export const useOnboardingState = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<QuizAnswers>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
+  const [workoutPlan, setWorkoutPlan] = useState<any | null>(null);
   const [personalizedMessage, setPersonalizedMessage] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [registrationData, setRegistrationData] = useState<any>({});
 
   // Quiz navigation handlers
   const handleOptionSelect = (questionId: keyof QuizAnswers, value: string) => {
@@ -35,6 +36,11 @@ export const useOnboardingState = () => {
 
   const handlePreviousStep = () => {
     setCurrentStep(prev => Math.max(0, prev - 1));
+  };
+
+  const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRegistrationData(prev => ({ ...prev, [name]: value }));
   };
 
   // Form submission
@@ -80,7 +86,7 @@ export const useOnboardingState = () => {
           weight_exact,
           height_exact,
           age_exact,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
         .eq('id', currentUser.id);
         
@@ -97,6 +103,10 @@ export const useOnboardingState = () => {
         throw planCheckError;
       }
       
+      // Transformar plan para compatibilidade com Json do Supabase
+      const planJson = JSON.parse(JSON.stringify(recommendedPlan.plan));
+      const tagsJson = JSON.parse(JSON.stringify(recommendedPlan.tags));
+      
       if (existingPlan) {
         // Atualizar plano existente
         const { error: planUpdateError } = await supabase
@@ -109,9 +119,9 @@ export const useOnboardingState = () => {
             level: recommendedPlan.level,
             environment: recommendedPlan.environment,
             objective: recommendedPlan.objective,
-            tags: recommendedPlan.tags || [],
-            plan: recommendedPlan.plan,
-            updated_at: new Date()
+            tags: tagsJson,
+            plan: planJson,
+            updated_at: new Date().toISOString()
           })
           .eq('id', existingPlan.id);
           
@@ -129,8 +139,8 @@ export const useOnboardingState = () => {
             level: recommendedPlan.level,
             environment: recommendedPlan.environment,
             objective: recommendedPlan.objective,
-            tags: recommendedPlan.tags || [],
-            plan: recommendedPlan.plan
+            tags: tagsJson,
+            plan: planJson
           });
           
         if (planInsertError) throw planInsertError;
@@ -170,12 +180,14 @@ export const useOnboardingState = () => {
   return {
     currentStep,
     answers,
+    registrationData,
     isSubmitting,
     workoutPlan,
     personalizedMessage,
     showResults,
     quizQuestions,
     handleOptionSelect,
+    handleRegistrationChange,
     handlePreviousStep,
     handleSubmit
   };

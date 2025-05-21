@@ -44,6 +44,8 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
     setIsSubmitting(true);
 
     try {
+      const now = new Date().toISOString();
+      
       // Atualizar perfil no Supabase
       const { error: profileError } = await supabase
         .from('profiles')
@@ -52,7 +54,7 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
           level: formData.level,
           days_per_week: formData.days_per_week,
           environment: formData.environment,
-          updated_at: new Date()
+          updated_at: now
         })
         .eq('id', currentUser.id);
         
@@ -69,7 +71,11 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
       };
 
       // Generate new workout plan based on updated answers
-      const newWorkoutPlan = findBestWorkoutPlan(quizAnswers);
+      const recommendedPlan = findBestWorkoutPlan(quizAnswers);
+      
+      // Transformar plan para compatibilidade com Json do Supabase
+      const planJson = JSON.parse(JSON.stringify(recommendedPlan.plan));
+      const tagsJson = JSON.parse(JSON.stringify(recommendedPlan.tags));
       
       // Verificar se já existe um plano de treino
       const { data: existingPlan, error: planCheckError } = await supabase
@@ -87,16 +93,16 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
         const { error: planUpdateError } = await supabase
           .from('user_workouts')
           .update({
-            plan_id: newWorkoutPlan.id,
-            name: newWorkoutPlan.name,
-            description: newWorkoutPlan.description || '',
-            days: newWorkoutPlan.days,
-            level: newWorkoutPlan.level,
-            environment: newWorkoutPlan.environment,
-            objective: newWorkoutPlan.objective,
-            tags: newWorkoutPlan.tags || [],
-            plan: newWorkoutPlan.plan,
-            updated_at: new Date()
+            plan_id: recommendedPlan.id,
+            name: recommendedPlan.name,
+            description: recommendedPlan.description || '',
+            days: recommendedPlan.days,
+            level: recommendedPlan.level,
+            environment: recommendedPlan.environment,
+            objective: recommendedPlan.objective,
+            tags: tagsJson,
+            plan: planJson,
+            updated_at: now
           })
           .eq('id', existingPlan.id);
           
@@ -107,15 +113,15 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
           .from('user_workouts')
           .insert({
             user_id: currentUser.id,
-            plan_id: newWorkoutPlan.id,
-            name: newWorkoutPlan.name,
-            description: newWorkoutPlan.description || '',
-            days: newWorkoutPlan.days,
-            level: newWorkoutPlan.level,
-            environment: newWorkoutPlan.environment,
-            objective: newWorkoutPlan.objective,
-            tags: newWorkoutPlan.tags || [],
-            plan: newWorkoutPlan.plan
+            plan_id: recommendedPlan.id,
+            name: recommendedPlan.name,
+            description: recommendedPlan.description || '',
+            days: recommendedPlan.days,
+            level: recommendedPlan.level,
+            environment: recommendedPlan.environment,
+            objective: recommendedPlan.objective,
+            tags: tagsJson,
+            plan: planJson
           });
           
         if (planInsertError) throw planInsertError;
@@ -128,7 +134,7 @@ export const useProfileEditForm = ({ userData, onSave }: UseProfileEditFormProps
           ...userData.profile,
           ...formData
         },
-        workoutPlan: newWorkoutPlan
+        workoutPlan: recommendedPlan
       };
       
       // Notify parent component about the update

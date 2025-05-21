@@ -120,7 +120,11 @@ export const useProfileData = () => {
 
     try {
       // Generate new workout plan based on updated answers
-      const newWorkoutPlan = findBestWorkoutPlan(quizAnswers);
+      const recommendedPlan = findBestWorkoutPlan(quizAnswers);
+      
+      // Transformar plan para compatibilidade com Json do Supabase
+      const planJson = JSON.parse(JSON.stringify(recommendedPlan.plan));
+      const tagsJson = JSON.parse(JSON.stringify(recommendedPlan.tags));
       
       // Check if a workout plan already exists for this user
       const { data: existingPlan } = await supabase
@@ -134,16 +138,16 @@ export const useProfileData = () => {
         const { error } = await supabase
           .from('user_workouts')
           .update({
-            plan_id: newWorkoutPlan.id,
-            name: newWorkoutPlan.name,
-            description: newWorkoutPlan.description || '',
-            days: newWorkoutPlan.days,
-            level: newWorkoutPlan.level,
-            environment: newWorkoutPlan.environment,
-            objective: newWorkoutPlan.objective,
-            tags: newWorkoutPlan.tags || [],
-            plan: newWorkoutPlan.plan,
-            updated_at: new Date()
+            plan_id: recommendedPlan.id,
+            name: recommendedPlan.name,
+            description: recommendedPlan.description || '',
+            days: recommendedPlan.days,
+            level: recommendedPlan.level,
+            environment: recommendedPlan.environment,
+            objective: recommendedPlan.objective,
+            tags: tagsJson,
+            plan: planJson,
+            updated_at: new Date().toISOString()
           })
           .eq('id', existingPlan.id);
           
@@ -154,15 +158,15 @@ export const useProfileData = () => {
           .from('user_workouts')
           .insert({
             user_id: currentUser.id,
-            plan_id: newWorkoutPlan.id,
-            name: newWorkoutPlan.name,
-            description: newWorkoutPlan.description || '',
-            days: newWorkoutPlan.days,
-            level: newWorkoutPlan.level,
-            environment: newWorkoutPlan.environment,
-            objective: newWorkoutPlan.objective,
-            tags: newWorkoutPlan.tags || [],
-            plan: newWorkoutPlan.plan
+            plan_id: recommendedPlan.id,
+            name: recommendedPlan.name,
+            description: recommendedPlan.description || '',
+            days: recommendedPlan.days,
+            level: recommendedPlan.level,
+            environment: recommendedPlan.environment,
+            objective: recommendedPlan.objective,
+            tags: tagsJson,
+            plan: planJson
           });
           
         if (error) throw error;
@@ -189,13 +193,17 @@ export const useProfileData = () => {
     if (!currentUser) return false;
 
     try {
+      const now = new Date();
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+
       const { error } = await supabase
         .from('premium')
         .update({ 
           plan_type: 'pro',
-          subscribed_at: new Date(),
-          expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
-          updated_at: new Date()
+          subscribed_at: now.toISOString(),
+          expires_at: nextYear.toISOString(), 
+          updated_at: now.toISOString()
         })
         .eq('user_id', currentUser.id);
 
