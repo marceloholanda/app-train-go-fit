@@ -7,6 +7,9 @@ export const muscleBeginnerGym: WorkoutPlan = {
   tags: ["gain_muscle", "beginner", "gym", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano ideal para iniciantes ganharem massa muscular na academia",
+  level: "beginner",
+  environment: "gym",
+  objective: "gain_muscle",
   plan: {
     dia1: [
       { nome: "Supino máquina", reps: "3x12" },

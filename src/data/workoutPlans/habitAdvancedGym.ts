@@ -7,6 +7,9 @@ export const habitAdvancedGym: WorkoutPlan = {
   tags: ["create_habit", "advanced", "gym", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano para praticantes avançados criarem consistência na academia",
+  level: "advanced",
+  environment: "gym",
+  objective: "create_habit",
   plan: {
     dia1: [
       { nome: "Esteira intervalada", reps: "10 minutos" },

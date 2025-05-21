@@ -7,6 +7,9 @@ export const fatLossIntermediateHome: WorkoutPlan = {
   tags: ["lose_fat", "returning", "home", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano de intensidade média para perda de gordura com treinos domiciliares",
+  level: "returning",
+  environment: "home",
+  objective: "lose_fat",
   plan: {
     dia1: [
       { nome: "Burpee", reps: "3x10" },

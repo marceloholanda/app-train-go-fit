@@ -7,6 +7,9 @@ export const muscleIntermediateGym: WorkoutPlan = {
   tags: ["gain_muscle", "returning", "gym", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano para praticantes de nível intermediário focados em ganho muscular",
+  level: "returning",
+  environment: "gym",
+  objective: "gain_muscle",
   plan: {
     dia1: [
       { nome: "Supino reto", reps: "4x10" },

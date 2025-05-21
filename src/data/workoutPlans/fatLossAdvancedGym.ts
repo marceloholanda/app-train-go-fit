@@ -7,6 +7,9 @@ export const fatLossAdvancedGym: WorkoutPlan = {
   tags: ["lose_fat", "advanced", "gym", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano intenso para praticantes avançados focado na perda de gordura",
+  level: "advanced",
+  environment: "gym",
+  objective: "lose_fat",
   plan: {
     dia1: [
       { nome: "Agachamento com barra", reps: "4x10" },

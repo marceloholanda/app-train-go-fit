@@ -7,6 +7,9 @@ export const habitConsistencyPlan: WorkoutPlan = {
   tags: ["create_habit", "beginner", "home", "15", "2", "full_body"],
   days: 2,
   description: "Plano simples para iniciantes criarem o hábito de exercício em casa com treinos curtos",
+  level: "beginner",
+  environment: "home",
+  objective: "create_habit",
   plan: {
     dia1: [
       { nome: "Marcha estacionária", reps: "3x30s" },

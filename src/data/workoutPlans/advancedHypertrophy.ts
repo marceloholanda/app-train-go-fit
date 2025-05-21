@@ -7,6 +7,9 @@ export const advancedHypertrophy: WorkoutPlan = {
   tags: ["gain_muscle", "advanced", "gym", "60+", "5_plus", "upper_body"],
   days: 5,
   description: "Plano avançado para ganho de massa muscular com divisão otimizada por grupos musculares",
+  level: "advanced",
+  environment: "gym",
+  objective: "gain_muscle",
   plan: {
     dia1: [
       { nome: "Supino reto", reps: "4x10-12" },

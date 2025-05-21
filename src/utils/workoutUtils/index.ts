@@ -44,11 +44,11 @@ export {
 // Get achievements function is already exported from achievements.ts
 export { getAchievements, unlockAchievement } from './achievements';
 
-// Re-export the getWorkoutStreaks function
-export { getWorkoutStreaks } from './streaks';
-
 // Add missing exports for expected workout days
 export { getExpectedWorkoutDays } from './scheduleTracking';
 
 // Export the workout dates function
 export { getWorkoutDatesForMonth } from './history';
+
+// Export the workout streaks function
+export { getWorkoutStreaks } from './streaks';
