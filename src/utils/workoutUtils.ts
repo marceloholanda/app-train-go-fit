@@ -14,6 +14,7 @@ import {
   getStreakData,
   updateWorkoutProgress,
   getWeeklyProgress,
+  getWorkoutsThisWeek,
   getWorkoutStreaks,
   getWorkoutDatesForMonth,
 } from './workoutUtils/index';
@@ -31,6 +32,7 @@ export {
   getStreakData,
   updateWorkoutProgress,
   getWeeklyProgress,
+  getWorkoutsThisWeek,
   getWorkoutStreaks,
   getWorkoutDatesForMonth,
 };
