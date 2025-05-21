@@ -1,7 +1,6 @@
 
 // Re-export functions from submodules
 // Use explicit exports to avoid name conflicts
-export * from './achievements';
 export * from './dayMapping';
 export * from './history';
 export * from './iconGeneration';
@@ -55,3 +54,11 @@ export {
 
 // Export the workout dates function explicitly
 export { getWorkoutDatesForMonth } from './history';
+
+// Explicit export for achievement functions
+export {
+  checkAchievements,
+  checkNewAchievement,
+  unlockAchievement,
+  getAchievements
+} from './achievements';
