@@ -30,8 +30,8 @@ export * from './videoMapping';
 
 // Explicit re-export for weeklyProgress
 export {
-  getWeeklyProgress,
   getWorkoutsThisWeek,
+  getWeeklyProgress,
   // Rename the conflicting function
   updateWorkoutProgress as updateWeeklyWorkoutProgress
 } from './weeklyProgress';
