@@ -20,7 +20,8 @@ export * from './progress';
 export {
   getWorkoutDaysOfWeek,
   // Rename the conflicting function
-  getExpectedWorkoutDays as getScheduledWorkoutDays
+  getExpectedWorkoutDays as getScheduledWorkoutDays,
+  getExpectedWorkoutDays
 } from './scheduleTracking';
 
 export * from './streakCalculation';
@@ -40,12 +41,6 @@ export {
 export {
   updateWorkoutProgress
 } from './workoutTracking';
-
-// Get achievements function is already exported from achievements.ts
-export { getAchievements, unlockAchievement } from './achievements';
-
-// Add missing exports for expected workout days
-export { getExpectedWorkoutDays } from './scheduleTracking';
 
 // Export the workout dates function explicitly
 export { getWorkoutDatesForMonth } from './history';

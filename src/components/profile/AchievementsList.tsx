@@ -4,7 +4,7 @@ import { Trophy } from 'lucide-react';
 import Card from '@/components/Card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { checkAchievements } from '@/utils/workoutUtils';
+import { getAchievements } from '@/utils/workoutUtils';
 import { Achievement } from '@/types/workout';
 
 const AchievementsList = ({ userData }: { userData: any }) => {
@@ -19,7 +19,7 @@ const AchievementsList = ({ userData }: { userData: any }) => {
     const loadAchievements = async () => {
       try {
         setIsLoading(true);
-        const userAchievements = await checkAchievements(currentUser.id);
+        const userAchievements = await getAchievements(currentUser.id);
         setAchievements(userAchievements);
       } catch (error) {
         console.error('Erro ao carregar conquistas:', error);
