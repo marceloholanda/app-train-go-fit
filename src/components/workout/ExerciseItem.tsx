@@ -116,7 +116,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         exerciseName={exercise.nome}
-        videoUrl={exercise.video_url || ""}
+        videoUrl={exercise.video || ""}
         isPremium={isPremium}
       />
 
@@ -126,7 +126,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({
         onClose={() => setIsReplaceModalOpen(false)}
         isPremium={isPremium}
         currentExercise={exercise}
-        alternativeExercises={exercise.substituicoes || []}
+        alternativeExercises={exercise.substitutes ? exercise.substitutes.map(s => ({ nome: s, reps: exercise.reps || "" })) : []}
         onReplaceExercise={handleReplaceExercise}
       />
     </div>

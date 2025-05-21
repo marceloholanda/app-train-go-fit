@@ -75,7 +75,7 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             onClose={onCloseReplaceModal}
             isPremium={isPremium}
             currentExercise={selectedExercise!}
-            alternativeExercises={selectedExercise?.substituicoes || []}
+            alternativeExercises={selectedExercise?.substitutes || []}
             onReplaceExercise={onReplaceExercise}
           />
           
@@ -84,7 +84,7 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             onClose={onCloseImageModal}
             exerciseName={selectedExercise?.nome || ""}
             imageUrl={getExerciseImageUrl(selectedExercise?.nome || "")}
-            description={selectedExercise?.descricao}
+            description={selectedExercise?.instructions}
           />
         </>
       )}

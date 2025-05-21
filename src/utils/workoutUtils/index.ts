@@ -50,3 +50,5 @@ export { getWorkoutStreaks } from './streaks';
 // Add missing exports for expected workout days
 export { getExpectedWorkoutDays } from './scheduleTracking';
 
+// Export the workout dates function
+export { getWorkoutDatesForMonth } from './history';

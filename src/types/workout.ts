@@ -1,3 +1,4 @@
+
 import { Json } from '@/integrations/supabase/types';
 
 export interface WorkoutPlan {
@@ -40,6 +41,13 @@ export interface Exercise {
   substitutes?: string[];
   equipment?: string;
   muscle?: string;
+  
+  // Additional properties used in components
+  gif_url?: string;
+  video_url?: string;
+  completed?: boolean;
+  descricao?: string;
+  substituicoes?: Exercise[];
 }
 
 export interface WorkoutDay {
