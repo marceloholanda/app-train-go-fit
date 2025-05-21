@@ -57,6 +57,19 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
 
   const selectedExercise = selectedExerciseIndex !== -1 ? visibleExercises[selectedExerciseIndex] : undefined;
 
+  // Convert string substitutes to Exercise objects if needed
+  const alternativeExercises: Exercise[] = selectedExercise?.substitutes 
+    ? selectedExercise.substitutes.map(sub => {
+        // If already an Exercise object, return as is
+        if (typeof sub === 'object') return sub as Exercise;
+        // If it's a string, convert to simple Exercise object
+        return { 
+          nome: String(sub),
+          reps: selectedExercise.reps || '3x10'
+        };
+      })
+    : [];
+
   return (
     <>
       {/* Exercise Modals */}
@@ -75,7 +88,7 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             onClose={onCloseReplaceModal}
             isPremium={isPremium}
             currentExercise={selectedExercise!}
-            alternativeExercises={selectedExercise?.substitutes || []}
+            alternativeExercises={alternativeExercises}
             onReplaceExercise={onReplaceExercise}
           />
           

@@ -47,7 +47,7 @@ export { getAchievements, unlockAchievement } from './achievements';
 // Add missing exports for expected workout days
 export { getExpectedWorkoutDays } from './scheduleTracking';
 
-// Export the workout dates function
+// Export the workout dates function explicitly
 export { getWorkoutDatesForMonth } from './history';
 
 // Export the workout streaks function
