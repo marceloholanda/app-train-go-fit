@@ -17,6 +17,7 @@ import {
   getWeeklyProgress,
   getWorkoutsThisWeek,
   getWorkoutDatesForMonth,
+  checkNewAchievement,
 } from './workoutUtils/index';
 
 export {
@@ -28,6 +29,7 @@ export {
   checkAchievements,
   getAchievements,
   unlockAchievement,
+  checkNewAchievement,
   calculateStreak,
   getStreakData,
   getWorkoutStreaksData as getWorkoutStreaks,
