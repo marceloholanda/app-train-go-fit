@@ -12,10 +12,10 @@ import {
   unlockAchievement,
   calculateStreak,
   getStreakData,
+  getWorkoutStreaksData as getWorkoutStreaks,
   updateWorkoutProgress,
   getWeeklyProgress,
   getWorkoutsThisWeek,
-  getWorkoutStreaks,
   getWorkoutDatesForMonth,
 } from './workoutUtils/index';
 
@@ -30,9 +30,10 @@ export {
   unlockAchievement,
   calculateStreak,
   getStreakData,
+  getWorkoutStreaks,
   updateWorkoutProgress,
   getWeeklyProgress,
   getWorkoutsThisWeek,
-  getWorkoutStreaks,
   getWorkoutDatesForMonth,
 };
+
