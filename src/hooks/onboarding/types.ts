@@ -4,7 +4,7 @@ import { QuizAnswers } from '@/utils/workoutRecommendation/types';
 export interface RegistrationData {
   email: string;
   password: string;
-  name?: string;
+  name: string;
 }
 
 export interface OnboardingState {
