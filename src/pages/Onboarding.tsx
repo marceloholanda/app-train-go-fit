@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
@@ -7,7 +6,7 @@ import WorkoutPlanResult from '@/components/onboarding/WorkoutPlanResult';
 import Quiz from '@/components/quiz/Quiz';
 import RegistrationForm from '@/components/quiz/RegistrationForm';
 import { quizQuestions } from '@/components/quiz/QuizData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 
 const Onboarding = () => {
   const navigate = useNavigate();

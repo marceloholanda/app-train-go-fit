@@ -3,7 +3,7 @@ import { useReducer, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { QuizAnswers } from '@/utils/workoutRecommendation/types';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { quizQuestions } from '@/components/quiz/QuizData';
 import { 
   processRegistration, 
