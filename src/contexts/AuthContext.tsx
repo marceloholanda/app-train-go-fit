@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthResponse } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
 
 // Define the Auth context type
@@ -11,7 +11,7 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (newPassword: string) => Promise<void>;
@@ -23,7 +23,9 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   isLoading: true,
   login: async () => {},
-  register: async () => {},
+  register: async () => {
+    throw new Error('Not implemented');
+  },
   logout: async () => {},
   forgotPassword: async () => {},
   resetPassword: async () => {},
@@ -117,11 +119,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Register function
-  const register = async (email: string, password: string, name: string) => {
+  const register = async (email: string, password: string, name: string): Promise<AuthResponse> => {
     try {
       console.log("[TrainGO] Registering new user:", email);
       
-      const { data, error } = await supabase.auth.signUp({
+      const authResponse = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -131,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       
-      if (error) throw error;
+      if (authResponse.error) throw authResponse.error;
       
       toast({
         title: "Cadastro realizado",
@@ -139,6 +141,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       console.log("[TrainGO] Registration successful");
+      
+      return authResponse;
       
     } catch (error: any) {
       console.error('[TrainGO] Registration error:', error);

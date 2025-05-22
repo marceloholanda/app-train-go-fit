@@ -75,17 +75,20 @@ export const useOnboardingState = () => {
         
         // Usar a função register do AuthContext para criar o usuário
         try {
-          const result = await register(
+          // Garantir que o registro retorna corretamente e armazenar o resultado
+          const registerResult = await register(
             registrationData.email,
             registrationData.password,
             registrationData.name || registrationData.email.split('@')[0]
           );
           
-          if (!result || !result.user) {
+          // Verificar se temos dados do usuário após o registro
+          if (!registerResult || !registerResult.data || !registerResult.data.user) {
             throw new Error("Não foi possível criar sua conta. Tente novamente.");
           }
           
-          userId = result.user.id;
+          // Extrair o ID do usuário do resultado do registro
+          userId = registerResult.data.user.id;
           
           console.log("[TrainGO] Usuário registrado com sucesso:", userId);
         } catch (error: any) {
