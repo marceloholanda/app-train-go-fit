@@ -4,6 +4,7 @@
 import {
   mapWorkoutDays,
   getWorkoutIcon,
+  generateWorkoutName,
   generateWorkoutNameFromGroups,
   getWorkoutProgress,
   getScheduledWorkoutDays,
@@ -23,6 +24,7 @@ import {
 export {
   mapWorkoutDays,
   getWorkoutIcon,
+  generateWorkoutName,
   generateWorkoutNameFromGroups,
   getWorkoutProgress,
   getScheduledWorkoutDays,

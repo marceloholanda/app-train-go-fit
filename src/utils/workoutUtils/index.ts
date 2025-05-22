@@ -8,7 +8,8 @@ export * from './levelTracking';
 
 // Explicit re-exports for mapping.ts to avoid conflicts
 export { 
-  // Rename the conflicting function from mapping
+  generateWorkoutName,
+  // Also export with the alias that's being used in other parts of the app
   generateWorkoutName as generateWorkoutNameFromGroups
 } from './mapping'; 
 
