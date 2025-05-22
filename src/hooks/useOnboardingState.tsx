@@ -75,17 +75,17 @@ export const useOnboardingState = () => {
         
         // Usar a função register do AuthContext para criar o usuário
         try {
-          const newUser = await register(
+          const result = await register(
             registrationData.email,
             registrationData.password,
             registrationData.name || registrationData.email.split('@')[0]
           );
           
-          if (!newUser) {
+          if (!result || !result.user) {
             throw new Error("Não foi possível criar sua conta. Tente novamente.");
           }
           
-          userId = newUser.id;
+          userId = result.user.id;
           
           console.log("[TrainGO] Usuário registrado com sucesso:", userId);
         } catch (error: any) {
@@ -95,6 +95,9 @@ export const useOnboardingState = () => {
       }
       
       // A partir daqui, temos certeza que userId existe
+      if (!userId) {
+        throw new Error("Erro durante o processo de registro. Por favor, tente novamente.");
+      }
       
       // Convert weight and height ranges to approximate numbers for IMC calculation
       const weight_exact = weightRangeToNumber(quizAnswers.weight);
