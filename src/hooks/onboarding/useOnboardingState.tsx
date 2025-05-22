@@ -25,7 +25,8 @@ export const useOnboardingState = () => {
   const handleOptionSelect = useCallback((questionId: keyof QuizAnswers, value: string) => {
     dispatch({ type: 'SET_ANSWER', payload: { questionId, value } });
     
-    // Automatic advance to next question unless it's the last one
+    // Não avançar automaticamente para a próxima questão quando for a última
+    // Isso permite a transição controlada para o formulário de registro
     if (state.currentStep < quizQuestions.length - 1) {
       setTimeout(() => {
         dispatch({ type: 'SET_STEP', payload: state.currentStep + 1 });
@@ -43,6 +44,11 @@ export const useOnboardingState = () => {
       type: 'SET_REGISTATION_DATA', 
       payload: { [name]: value } 
     });
+  }, []);
+  
+  // Função para avançar para a tela de registro quando o quiz for concluído
+  const handleQuizCompleted = useCallback(() => {
+    dispatch({ type: 'SET_STEP', payload: quizQuestions.length });
   }, []);
 
   // Form submission
@@ -66,17 +72,19 @@ export const useOnboardingState = () => {
       
       // Se não estiver autenticado, criar uma conta com as informações do formulário
       if (!userId) {
-        if (!state.registrationData.email || !state.registrationData.password) {
-          throw new Error("Por favor, preencha seu email e senha para continuar");
+        if (!state.registrationData.email || !state.registrationData.password || !state.registrationData.name) {
+          throw new Error("Por favor, preencha todos os campos para continuar");
         }
         
         // Usar a função register do AuthContext para criar o usuário
         try {
+          console.log("[TrainGO] Registrando usuário:", state.registrationData.email);
+          
           // Garantir que o registro retorna corretamente e armazenar o resultado
           const registerResult = await register(
             state.registrationData.email,
             state.registrationData.password,
-            state.registrationData.name || state.registrationData.email.split('@')[0]
+            state.registrationData.name
           );
           
           // Verificar se temos dados do usuário após o registro
@@ -144,6 +152,7 @@ export const useOnboardingState = () => {
     handleOptionSelect,
     handleRegistrationChange,
     handlePreviousStep,
-    handleSubmit
+    handleSubmit,
+    handleQuizCompleted
   };
 };

@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import QuizQuestion from './QuizQuestion';
 import { ArrowLeft } from 'lucide-react';
-import { QuizAnswers } from '@/utils/workoutRecommendation';
+import { QuizAnswers } from '@/utils/workoutRecommendation/types';
 
 // Definição dos tipos para as perguntas do quiz
 export interface QuizQuestionType {
@@ -21,6 +21,7 @@ interface QuizProps {
   onAnswerChange: (questionId: keyof QuizAnswers, value: string) => void;
   currentStep: number;
   onPrevStep: () => void;
+  onCompleted?: () => void;
 }
 
 const Quiz: React.FC<QuizProps> = ({ 
@@ -28,9 +29,26 @@ const Quiz: React.FC<QuizProps> = ({
   answers, 
   onAnswerChange, 
   currentStep, 
-  onPrevStep 
+  onPrevStep,
+  onCompleted
 }) => {
   const currentQuestion = questions[currentStep];
+  
+  // Verificar se todas as perguntas foram respondidas
+  useEffect(() => {
+    if (
+      onCompleted &&
+      currentStep === questions.length - 1 && 
+      answers[currentQuestion.id]
+    ) {
+      // Esperar um pouco para que o usuário veja que sua escolha foi registrada
+      const timer = setTimeout(() => {
+        onCompleted();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, questions.length, answers, currentQuestion, onCompleted]);
   
   if (!currentQuestion) return null;
 

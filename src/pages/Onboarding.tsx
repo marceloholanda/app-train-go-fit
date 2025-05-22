@@ -24,7 +24,8 @@ const Onboarding = () => {
     handleOptionSelect,
     handleRegistrationChange,
     handlePreviousStep,
-    handleSubmit
+    handleSubmit,
+    handleQuizCompleted
   } = useOnboardingState();
 
   // Debug logs
@@ -69,6 +70,7 @@ const Onboarding = () => {
           onAnswerChange={handleOptionSelect}
           currentStep={currentStep}
           onPrevStep={handlePreviousStep}
+          onCompleted={handleQuizCompleted}
         />
       ) : (
         <RegistrationForm
