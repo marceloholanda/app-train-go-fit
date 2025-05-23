@@ -16,7 +16,7 @@ import { Json } from '@/integrations/supabase/types';
 export const useDashboardData = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser } = useAuth();
+  const { currentUser, session } = useAuth();
   
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,10 +26,17 @@ export const useDashboardData = () => {
   useEffect(() => {
     // Carregar dados do usuário e plano de treino do Supabase
     const loadUserData = async () => {
-      if (!currentUser) {
+      // Always get fresh user session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const activeUser = currentSession?.user || currentUser;
+      
+      if (!activeUser) {
+        console.log('[TrainGO] No user found, redirecting to login');
         navigate('/login');
         return;
       }
+      
+      console.log('[TrainGO] Loading dashboard data for user:', activeUser.id);
       
       try {
         setIsLoading(true);
@@ -38,19 +45,23 @@ export const useDashboardData = () => {
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', currentUser.id)
+          .eq('id', activeUser.id)
           .single();
           
-        if (profileError) throw profileError;
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('[TrainGO] Error fetching profile for user', activeUser.id, ':', profileError);
+          throw profileError;
+        }
         
         // Buscar plano de treino do usuário
         const { data: workoutPlan, error: workoutPlanError } = await supabase
           .from('user_workouts')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', activeUser.id)
           .maybeSingle();
           
         if (workoutPlanError && workoutPlanError.code !== 'PGRST116') {
+          console.error('[TrainGO] Error fetching workout plan for user', activeUser.id, ':', workoutPlanError);
           throw workoutPlanError;
         }
         
@@ -58,10 +69,11 @@ export const useDashboardData = () => {
         const { data: stats, error: statsError } = await supabase
           .from('stats')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', activeUser.id)
           .maybeSingle();
           
         if (statsError && statsError.code !== 'PGRST116') {
+          console.error('[TrainGO] Error fetching stats for user', activeUser.id, ':', statsError);
           throw statsError;
         }
         
@@ -69,15 +81,18 @@ export const useDashboardData = () => {
         const { data: completedWorkouts, error: completedWorkoutsError } = await supabase
           .from('progress')
           .select('workout_day')
-          .eq('user_id', currentUser.id);
+          .eq('user_id', activeUser.id);
           
-        if (completedWorkoutsError) throw completedWorkoutsError;
+        if (completedWorkoutsError) {
+          console.error('[TrainGO] Error fetching completed workouts for user', activeUser.id, ':', completedWorkoutsError);
+          throw completedWorkoutsError;
+        }
         
         const completed = completedWorkouts?.map(item => item.workout_day) || [];
         
         // Montar objeto com os dados do usuário
         const user = {
-          ...currentUser,
+          ...activeUser,
           profile,
           workoutPlan,
           stats,
@@ -87,8 +102,9 @@ export const useDashboardData = () => {
           }
         };
         
-        console.log("[TrainGO] User data loaded:", user.email);
+        console.log("[TrainGO] Dashboard data loaded for user:", activeUser.id, activeUser.email);
         console.log("[TrainGO] Workout plan:", workoutPlan ? "Found" : "Not found");
+        console.log("[TrainGO] Completed workouts:", completed.length);
         
         setUserData(user);
         
@@ -97,15 +113,11 @@ export const useDashboardData = () => {
           processWorkoutPlan(workoutPlan, completed);
           setWeekProgress(stats?.week_progress || 0);
         } else {
-          console.error("[TrainGO] No workout plan found for user");
-          toast({
-            title: "Plano não encontrado",
-            description: "Não foi possível encontrar seu plano de treino.",
-            variant: "destructive",
-          });
+          console.log("[TrainGO] No workout plan found for user:", activeUser.id);
+          setWorkouts([]);
         }
       } catch (error) {
-        console.error('[TrainGO] Erro ao carregar dados do usuário:', error);
+        console.error('[TrainGO] Error loading dashboard data for user', activeUser?.id, ':', error);
         toast({
           title: "Erro ao carregar dados",
           description: "Não foi possível carregar seu perfil.",
@@ -117,7 +129,7 @@ export const useDashboardData = () => {
     };
 
     loadUserData();
-  }, [navigate, toast, currentUser]);
+  }, [navigate, toast, currentUser, session]);
   
   // Processa o plano de treino e prepara os dados para exibição
   const processWorkoutPlan = (workoutPlanData: WorkoutPlanSupabase, completedWorkouts: number[]) => {
@@ -180,7 +192,16 @@ export const useDashboardData = () => {
   };
 
   const updateWorkoutStatus = async (workoutId: number, status: 'completed' | 'pending') => {
-    if (!currentUser) return;
+    // Get fresh session
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const activeUser = currentSession?.user || currentUser;
+    
+    if (!activeUser) {
+      console.error('[TrainGO] No user found for workout status update');
+      return;
+    }
+    
+    console.log('[TrainGO] Updating workout status for user:', activeUser.id, 'workout:', workoutId, 'status:', status);
     
     try {
       if (status === 'completed') {
@@ -189,21 +210,23 @@ export const useDashboardData = () => {
         const { error } = await supabase
           .from('progress')
           .insert({
-            user_id: currentUser.id,
+            user_id: activeUser.id,
             workout_day: workoutId,
             completed_date: today.toISOString().split('T')[0]
           });
           
         if (error) throw error;
+        console.log('[TrainGO] Workout marked as completed for user:', activeUser.id);
       } else {
         // Remover registro de treino concluído
         const { error } = await supabase
           .from('progress')
           .delete()
-          .eq('user_id', currentUser.id)
+          .eq('user_id', activeUser.id)
           .eq('workout_day', workoutId);
           
         if (error) throw error;
+        console.log('[TrainGO] Workout marked as pending for user:', activeUser.id);
       }
       
       // Atualizar a lista local de treinos
@@ -227,11 +250,12 @@ export const useDashboardData = () => {
           week_progress: newProgress,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', currentUser.id);
+        .eq('user_id', activeUser.id);
       
       setWeekProgress(newProgress);
+      console.log('[TrainGO] Progress updated for user:', activeUser.id, 'new progress:', newProgress);
     } catch (error) {
-      console.error('[TrainGO] Erro ao atualizar status do treino:', error);
+      console.error('[TrainGO] Error updating workout status for user', activeUser.id, ':', error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o status do treino.",

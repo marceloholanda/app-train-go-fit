@@ -6,23 +6,34 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { getAchievements } from '@/utils/workoutUtils';
 import { Achievement } from '@/types/workout';
+import { supabase } from '@/integrations/supabase/client';
 
 const AchievementsList = ({ userData }: { userData: any }) => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser, session } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!currentUser) return;
-
     const loadAchievements = async () => {
+      // Get fresh session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const activeUser = currentSession?.user || currentUser;
+      
+      if (!activeUser) {
+        console.log('[TrainGO] No user found for achievements');
+        return;
+      }
+
+      console.log('[TrainGO] Loading achievements for user:', activeUser.id);
+
       try {
         setIsLoading(true);
-        const userAchievements = await getAchievements(currentUser.id);
+        const userAchievements = await getAchievements(activeUser.id);
         setAchievements(userAchievements);
+        console.log('[TrainGO] Achievements loaded for user:', activeUser.id, userAchievements.length);
       } catch (error) {
-        console.error('Erro ao carregar conquistas:', error);
+        console.error('[TrainGO] Error loading achievements for user', activeUser.id, ':', error);
         toast({
           title: 'Erro',
           description: 'Não foi possível carregar suas conquistas',
@@ -34,7 +45,7 @@ const AchievementsList = ({ userData }: { userData: any }) => {
     };
 
     loadAchievements();
-  }, [currentUser, toast]);
+  }, [currentUser, session, toast]);
 
   if (isLoading) {
     return <p>Carregando conquistas...</p>;

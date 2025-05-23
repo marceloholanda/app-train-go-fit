@@ -71,12 +71,14 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: string | null
           age_exact: number | null
           avatar_url: string | null
           created_at: string
           days_per_week: string | null
           email: string | null
           environment: string | null
+          height: string | null
           height_exact: number | null
           id: string
           level: string | null
@@ -85,15 +87,18 @@ export type Database = {
           objective: string | null
           training_barrier: string | null
           updated_at: string
+          weight: string | null
           weight_exact: number | null
         }
         Insert: {
+          age?: string | null
           age_exact?: number | null
           avatar_url?: string | null
           created_at?: string
           days_per_week?: string | null
           email?: string | null
           environment?: string | null
+          height?: string | null
           height_exact?: number | null
           id: string
           level?: string | null
@@ -102,15 +107,18 @@ export type Database = {
           objective?: string | null
           training_barrier?: string | null
           updated_at?: string
+          weight?: string | null
           weight_exact?: number | null
         }
         Update: {
+          age?: string | null
           age_exact?: number | null
           avatar_url?: string | null
           created_at?: string
           days_per_week?: string | null
           email?: string | null
           environment?: string | null
+          height?: string | null
           height_exact?: number | null
           id?: string
           level?: string | null
@@ -119,6 +127,7 @@ export type Database = {
           objective?: string | null
           training_barrier?: string | null
           updated_at?: string
+          weight?: string | null
           weight_exact?: number | null
         }
         Relationships: []

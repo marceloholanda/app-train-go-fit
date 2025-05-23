@@ -22,7 +22,7 @@ export interface UserProfile {
 }
 
 export const useProfileData = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, session } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,47 +30,66 @@ export const useProfileData = () => {
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      if (!currentUser) {
+      // Always get fresh user session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const activeUser = currentSession?.user || currentUser;
+      
+      if (!activeUser) {
+        console.log('[TrainGO] No user found, clearing profile data');
+        setProfile(null);
+        setIsPremium(false);
         setIsLoading(false);
         return;
       }
 
+      console.log('[TrainGO] Fetching profile data for user:', activeUser.id);
+
       try {
         setIsLoading(true);
         
-        // Fetch profile data
+        // Fetch profile data with explicit user ID
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', currentUser.id)
+          .eq('id', activeUser.id)
           .single();
           
         if (profileError) {
-          throw profileError;
+          console.error('[TrainGO] Error fetching profile:', profileError);
+          if (profileError.code !== 'PGRST116') { // Not found is ok for new users
+            throw profileError;
+          }
         }
 
         if (profileData) {
+          console.log('[TrainGO] Profile data loaded for user:', activeUser.id, profileData.name);
           setProfile(profileData);
-          console.log('[TrainGO] Profile data loaded:', profileData);
+        } else {
+          console.log('[TrainGO] No profile found for user:', activeUser.id);
+          setProfile(null);
         }
 
-        // Fetch premium status
+        // Fetch premium status with explicit user ID
         const { data: premiumData, error: premiumError } = await supabase
           .from('premium')
           .select('*')
-          .eq('user_id', currentUser.id)
+          .eq('user_id', activeUser.id)
           .single();
           
         if (premiumError && premiumError.code !== 'PGRST116') {
+          console.error('[TrainGO] Error fetching premium status:', premiumError);
           throw premiumError;
         }
 
         if (premiumData) {
           setIsPremium(premiumData.plan_type === 'pro');
-          console.log('[TrainGO] Premium status:', premiumData.plan_type);
+          console.log('[TrainGO] Premium status for user', activeUser.id, ':', premiumData.plan_type);
+        } else {
+          setIsPremium(false);
+          console.log('[TrainGO] No premium data found for user:', activeUser.id);
         }
       } catch (error) {
-        console.error('[TrainGO] Error fetching profile:', error);
+        console.error('[TrainGO] Error fetching profile data for user', activeUser.id, ':', error);
         toast({
           title: "Erro ao carregar perfil",
           description: "Não foi possível carregar os dados do seu perfil.",
@@ -82,22 +101,32 @@ export const useProfileData = () => {
     };
 
     fetchProfileData();
-  }, [currentUser, toast]);
+  }, [currentUser, session, toast]);
 
   const updateProfile = async (updatedData: Partial<UserProfile>) => {
-    if (!currentUser || !profile) return;
+    // Get fresh session
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const activeUser = currentSession?.user || currentUser;
+    
+    if (!activeUser || !profile) {
+      console.error('[TrainGO] No user or profile found for update');
+      return false;
+    }
+
+    console.log('[TrainGO] Updating profile for user:', activeUser.id);
 
     try {
       const { error } = await supabase
         .from('profiles')
         .update(updatedData)
-        .eq('id', currentUser.id);
+        .eq('id', activeUser.id);
 
       if (error) throw error;
 
       // Update local state
       setProfile(prev => prev ? { ...prev, ...updatedData } : null);
 
+      console.log('[TrainGO] Profile updated successfully for user:', activeUser.id);
       toast({
         title: "Perfil atualizado",
         description: "Seus dados foram salvos com sucesso!",
@@ -105,7 +134,7 @@ export const useProfileData = () => {
 
       return true;
     } catch (error) {
-      console.error('[TrainGO] Error updating profile:', error);
+      console.error('[TrainGO] Error updating profile for user', activeUser.id, ':', error);
       toast({
         title: "Erro ao atualizar perfil",
         description: "Não foi possível salvar suas alterações.",
@@ -116,7 +145,16 @@ export const useProfileData = () => {
   };
 
   const updateWorkoutPlan = async (quizAnswers: any) => {
-    if (!currentUser) return false;
+    // Get fresh session
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const activeUser = currentSession?.user || currentUser;
+    
+    if (!activeUser) {
+      console.error('[TrainGO] No user found for workout plan update');
+      return false;
+    }
+
+    console.log('[TrainGO] Updating workout plan for user:', activeUser.id);
 
     try {
       // Generate new workout plan based on updated answers
@@ -130,7 +168,7 @@ export const useProfileData = () => {
       const { data: existingPlan } = await supabase
         .from('user_workouts')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', activeUser.id)
         .maybeSingle();
       
       if (existingPlan) {
@@ -152,12 +190,13 @@ export const useProfileData = () => {
           .eq('id', existingPlan.id);
           
         if (error) throw error;
+        console.log('[TrainGO] Workout plan updated for user:', activeUser.id);
       } else {
         // Create new plan
         const { error } = await supabase
           .from('user_workouts')
           .insert({
-            user_id: currentUser.id,
+            user_id: activeUser.id,
             plan_id: recommendedPlan.id,
             name: recommendedPlan.name,
             description: recommendedPlan.description || '',
@@ -170,6 +209,7 @@ export const useProfileData = () => {
           });
           
         if (error) throw error;
+        console.log('[TrainGO] New workout plan created for user:', activeUser.id);
       }
       
       toast({
@@ -179,7 +219,7 @@ export const useProfileData = () => {
       
       return true;
     } catch (error) {
-      console.error('[TrainGO] Error updating workout plan:', error);
+      console.error('[TrainGO] Error updating workout plan for user', activeUser.id, ':', error);
       toast({
         title: "Erro ao atualizar plano",
         description: "Não foi possível atualizar seu plano de treino.",
@@ -190,7 +230,16 @@ export const useProfileData = () => {
   };
 
   const upgradeToPremium = async () => {
-    if (!currentUser) return false;
+    // Get fresh session
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const activeUser = currentSession?.user || currentUser;
+    
+    if (!activeUser) {
+      console.error('[TrainGO] No user found for premium upgrade');
+      return false;
+    }
+
+    console.log('[TrainGO] Upgrading to premium for user:', activeUser.id);
 
     try {
       const now = new Date();
@@ -205,11 +254,12 @@ export const useProfileData = () => {
           expires_at: nextYear.toISOString(), 
           updated_at: now.toISOString()
         })
-        .eq('user_id', currentUser.id);
+        .eq('user_id', activeUser.id);
 
       if (error) throw error;
 
       setIsPremium(true);
+      console.log('[TrainGO] Premium upgrade successful for user:', activeUser.id);
 
       toast({
         title: "Upgrade realizado",
@@ -218,7 +268,7 @@ export const useProfileData = () => {
 
       return true;
     } catch (error) {
-      console.error('[TrainGO] Error upgrading to premium:', error);
+      console.error('[TrainGO] Error upgrading to premium for user', activeUser.id, ':', error);
       toast({
         title: "Erro no upgrade",
         description: "Não foi possível atualizar seu plano.",

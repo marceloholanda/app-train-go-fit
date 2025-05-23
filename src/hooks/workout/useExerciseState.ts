@@ -6,14 +6,21 @@ import { useToast } from '@/hooks/use-toast';
 
 export const useExerciseState = (
   workoutDayId: string | undefined,
-  userId: string | undefined
+  getUserId: () => Promise<string | undefined>
 ) => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const { toast } = useToast();
 
   const handleExerciseToggle = async (index: number) => {
-    if (!userId || !workoutDayId) return;
+    const userId = await getUserId();
+    
+    if (!userId || !workoutDayId) {
+      console.error('[TrainGO] No user ID or workout day ID for exercise toggle');
+      return;
+    }
+    
+    console.log('[TrainGO] Toggling exercise for user:', userId, 'workout:', workoutDayId, 'exercise:', index);
     
     const updatedExercises = exercises.map((exercise, i) => 
       i === index ? { ...exercise, completed: !exercise.completed } : exercise
@@ -38,6 +45,7 @@ export const useExerciseState = (
             exercises: updatedExercises as any
           })
           .eq('id', existingProgress.id);
+        console.log('[TrainGO] Exercise progress updated for user:', userId);
       }
       
       // Check if all exercises are completed
@@ -48,7 +56,7 @@ export const useExerciseState = (
         markWorkoutAsPending();
       }
     } catch (error) {
-      console.error('Error saving exercise state:', error);
+      console.error('[TrainGO] Error saving exercise state for user', userId, ':', error);
       toast({
         title: "Error",
         description: "Could not save your progress.",
@@ -58,7 +66,14 @@ export const useExerciseState = (
   };
 
   const markWorkoutAsCompleted = async () => {
-    if (!userId || !workoutDayId) return;
+    const userId = await getUserId();
+    
+    if (!userId || !workoutDayId) {
+      console.error('[TrainGO] No user ID or workout day ID for marking complete');
+      return;
+    }
+    
+    console.log('[TrainGO] Marking workout as completed for user:', userId, 'workout:', workoutDayId);
     
     try {
       const today = new Date();
@@ -93,13 +108,14 @@ export const useExerciseState = (
       }
       
       setIsCompleted(true);
+      console.log('[TrainGO] Workout marked as completed for user:', userId);
       
       toast({
         title: "Workout completed!",
         description: "Congratulations! Your progress has been updated.",
       });
     } catch (error) {
-      console.error('Error marking workout as completed:', error);
+      console.error('[TrainGO] Error marking workout as completed for user', userId, ':', error);
       toast({
         title: "Error",
         description: "Could not update your progress.",
@@ -109,7 +125,14 @@ export const useExerciseState = (
   };
   
   const markWorkoutAsPending = async () => {
-    if (!userId || !workoutDayId) return;
+    const userId = await getUserId();
+    
+    if (!userId || !workoutDayId) {
+      console.error('[TrainGO] No user ID or workout day ID for marking pending');
+      return;
+    }
+    
+    console.log('[TrainGO] Marking workout as pending for user:', userId, 'workout:', workoutDayId);
     
     try {
       // Remove completed workout record
@@ -120,8 +143,9 @@ export const useExerciseState = (
         .eq('workout_day', parseInt(workoutDayId));
         
       setIsCompleted(false);
+      console.log('[TrainGO] Workout marked as pending for user:', userId);
     } catch (error) {
-      console.error('Error marking workout as pending:', error);
+      console.error('[TrainGO] Error marking workout as pending for user', userId, ':', error);
       toast({
         title: "Error",
         description: "Could not update your progress.",

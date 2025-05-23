@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useWorkoutFetch = (
-  userId: string | undefined,
+  getUserId: () => Promise<string | undefined>,
   workoutDayId: string | undefined,
   setExercises: React.Dispatch<React.SetStateAction<Exercise[]>>,
   setIsCompleted: React.Dispatch<React.SetStateAction<boolean>>
@@ -19,10 +19,15 @@ export const useWorkoutFetch = (
 
   useEffect(() => {
     const loadWorkoutData = async () => {
+      const userId = await getUserId();
+      
       if (!userId || !workoutDayId) {
+        console.log('[TrainGO] No user ID or workout day ID, redirecting to dashboard');
         navigate('/dashboard');
         return;
       }
+      
+      console.log('[TrainGO] Loading workout data for user:', userId, 'workout day:', workoutDayId);
       
       try {
         setIsLoading(true);
@@ -36,6 +41,7 @@ export const useWorkoutFetch = (
           
         if (profile && profile.level) {
           setUserLevel(profile.level);
+          console.log('[TrainGO] User level loaded:', profile.level);
         }
         
         // Fetch user's workout plan
@@ -45,9 +51,13 @@ export const useWorkoutFetch = (
           .eq('user_id', userId)
           .maybeSingle();
           
-        if (workoutPlanError) throw workoutPlanError;
+        if (workoutPlanError) {
+          console.error('[TrainGO] Error fetching workout plan:', workoutPlanError);
+          throw workoutPlanError;
+        }
         
         if (!workoutPlan) {
+          console.log('[TrainGO] No workout plan found for user:', userId);
           toast({
             title: "Plan not found",
             description: "Could not find your workout plan.",
@@ -71,6 +81,7 @@ export const useWorkoutFetch = (
         const dayExercises = workoutPlan.plan[dayKey];
         
         if (!dayExercises) {
+          console.log('[TrainGO] Workout day not found in plan:', dayKey);
           toast({
             title: "Workout not found",
             description: "This workout doesn't exist in your current plan.",
@@ -87,16 +98,19 @@ export const useWorkoutFetch = (
         let exercisesWithStatus;
         if (progress && progress.exercises) {
           exercisesWithStatus = progress.exercises;
+          console.log('[TrainGO] Loaded exercise progress from database');
         } else {
           exercisesWithStatus = dayExercises.map((ex: Exercise) => ({ 
             ...ex, 
             completed: false
           }));
+          console.log('[TrainGO] Using default exercise status');
         }
         
         setExercises(exercisesWithStatus);
+        console.log('[TrainGO] Workout data loaded successfully for user:', userId);
       } catch (error) {
-        console.error('Error loading workout:', error);
+        console.error('[TrainGO] Error loading workout for user', userId, ':', error);
         toast({
           title: "Error loading workout",
           description: "An error occurred while loading workout details.",
@@ -109,7 +123,7 @@ export const useWorkoutFetch = (
     };
     
     loadWorkoutData();
-  }, [workoutDayId, navigate, toast, userId, setExercises, setIsCompleted]);
+  }, [workoutDayId, navigate, toast, getUserId, setExercises, setIsCompleted]);
 
   return { workoutDay, isLoading, userLevel };
 };
