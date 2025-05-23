@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { isPremiumUser } from '@/utils/userUtils';
 import FreePlanUpgradeCard from '@/components/premium/FreePlanUpgradeCard';
 import { useWorkoutData } from '@/hooks/useWorkoutData';
@@ -15,6 +15,25 @@ import ExerciseModals from '@/components/workout/ExerciseModals';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  
+  // Add logging and validation for the route parameter
+  useEffect(() => {
+    console.log('[TrainGO] ExerciseDetail - Component mounted with ID:', id);
+    
+    if (!id) {
+      console.error('[TrainGO] ExerciseDetail - No ID parameter provided');
+      navigate('/dashboard');
+      return;
+    }
+    
+    const workoutId = parseInt(id);
+    if (isNaN(workoutId) || workoutId < 1) {
+      console.error('[TrainGO] ExerciseDetail - Invalid ID parameter:', id);
+      navigate('/dashboard');
+      return;
+    }
+  }, [id, navigate]);
   
   // Custom hooks for workout data and modals
   const {
@@ -56,21 +75,34 @@ const ExerciseDetail = () => {
 
   // Revalidate premium status when component mounts
   useEffect(() => {
-    // Check initial status
     checkPremiumStatus();
     
-    // Set up event listener for storage changes
     const handleStorageChange = () => {
       checkPremiumStatus();
     };
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [checkPremiumStatus]);
+
+  // Don't render anything if no ID (will redirect above)
+  if (!id) {
+    return null;
+  }
 
   if (isLoading) {
+    console.log('[TrainGO] ExerciseDetail - Rendering loading state');
     return <ExerciseDetailLoading />;
   }
+  
+  // Log the current state for debugging
+  console.log('[TrainGO] ExerciseDetail - Rendering with state:', {
+    workoutDay,
+    exerciseCount: exercises.length,
+    visibleExerciseCount: visibleExercises.length,
+    isCompleted,
+    isPremium
+  });
   
   return (
     <div className="min-h-screen pb-16">
@@ -79,26 +111,40 @@ const ExerciseDetail = () => {
       
       {/* Header with workout day and toggle button */}
       <ExerciseHeader
-        workoutDay={workoutDay}
+        workoutDay={workoutDay || `Dia ${id}`}
         isCompleted={isCompleted}
         handleToggleWorkout={handleToggleWorkout}
       />
       
       {/* Exercise List Section */}
       <section className="p-6">
-        <ExerciseList
-          visibleExercises={visibleExercises}
-          isPremium={isPremium}
-          totalExercises={exercises.length}
-          handleExerciseToggle={handleExerciseToggle}
-          handleOpenVideoModal={handleOpenVideoModal}
-          handleOpenReplaceModal={handleOpenReplaceModal}
-          handleOpenImageModal={handleOpenImageModal}
-          handleAddExerciseModal={handleOpenAddExerciseModal}
-        />
-        
-        {/* Upgrade card for free users */}
-        {!isPremium && <FreePlanUpgradeCard />}
+        {visibleExercises.length > 0 ? (
+          <>
+            <ExerciseList
+              visibleExercises={visibleExercises}
+              isPremium={isPremium}
+              totalExercises={exercises.length}
+              handleExerciseToggle={handleExerciseToggle}
+              handleOpenVideoModal={handleOpenVideoModal}
+              handleOpenReplaceModal={handleOpenReplaceModal}
+              handleOpenImageModal={handleOpenImageModal}
+              handleAddExerciseModal={handleOpenAddExerciseModal}
+            />
+            
+            {/* Upgrade card for free users */}
+            {!isPremium && <FreePlanUpgradeCard />}
+          </>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-400 mb-4">Nenhum exercício encontrado para este dia.</p>
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="text-traingo-primary hover:underline"
+            >
+              Voltar ao Dashboard
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Modals */}
