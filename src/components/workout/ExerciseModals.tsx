@@ -48,15 +48,31 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
   const { selectedExercise, alternativeExercises, videoUrl, imageUrl } = 
     useExerciseModalProps(selectedExerciseIndex, visibleExercises);
 
+  // Log modal state for debugging
+  React.useEffect(() => {
+    if (isImageModalOpen) {
+      console.log('[TrainGO] Image modal opened for exercise:', selectedExercise?.nome || 'unknown');
+      console.log('[TrainGO] Exercise data:', selectedExercise);
+      console.log('[TrainGO] Image URL:', imageUrl);
+    }
+  }, [isImageModalOpen, selectedExercise, imageUrl]);
+
+  React.useEffect(() => {
+    if (isVideoModalOpen) {
+      console.log('[TrainGO] Video modal opened for exercise:', selectedExercise?.nome || 'unknown');
+      console.log('[TrainGO] Video URL:', videoUrl);
+    }
+  }, [isVideoModalOpen, selectedExercise, videoUrl]);
+
   return (
     <>
       {/* Exercise Modals */}
-      {selectedExerciseIndex !== -1 && (
+      {selectedExerciseIndex !== -1 && selectedExercise && (
         <>
           <ExerciseVideoModal
             isOpen={isVideoModalOpen}
             onClose={onCloseVideoModal}
-            exerciseName={selectedExercise?.nome || ""}
+            exerciseName={selectedExercise.nome || "Exercício"}
             videoUrl={videoUrl}
             isPremium={isPremium}
           />
@@ -65,7 +81,7 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             isOpen={isReplaceModalOpen}
             onClose={onCloseReplaceModal}
             isPremium={isPremium}
-            currentExercise={selectedExercise!}
+            currentExercise={selectedExercise}
             alternativeExercises={alternativeExercises}
             onReplaceExercise={onReplaceExercise}
           />
@@ -73,9 +89,9 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
           <ExerciseImageModal
             isOpen={isImageModalOpen}
             onClose={onCloseImageModal}
-            exerciseName={selectedExercise?.nome || ""}
+            exerciseName={selectedExercise.nome || "Exercício"}
             imageUrl={imageUrl}
-            description={selectedExercise?.instructions}
+            description={selectedExercise.instructions}
           />
         </>
       )}

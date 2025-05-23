@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +21,7 @@ export interface UserProfile {
 }
 
 export const useProfileData = () => {
-  const { currentUser, session } = useAuth();
+  const { currentUser, session, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +29,12 @@ export const useProfileData = () => {
 
   useEffect(() => {
     const fetchProfileData = async () => {
+      // Wait for auth to load first
+      if (authLoading) {
+        console.log('[TrainGO] Waiting for auth to load...');
+        return;
+      }
+
       // Always get fresh user session
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       const activeUser = currentSession?.user || currentUser;
@@ -66,7 +71,13 @@ export const useProfileData = () => {
           setProfile(profileData);
         } else {
           console.log('[TrainGO] No profile found for user:', activeUser.id);
-          setProfile(null);
+          // Create a basic profile from auth data
+          const basicProfile: UserProfile = {
+            id: activeUser.id,
+            name: activeUser.user_metadata?.name || activeUser.email?.split('@')[0] || 'Usuário',
+            email: activeUser.email || ''
+          };
+          setProfile(basicProfile);
         }
 
         // Fetch premium status with explicit user ID
@@ -89,7 +100,7 @@ export const useProfileData = () => {
           console.log('[TrainGO] No premium data found for user:', activeUser.id);
         }
       } catch (error) {
-        console.error('[TrainGO] Error fetching profile data for user', activeUser.id, ':', error);
+        console.error('[TrainGO] Error fetching profile data for user', activeUser?.id, ':', error);
         toast({
           title: "Erro ao carregar perfil",
           description: "Não foi possível carregar os dados do seu perfil.",
@@ -101,7 +112,7 @@ export const useProfileData = () => {
     };
 
     fetchProfileData();
-  }, [currentUser, session, toast]);
+  }, [currentUser, session, authLoading, toast]);
 
   const updateProfile = async (updatedData: Partial<UserProfile>) => {
     // Get fresh session

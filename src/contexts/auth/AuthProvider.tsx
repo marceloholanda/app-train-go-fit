@@ -72,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Clear data on sign out
         if (event === 'SIGNED_OUT') {
           clearUserData();
+          setIsLoading(false);
           return;
         }
         
@@ -84,10 +85,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log("[TrainGO] User email:", newSession.user.email);
         }
         
-        // Redirect to onboarding for new sign-ups
+        // Set loading to false once we have processed the auth state
+        setIsLoading(false);
+        
+        // Handle redirects after auth state is fully processed
         if (event === 'SIGNED_IN' && newSession) {
-          // Use setTimeout to prevent potential event loops
+          // Use setTimeout to prevent potential event loops and ensure state is updated
           setTimeout(() => {
+            // Check current path to avoid unnecessary redirects
+            const currentPath = window.location.pathname;
+            
+            // Don't redirect if already on the right page
+            if (currentPath === '/dashboard' || currentPath === '/profile' || currentPath.startsWith('/exercise/')) {
+              console.log("[TrainGO] User already on authenticated page, no redirect needed");
+              return;
+            }
+            
             const isNewUser = newSession.user.app_metadata.provider === 'email' && 
                              !newSession.user.app_metadata.onboarded;
             if (isNewUser) {
@@ -97,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.log("[TrainGO] Existing user, redirecting to dashboard");
               navigate('/dashboard');
             }
-          }, 0);
+          }, 100);
         }
       }
     );
@@ -110,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (data.session?.user) {
           console.log("[TrainGO] Found existing session for user:", data.session.user.id);
+          console.log("[TrainGO] Session expires at:", data.session.expires_at);
           setSession(data.session);
           setCurrentUser(data.session.user);
         } else {
@@ -135,6 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Login function
   const login = async (email: string, password: string) => {
     console.log("[TrainGO] Attempting login for email:", email);
+    setIsLoading(true);
     try {
       await loginUser(email, password);
       // Get the fresh session after login
@@ -147,12 +162,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error("[TrainGO] Login failed:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Register function
   const register = async (email: string, password: string, name: string): Promise<AuthResponse> => {
     console.log("[TrainGO] Attempting registration for email:", email);
+    setIsLoading(true);
     try {
       const result = await registerUser(email, password, name);
       console.log("[TrainGO] Registration successful for user:", result.data.user?.id);
@@ -160,12 +178,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error("[TrainGO] Registration failed:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Logout function
   const logout = async () => {
     console.log("[TrainGO] Logging out user:", currentUser?.id);
+    setIsLoading(true);
     try {
       await logoutUser();
       clearUserData();
@@ -178,6 +199,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Even if logout fails, clear local data
       clearUserData();
       navigate('/login');
+    } finally {
+      setIsLoading(false);
     }
   };
 
