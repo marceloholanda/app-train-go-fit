@@ -1,9 +1,10 @@
 # App construido em no-code
 
-O **TrainGO** é um aplicativo de treinos personalizados desenvolvido com foco em praticidade e autonomia. Ideal para quem deseja treinar por conta própria, em casa ou na academia, sem depender de um personal trainer.
+O **TrainGO** é um aplicativo desenvolvido em formato PWA de treinos personalizados com foco em praticidade e autonomia. Ideal para quem deseja treinar por conta própria, em casa ou na academia, sem depender de um personal trainer.
 
 
 
+![image alt](https://github.com/marceloholanda/app-train-go-fit/blob/6efed58ece589478d19e42fa5220e3fd375ac954/onboarding.png)
 
 
 
@@ -36,6 +37,8 @@ O **TrainGO** é um aplicativo de treinos personalizados desenvolvido com foco e
 - Sistema de conquistas e motivação (gamificação)
 - Armazenamento local 
 
+![image alt](https://github.com/marceloholanda/app-train-go-fit/blob/6efed58ece589478d19e42fa5220e3fd375ac954/onboarding2.png)
+
 ## Fluxo do Usuário
 
 1. Acessa a **landing page**
@@ -56,4 +59,6 @@ O **TrainGO** é um aplicativo de treinos personalizados desenvolvido com foco e
 - Conquistas desbloqueadas
 
 
+![image alt](https://github.com/marceloholanda/app-train-go-fit/blob/6efed58ece589478d19e42fa5220e3fd375ac954/dashboard.png)
 
+![image alt](https://github.com/marceloholanda/app-train-go-fit/blob/6efed58ece589478d19e42fa5220e3fd375ac954/settings.png)
