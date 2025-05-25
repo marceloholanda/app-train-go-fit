@@ -9,7 +9,237 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          badge_id: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      premium: {
+        Row: {
+          expires_at: string | null
+          payment_id: string | null
+          payment_status: string | null
+          plan_type: string
+          subscribed_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
+          plan_type?: string
+          subscribed_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          payment_id?: string | null
+          payment_status?: string | null
+          plan_type?: string
+          subscribed_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: string | null
+          age_exact: number | null
+          avatar_url: string | null
+          created_at: string
+          days_per_week: string | null
+          email: string | null
+          environment: string | null
+          height: string | null
+          height_exact: number | null
+          id: string
+          level: string | null
+          motivation_type: string | null
+          name: string | null
+          objective: string | null
+          training_barrier: string | null
+          updated_at: string
+          weight: string | null
+          weight_exact: number | null
+        }
+        Insert: {
+          age?: string | null
+          age_exact?: number | null
+          avatar_url?: string | null
+          created_at?: string
+          days_per_week?: string | null
+          email?: string | null
+          environment?: string | null
+          height?: string | null
+          height_exact?: number | null
+          id: string
+          level?: string | null
+          motivation_type?: string | null
+          name?: string | null
+          objective?: string | null
+          training_barrier?: string | null
+          updated_at?: string
+          weight?: string | null
+          weight_exact?: number | null
+        }
+        Update: {
+          age?: string | null
+          age_exact?: number | null
+          avatar_url?: string | null
+          created_at?: string
+          days_per_week?: string | null
+          email?: string | null
+          environment?: string | null
+          height?: string | null
+          height_exact?: number | null
+          id?: string
+          level?: string | null
+          motivation_type?: string | null
+          name?: string | null
+          objective?: string | null
+          training_barrier?: string | null
+          updated_at?: string
+          weight?: string | null
+          weight_exact?: number | null
+        }
+        Relationships: []
+      }
+      progress: {
+        Row: {
+          completed_date: string
+          created_at: string
+          exercises: Json | null
+          id: string
+          notes: string | null
+          user_id: string
+          workout_day: number
+        }
+        Insert: {
+          completed_date: string
+          created_at?: string
+          exercises?: Json | null
+          id?: string
+          notes?: string | null
+          user_id: string
+          workout_day: number
+        }
+        Update: {
+          completed_date?: string
+          created_at?: string
+          exercises?: Json | null
+          id?: string
+          notes?: string | null
+          user_id?: string
+          workout_day?: number
+        }
+        Relationships: []
+      }
+      stats: {
+        Row: {
+          current_streak: number | null
+          last_workout_date: string | null
+          longest_streak: number | null
+          total_workouts: number | null
+          updated_at: string
+          user_id: string
+          week_progress: number | null
+        }
+        Insert: {
+          current_streak?: number | null
+          last_workout_date?: string | null
+          longest_streak?: number | null
+          total_workouts?: number | null
+          updated_at?: string
+          user_id: string
+          week_progress?: number | null
+        }
+        Update: {
+          current_streak?: number | null
+          last_workout_date?: string | null
+          longest_streak?: number | null
+          total_workouts?: number | null
+          updated_at?: string
+          user_id?: string
+          week_progress?: number | null
+        }
+        Relationships: []
+      }
+      user_workouts: {
+        Row: {
+          created_at: string
+          days: number
+          description: string | null
+          environment: string | null
+          id: string
+          level: string | null
+          name: string
+          objective: string | null
+          plan: Json
+          plan_id: string
+          tags: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days: number
+          description?: string | null
+          environment?: string | null
+          id?: string
+          level?: string | null
+          name: string
+          objective?: string | null
+          plan: Json
+          plan_id: string
+          tags?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days?: number
+          description?: string | null
+          environment?: string | null
+          id?: string
+          level?: string | null
+          name?: string
+          objective?: string | null
+          plan?: Json
+          plan_id?: string
+          tags?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

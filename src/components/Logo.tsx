@@ -7,7 +7,7 @@ interface LogoProps {
   withText?: boolean;
 }
 
-const Logo: React.FC<LogoProps> = ({ size = 'medium', withText = true }) => {
+const Logo: React.FC<LogoProps> = ({ size = 'medium', withText = false }) => {
   const sizeClasses = {
     small: 'h-8',
     medium: 'h-12',
@@ -20,13 +20,8 @@ const Logo: React.FC<LogoProps> = ({ size = 'medium', withText = true }) => {
         <img 
           src="/lovable-uploads/01192848-d3c4-42c7-995d-11f46e901611.png" 
           alt="TrainGO Logo" 
-          className={sizeClasses[size] + " mr-2"}
+          className={sizeClasses[size]}
         />
-        {withText && (
-          <span className="font-bold text-white text-xl">
-            Train<span className="text-traingo-primary">GO</span>
-          </span>
-        )}
       </div>
     </Link>
   );
