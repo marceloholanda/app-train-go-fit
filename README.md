@@ -2,6 +2,11 @@
 
 O **TrainGO** é um aplicativo de treinos personalizados desenvolvido com foco em praticidade e autonomia. Ideal para quem deseja treinar por conta própria, em casa ou na academia, sem depender de um personal trainer.
 
+
+
+
+
+
 ##  Stacks/Frameworks/Bibliotecas
 
 - **Vite** 
