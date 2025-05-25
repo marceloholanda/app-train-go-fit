@@ -12,7 +12,7 @@ const Dashboard = () => {
     userData,
     isLoading,
     weekProgress,
-    setWorkProgress, // Renamed from setWeekProgress to match hook
+    setWeekProgress,
     workouts,
     setWorkouts
   } = useDashboardData();
@@ -44,7 +44,7 @@ const Dashboard = () => {
         <WorkoutsList 
           workouts={workouts} 
           setWorkouts={setWorkouts} 
-          setWeekProgress={setWorkProgress} // Using the renamed property
+          setWeekProgress={setWeekProgress} 
         />
         
         {/* Upgrade/Premium Banner */}

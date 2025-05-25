@@ -1,90 +1,47 @@
-import { supabase } from '@/integrations/supabase/client';
-
-interface WeeklyWorkouts {
-  completed: number;
-  total: number;
-}
 
 /**
- * Obtém o progresso semanal do usuário
- * @returns Objeto com treinos completados e total da semana
+ * Calcula a quantidade de dias treinados na semana atual
  */
-export const getWorkoutsThisWeek = async (userId?: string): Promise<WeeklyWorkouts> => {
-  if (!userId) {
-    return {
-      completed: 0,
-      total: 3
-    };
-  }
-
+export const getWorkoutsThisWeek = (): { completed: number, total: number } => {
   try {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+    const userData = localStorage.getItem('traingo-user');
+    if (!userData) return { completed: 0, total: 0 };
     
-    const { data: completed, error } = await supabase
-      .from('progress')
-      .select('id')
-      .eq('user_id', userId)
-      .gte('completed_date', startOfWeek.toISOString().split('T')[0]);
-      
-    if (error) {
-      console.error('Erro ao obter treinos da semana:', error);
-      return { completed: 0, total: 3 };
-    }
+    const user = JSON.parse(userData);
+    if (!user.workoutHistory) return { completed: 0, total: 0 };
     
-    // Get user's workout plan to determine total workouts per week
-    const { data: workoutPlan } = await supabase
-      .from('user_workouts')
-      .select('days')
-      .eq('user_id', userId)
-      .single();
+    // Determina o primeiro e último dia da semana atual (domingo a sábado)
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = domingo, 6 = sábado
+    
+    // Cria uma data para o início da semana (domingo)
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - currentDay);
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    // Cria uma data para o fim da semana (sábado)
+    const endOfWeek = new Date(now);
+    endOfWeek.setDate(now.getDate() + (6 - currentDay));
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    // Filtra os treinos realizados nesta semana
+    const workoutsThisWeek = user.workoutHistory.filter((workout: {date: string}) => {
+      const workoutDate = new Date(workout.date);
+      return workoutDate >= startOfWeek && workoutDate <= endOfWeek;
+    });
+    
+    // Conta dias únicos treinados na semana
+    const uniqueDays = new Set(workoutsThisWeek.map((workout: {date: string}) => workout.date));
+    
+    // Total de dias na semana é 7 ou o total de dias do plano do usuário, o que for menor
+    const totalDays = Math.min(7, user.workoutPlan?.days || 7);
     
     return {
-      completed: completed?.length || 0,
-      total: workoutPlan?.days || 3
+      completed: uniqueDays.size,
+      total: totalDays
     };
   } catch (error) {
     console.error('Erro ao obter treinos da semana:', error);
-    return { completed: 0, total: 3 };
+    return { completed: 0, total: 0 };
   }
-};
-
-/**
- * Obtém o progresso semanal do usuário em porcentagem
- * @param userId ID do usuário
- * @returns Número entre 0 e 100 representando o progresso
- */
-export const getWeeklyProgress = async (userId: string): Promise<number> => {
-  try {
-    const { data, error } = await supabase
-      .from('stats')
-      .select('week_progress')
-      .eq('user_id', userId)
-      .single();
-      
-    if (error) {
-      console.error('Erro ao obter progresso semanal:', error);
-      return 0;
-    }
-    
-    return data?.week_progress || 0;
-  } catch (error) {
-    console.error('Erro ao obter progresso semanal:', error);
-    return 0;
-  }
-};
-
-/**
- * Atualiza o progresso do treino e retorna o novo progresso semanal
- * @param workoutId ID do treino
- * @param completed Status de conclusão
- * @returns Novo progresso semanal (0-100)
- */
-export const updateWorkoutProgress = (workoutId: number, completed: boolean): number => {
-  // Implementação temporária (síncrona) para compatibilidade
-  console.log(`Atualizando treino ${workoutId} para ${completed ? 'concluído' : 'pendente'}`);
-  
-  // Simula um progresso entre 0-100
-  return Math.min(100, Math.max(0, Math.floor(Math.random() * 100)));
 };

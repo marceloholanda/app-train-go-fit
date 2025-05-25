@@ -83,10 +83,10 @@ const ExerciseReplaceModal: React.FC<ExerciseReplaceModalProps> = ({
                 }}
               >
                 <div className="flex items-center gap-4">
-                  {exercise.image && (
+                  {exercise.gif_url && (
                     <div className="w-16 h-16 flex-shrink-0 bg-black rounded overflow-hidden">
                       <img 
-                        src={exercise.image} 
+                        src={exercise.gif_url} 
                         alt={exercise.nome} 
                         className="w-full h-full object-cover" 
                       />

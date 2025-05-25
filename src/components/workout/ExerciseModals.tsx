@@ -1,14 +1,13 @@
 
 import React from 'react';
 import { Exercise } from '@/types/workout';
-import ExerciseVideoModal from '@/components/workout/modals/ExerciseVideoModal';
-import ExerciseReplaceModal from '@/components/workout/modals/ExerciseReplaceModal';
-import ExerciseAddModal from '@/components/workout/modals/ExerciseAddModal';
-import ExerciseImageModal from '@/components/workout/modals/ExerciseImageModal';
+import ExerciseVideoModal from '@/components/workout/ExerciseVideoModal';
+import ExerciseReplaceModal from '@/components/workout/ExerciseReplaceModal';
+import ExerciseAddModal from '@/components/workout/ExerciseAddModal';
+import ExerciseImageModal from '@/components/workout/ExerciseImageModal';
 import PremiumWelcomeModal from '@/components/premium/PremiumWelcomeModal';
 import { getExerciseVideoUrl } from '@/utils/workoutUtils/videoMapping';
 import { getExerciseImageUrl } from '@/utils/workoutRecommendation/exerciseImages';
-import { useExerciseModalProps } from '@/hooks/useExerciseModalProps';
 
 interface ExerciseModalsProps {
   selectedExerciseIndex: number;
@@ -45,35 +44,29 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
   onReplaceExercise,
   onAddExercises
 }) => {
-  const { selectedExercise, alternativeExercises, videoUrl, imageUrl } = 
-    useExerciseModalProps(selectedExerciseIndex, visibleExercises);
+  // Função para obter o URL do vídeo (da propriedade do exercício ou do mapeamento)
+  const getVideoUrl = (exercise: Exercise | undefined): string => {
+    if (!exercise) return '';
+    
+    // Usar o URL do vídeo do exercício, se disponível
+    if (exercise.video_url) return exercise.video_url;
+    
+    // Caso contrário, procurar no mapeamento
+    return getExerciseVideoUrl(exercise.nome) || '';
+  };
 
-  // Log modal state for debugging
-  React.useEffect(() => {
-    if (isImageModalOpen) {
-      console.log('[TrainGO] Image modal opened for exercise:', selectedExercise?.nome || 'unknown');
-      console.log('[TrainGO] Exercise data:', selectedExercise);
-      console.log('[TrainGO] Image URL:', imageUrl);
-    }
-  }, [isImageModalOpen, selectedExercise, imageUrl]);
-
-  React.useEffect(() => {
-    if (isVideoModalOpen) {
-      console.log('[TrainGO] Video modal opened for exercise:', selectedExercise?.nome || 'unknown');
-      console.log('[TrainGO] Video URL:', videoUrl);
-    }
-  }, [isVideoModalOpen, selectedExercise, videoUrl]);
+  const selectedExercise = selectedExerciseIndex !== -1 ? visibleExercises[selectedExerciseIndex] : undefined;
 
   return (
     <>
       {/* Exercise Modals */}
-      {selectedExerciseIndex !== -1 && selectedExercise && (
+      {selectedExerciseIndex !== -1 && (
         <>
           <ExerciseVideoModal
             isOpen={isVideoModalOpen}
             onClose={onCloseVideoModal}
-            exerciseName={selectedExercise.nome || "Exercício"}
-            videoUrl={videoUrl}
+            exerciseName={selectedExercise?.nome || ""}
+            videoUrl={getVideoUrl(selectedExercise)}
             isPremium={isPremium}
           />
 
@@ -81,17 +74,17 @@ const ExerciseModals: React.FC<ExerciseModalsProps> = ({
             isOpen={isReplaceModalOpen}
             onClose={onCloseReplaceModal}
             isPremium={isPremium}
-            currentExercise={selectedExercise}
-            alternativeExercises={alternativeExercises}
+            currentExercise={selectedExercise!}
+            alternativeExercises={selectedExercise?.substituicoes || []}
             onReplaceExercise={onReplaceExercise}
           />
           
           <ExerciseImageModal
             isOpen={isImageModalOpen}
             onClose={onCloseImageModal}
-            exerciseName={selectedExercise.nome || "Exercício"}
-            imageUrl={imageUrl}
-            description={selectedExercise.instructions}
+            exerciseName={selectedExercise?.nome || ""}
+            imageUrl={getExerciseImageUrl(selectedExercise?.nome || "")}
+            description={selectedExercise?.descricao}
           />
         </>
       )}

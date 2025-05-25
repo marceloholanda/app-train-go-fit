@@ -1,12 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Flame, Flag } from 'lucide-react';
 import Card from '@/components/Card';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { 
-  getWorkoutDatesForMonth, 
-  getWorkoutStreaks
-} from '@/utils/workoutUtils';
-import { useAuth } from '@/contexts/AuthContext';
+import { getWorkoutDatesForMonth } from '@/utils/workoutUtils';
+import { getWorkoutsThisWeek } from '@/utils/workoutUtils/weeklyProgress';
+import { getWorkoutStreaks, getExpectedWorkoutDays } from '@/utils/workoutUtils';
 import { useToast } from '@/hooks/use-toast';
 import { ptBR } from 'date-fns/locale';
 
@@ -18,49 +17,38 @@ const WorkoutCalendar = ({ userData }: WorkoutCalendarProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [workoutDates, setWorkoutDates] = useState<string[]>([]);
   const [missedDates, setMissedDates] = useState<string[]>([]);
-  const { currentUser } = useAuth();
-  const { toast } = useToast();
-
-  // Dados simulados de progresso semanal e streaks
   const [weekProgress, setWeekProgress] = useState({ completed: 0, total: 0 });
   const [streaks, setStreaks] = useState({ current: 0, longest: 0 });
 
   useEffect(() => {
-    if (!currentUser) return;
+    refreshCalendarData(new Date());
     
-    const refreshCalendarData = async () => {
-      const month = date.getMonth();
-      const year = date.getFullYear();
-      
-      try {
-        // Obter datas de treino com ID do usuário
-        const dates = await getWorkoutDatesForMonth(month, year, currentUser.id);
-        setWorkoutDates(dates);
-        
-        // Configurar progresso semanal e streaks com dados estáticos por enquanto
-        setWeekProgress({ completed: 2, total: 3 });
-        
-        // Get streak data
-        const streakData = await getWorkoutStreaks(currentUser.id);
-        setStreaks(streakData);
-        
-        // Datas perdidas (simuladas)
-        setMissedDates(['2023-05-15', '2023-05-22']);
-      } catch (error) {
-        console.error('Erro ao atualizar dados do calendário:', error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível carregar seu histórico de treinos.",
-          variant: "destructive",
-        });
-      }
-    };
+    // Carregar dados de progresso semanal
+    const weekStats = getWorkoutsThisWeek();
+    setWeekProgress(weekStats);
+    
+    // Carregar dados de streaks
+    const streakStats = getWorkoutStreaks();
+    setStreaks(streakStats);
+  }, [userData]);
 
-    refreshCalendarData();
-  }, [currentUser, date, toast]);
+  const refreshCalendarData = (selectedDate: Date) => {
+    const month = selectedDate.getMonth();
+    const year = selectedDate.getFullYear();
+    const dates = getWorkoutDatesForMonth(month, year);
+    setWorkoutDates(dates);
+    
+    // Obter dias esperados de treino que foram perdidos
+    const expectedDays = getExpectedWorkoutDays();
+    const missed = expectedDays
+      .filter(day => day.missed)
+      .map(day => day.date);
+    setMissedDates(missed);
+  };
 
   const handleMonthChange = (newDate: Date) => {
     setDate(newDate);
+    refreshCalendarData(newDate);
   };
 
   const getModifierStyles = (date: Date) => {

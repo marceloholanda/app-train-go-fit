@@ -1,57 +1,177 @@
-
-import { useAuth } from '@/contexts/AuthContext';
-import { useExerciseState } from './workout/useExerciseState';
-import { useWorkoutFetch } from './workout/useWorkoutFetch';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { Exercise } from '@/types/workout';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { updateWorkoutProgress } from '@/utils/workoutUtils';
 
 export const useWorkoutData = (id: string | undefined) => {
-  const { currentUser, session } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
-  // Add logging for debugging navigation issues
+  const [workoutDay, setWorkoutDay] = useState<string>('');
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [userLevel, setUserLevel] = useState<string>('beginner');
+
   useEffect(() => {
-    console.log('[TrainGO] useWorkoutData initialized with:', {
-      workoutId: id,
-      hasUser: !!currentUser,
-      hasSession: !!session,
-      userId: currentUser?.id
-    });
-  }, [id, currentUser, session]);
-  
-  // Get current user ID with session verification
-  const getCurrentUserId = async () => {
-    try {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      const activeUser = currentSession?.user || currentUser;
-      
-      if (!activeUser?.id) {
-        console.error('[TrainGO] useWorkoutData - No valid user found');
-        return undefined;
+    const loadWorkoutData = () => {
+      try {
+        setIsLoading(true);
+        
+        const userData = localStorage.getItem('traingo-user');
+        if (!userData || !id) {
+          navigate('/dashboard');
+          return;
+        }
+        
+        const user = JSON.parse(userData);
+        const workoutPlan = user.workoutPlan;
+        
+        if (!workoutPlan) {
+          toast({
+            title: "Plano não encontrado",
+            description: "Não foi possível encontrar seu plano de treino.",
+            variant: "destructive",
+          });
+          navigate('/dashboard');
+          return;
+        }
+
+        // Obter o nível do usuário para determinar o limite de exercícios
+        if (user.quizAnswers && user.quizAnswers.level) {
+          setUserLevel(user.quizAnswers.level);
+        }
+        
+        // Encontrar o dia de treino baseado no ID
+        const dayNumber = parseInt(id);
+        const dayKey = `dia${dayNumber}`;
+        const dayExercises = workoutPlan.plan[dayKey];
+        
+        if (!dayExercises) {
+          toast({
+            title: "Treino não encontrado",
+            description: "Este treino não existe no seu plano atual.",
+            variant: "destructive",
+          });
+          navigate('/dashboard');
+          return;
+        }
+        
+        // Verificar se o treino está concluído
+        const completedWorkouts = user.workoutProgress?.completedWorkouts || [];
+        const completed = completedWorkouts.includes(dayNumber);
+        setIsCompleted(completed);
+        
+        // Preparar dados para exibição
+        setWorkoutDay(`Dia ${dayNumber}`);
+        
+        // Carregar status de conclusão individual dos exercícios (se salvo)
+        const savedExercises = user[`exercises_day${dayNumber}`] || dayExercises.map((ex: Exercise) => ({ 
+          ...ex, 
+          completed: false
+        }));
+        
+        setExercises(savedExercises);
+      } catch (error) {
+        console.error('Erro ao carregar treino:', error);
+        toast({
+          title: "Erro ao carregar treino",
+          description: "Ocorreu um erro ao carregar os detalhes do treino.",
+          variant: "destructive",
+        });
+        navigate('/dashboard');
+      } finally {
+        setIsLoading(false);
       }
-      
-      console.log('[TrainGO] useWorkoutData - Current user ID:', activeUser.id);
-      return activeUser.id;
+    };
+    
+    loadWorkoutData();
+  }, [id, navigate, toast]);
+
+  const handleExerciseToggle = (index: number) => {
+    const updatedExercises = exercises.map((exercise, i) => 
+      i === index ? { ...exercise, completed: !exercise.completed } : exercise
+    );
+    
+    setExercises(updatedExercises);
+    
+    // Salvar estado dos exercícios
+    try {
+      const userData = localStorage.getItem('traingo-user');
+      if (userData && id) {
+        const user = JSON.parse(userData);
+        user[`exercises_day${id}`] = updatedExercises;
+        localStorage.setItem('traingo-user', JSON.stringify(user));
+      }
     } catch (error) {
-      console.error('[TrainGO] useWorkoutData - Error getting user ID:', error);
-      return undefined;
+      console.error('Erro ao salvar estado dos exercícios:', error);
+    }
+    
+    // Verificar se todos exercícios estão concluídos
+    const allCompleted = updatedExercises.every(ex => ex.completed);
+    if (allCompleted && !isCompleted) {
+      markWorkoutAsCompleted();
+    } else if (!allCompleted && isCompleted) {
+      markWorkoutAsPending();
     }
   };
-  
-  const {
-    exercises,
-    setExercises,
-    isCompleted,
-    setIsCompleted,
-    handleExerciseToggle,
-    handleToggleWorkout
-  } = useExerciseState(id, getCurrentUserId);
 
-  const { workoutDay, isLoading, userLevel } = useWorkoutFetch(
-    getCurrentUserId,
-    id,
-    setExercises,
-    setIsCompleted
-  );
+  const markWorkoutAsCompleted = () => {
+    if (!id) return;
+    
+    setIsCompleted(true);
+    updateWorkoutProgress(parseInt(id), true);
+    
+    toast({
+      title: "Treino concluído!",
+      description: "Parabéns! Seu progresso foi atualizado.",
+    });
+  };
+  
+  const markWorkoutAsPending = () => {
+    if (!id) return;
+    
+    setIsCompleted(false);
+    updateWorkoutProgress(parseInt(id), false);
+  };
+  
+  const handleToggleWorkout = () => {
+    if (!id) return;
+    
+    const newStatus = !isCompleted;
+    setIsCompleted(newStatus);
+    
+    // Atualizar status de todos os exercícios
+    const updatedExercises = exercises.map(exercise => ({ 
+      ...exercise, 
+      completed: newStatus 
+    }));
+    
+    setExercises(updatedExercises);
+    
+    // Salvar estado dos exercícios
+    try {
+      const userData = localStorage.getItem('traingo-user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        user[`exercises_day${id}`] = updatedExercises;
+        localStorage.setItem('traingo-user', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Erro ao salvar estado dos exercícios:', error);
+    }
+    
+    // Atualizar progresso
+    updateWorkoutProgress(parseInt(id), newStatus);
+    
+    toast({
+      title: newStatus ? "Treino concluído!" : "Treino desmarcado",
+      description: newStatus 
+        ? "Parabéns! Seu progresso foi atualizado."
+        : "O treino foi marcado como pendente.",
+    });
+  };
 
   return {
     workoutDay,

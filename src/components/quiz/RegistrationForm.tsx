@@ -2,7 +2,12 @@
 import React from 'react';
 import Button from '@/components/Button';
 import { ArrowRight } from 'lucide-react';
-import { RegistrationData } from '@/hooks/onboarding/types';
+
+interface RegistrationData {
+  name: string;
+  email: string;
+  password: string;
+}
 
 interface RegistrationFormProps {
   data: RegistrationData;

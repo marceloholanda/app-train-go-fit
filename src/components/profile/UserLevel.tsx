@@ -3,7 +3,9 @@ import React from 'react';
 import { Trophy, Clock } from 'lucide-react';
 import Card from '@/components/Card';
 import { Progress } from '@/components/ui/progress';
+import { getUserLevel } from '@/utils/workoutUtils';
 import { cn } from '@/lib/utils';
+import { getUnlockedLevels } from '@/utils/workoutUtils/levelTracking';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -12,16 +14,8 @@ interface UserLevelProps {
 }
 
 const UserLevel = ({ userData }: UserLevelProps) => {
-  // Dados simulados para o nível do usuário
-  const levelData = {
-    level: "Iniciante", 
-    nextLevel: "Intermediário",
-    progress: 15
-  };
-
-  const unlockedLevels = [
-    { nivel: "Iniciante", date: "2023-05-01" }
-  ];
+  const { level, nextLevel, progress } = getUserLevel();
+  const unlockedLevels = getUnlockedLevels();
 
   // Define cores e ícones para cada nível
   const getLevelColor = (level: string) => {
@@ -74,10 +68,10 @@ const UserLevel = ({ userData }: UserLevelProps) => {
       <Card className="mb-4">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
-            <span className="text-2xl mr-2">{getLevelIcon(levelData.level)}</span>
+            <span className="text-2xl mr-2">{getLevelIcon(level)}</span>
             <div>
-              <h3 className={cn("font-bold text-lg", getLevelColor(levelData.level))}>
-                {levelData.level}
+              <h3 className={cn("font-bold text-lg", getLevelColor(level))}>
+                {level}
               </h3>
               <p className="text-xs text-gray-400">Nível de consistência</p>
             </div>
@@ -85,15 +79,15 @@ const UserLevel = ({ userData }: UserLevelProps) => {
           
           <div className="flex flex-col items-end">
             <span className="text-sm">
-              Próximo nível: <span className="font-semibold">{levelData.nextLevel}</span>
+              Próximo nível: <span className="font-semibold">{nextLevel}</span>
             </span>
-            <span className="text-xs text-gray-400">{levelData.progress}% concluído</span>
+            <span className="text-xs text-gray-400">{progress}% concluído</span>
           </div>
         </div>
         
         {/* Barra de Progresso */}
         <div className="mb-1">
-          <Progress value={levelData.progress} className="h-2" />
+          <Progress value={progress} className="h-2" />
         </div>
         
         <p className="text-center text-xs text-gray-400 mt-4 mb-6">

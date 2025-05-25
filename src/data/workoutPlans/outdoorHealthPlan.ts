@@ -7,9 +7,6 @@ export const outdoorHealthPlan: WorkoutPlan = {
   tags: ["health_energy", "returning", "outdoor", "30_45", "4", "full_body"],
   days: 4,
   description: "Plano para melhorar a disposição e saúde geral com treinos ao ar livre",
-  level: "returning",
-  environment: "outdoor",
-  objective: "health_energy",
   plan: {
     dia1: [
       { nome: "Caminhada rápida", reps: "20 minutos" },

@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from '@/contexts/AuthContext';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileInfo from '@/components/profile/ProfileInfo';
 import WorkoutCalendar from '@/components/profile/WorkoutCalendar';
@@ -12,66 +11,74 @@ import UpgradeBanner from '@/components/profile/UpgradeBanner';
 import MonthlyEvaluation from '@/components/profile/MonthlyEvaluation';
 import LevelOnboardingBanner from '@/components/profile/LevelOnboardingBanner';
 import PlanStatusCard from '@/components/profile/PlanStatusCard';
-import { useProfileData } from '@/hooks/useProfileData';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser, session, isLoading: authLoading } = useAuth();
-  const { profile, isLoading: profileLoading, isPremium } = useProfileData();
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Redirect to login if not authenticated, but wait for auth to load first
   useEffect(() => {
-    if (!authLoading && !currentUser && !session) {
-      console.log('[TrainGO] No authenticated user found, redirecting to login');
-      navigate('/login');
-      return;
-    }
+    // Carregar dados do usuário
+    const loadUserData = () => {
+      try {
+        const user = localStorage.getItem('traingo-user');
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          setUserData(parsedUser);
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Não foi possível carregar seu perfil.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    if (currentUser) {
-      console.log('[TrainGO] Authenticated user found for profile:', currentUser.id);
-    }
-  }, [currentUser, session, authLoading, navigate]);
+    loadUserData();
+  }, [navigate, toast]);
 
-  // Show loading while authentication or profile is loading
-  if (authLoading || profileLoading) {
-    console.log('[TrainGO] Loading profile page - auth:', authLoading, 'profile:', profileLoading);
+  // Função para atualizar os dados do usuário na interface
+  const updateUserData = () => {
+    try {
+      const user = localStorage.getItem('traingo-user');
+      if (user) {
+        setUserData(JSON.parse(user));
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar dados do usuário:', error);
+    }
+  };
+
+  // Escutar mudanças no localStorage para atualização dinâmica
+  useEffect(() => {
+    window.addEventListener('storage', updateUserData);
+    
+    return () => {
+      window.removeEventListener('storage', updateUserData);
+    };
+  }, []);
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-10 h-10 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-400">Carregando perfil...</p>
-        </div>
+        <div className="w-10 h-10 border-4 border-traingo-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Don't render anything if no user (will redirect above)
-  if (!currentUser) {
-    return null;
-  }
-
-  // Use profile data from Supabase, fallback to basic user data
-  const userData = profile ? {
-    id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    plan: isPremium ? 'premium' : 'free',
-    profile: profile
-  } : {
-    id: currentUser.id,
-    name: currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || 'Usuário',
-    email: currentUser.email,
-    plan: 'free',
-    profile: null
-  };
-
-  console.log('[TrainGO] Rendering profile for user:', userData.id, 'with data:', userData);
+  const isPremium = userData?.plan === 'premium';
 
   return (
     <div className="min-h-screen pb-24">
-      <ProfileHeader userData={userData} setUserData={() => {/* Profile updates handled by useProfileData */}} />
+      <ProfileHeader userData={userData} setUserData={setUserData} />
 
       {/* Avaliação Mensal e Banner de Onboarding */}
       <MonthlyEvaluation />

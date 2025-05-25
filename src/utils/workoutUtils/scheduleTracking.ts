@@ -1,99 +1,83 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { ExpectedWorkoutDay } from '@/types/workout';
-
 /**
- * Obter os dias da semana em que o usuário deve treinar
+ * Calcula os dias esperados de treino com base na configuração do usuário
  */
-export const getWorkoutDaysOfWeek = async (userId: string): Promise<number[]> => {
+export const getExpectedWorkoutDays = (): {date: string, missed: boolean}[] => {
   try {
-    // Buscar perfil do usuário para obter frequência de treinos
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('days_per_week')
-      .eq('id', userId)
-      .single();
-      
-    if (error || !profile) {
-      console.error('Erro ao obter dias de treino:', error);
-      return [1, 3, 5]; // Default: Segunda, Quarta e Sexta
-    }
+    const userData = localStorage.getItem('traingo-user');
+    if (!userData) return [];
     
-    // Mapear string para array de dias (0 = domingo, 6 = sábado)
-    switch(profile.days_per_week) {
-      case '3': return [1, 3, 5]; // 3x: Segunda, Quarta e Sexta
-      case '4': return [1, 2, 4, 5]; // 4x: Segunda, Terça, Quinta e Sexta
-      case '5': return [1, 2, 3, 4, 5]; // 5x: Segunda a Sexta
-      case '6': return [1, 2, 3, 4, 5, 6]; // 6x: Segunda a Sábado
-      case '7': return [0, 1, 2, 3, 4, 5, 6]; // 7x: Todos os dias
-      case '2': return [1, 4]; // 2x: Segunda e Quinta
-      default: return [1, 3, 5]; // Default: 3x por semana
-    }
+    const user = JSON.parse(userData);
+    if (!user.workoutPlan || !user.workoutPlan.days_per_week) return [];
     
-  } catch (error) {
-    console.error('Erro ao obter dias de treino:', error);
-    return [1, 3, 5]; // Default em caso de erro
-  }
-};
-
-/**
- * Calcula os dias de treino esperados para o usuário
- */
-export const getExpectedWorkoutDays = async (userId: string, startDate?: Date, daysAhead = 14): Promise<ExpectedWorkoutDay[]> => {
-  try {
-    const workoutDays = await getWorkoutDaysOfWeek(userId);
-    const start = startDate || new Date();
-    start.setHours(0, 0, 0, 0);
-    
-    const expectedDays: ExpectedWorkoutDay[] = [];
+    const daysPerWeek = user.workoutPlan.days_per_week;
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     
-    // Obter os dias de treino completados para comparação
-    const { data: completed, error } = await supabase
-      .from('progress')
-      .select('completed_date')
-      .eq('user_id', userId)
-      .gte('completed_date', new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-      .lte('completed_date', new Date(start.getTime() + daysAhead * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    // Obtém todos os dias treinados do mês atual
+    const trainedDays = new Set(
+      (user.workoutHistory || [])
+        .map((workout: {date: string}) => workout.date)
+        .filter((date: string) => {
+          const workoutDate = new Date(date);
+          return workoutDate.getMonth() === today.getMonth() && 
+                 workoutDate.getFullYear() === today.getFullYear();
+        })
+    );
+    
+    const expectedDays: {date: string, missed: boolean}[] = [];
+    
+    // Define quais dias da semana devem ser dias de treino com base em days_per_week
+    // Assumindo: 1=segunda, 2=terça, etc. Distribui os dias uniformemente na semana.
+    const workoutDays = getWorkoutDaysOfWeek(daysPerWeek);
+    
+    // Para cada dia do mês atual até hoje
+    const currentDate = new Date(startOfMonth);
+    while (currentDate <= today) {
+      const dayOfWeek = currentDate.getDay(); // 0=domingo, 1=segunda, etc.
       
-    if (error) {
-      console.error('Erro ao obter treinos completados:', error);
-    }
-    
-    const completedDates = completed ? completed.map(c => c.completed_date) : [];
-    
-    // Gerar datas esperadas
-    for (let i = -7; i <= daysAhead; i++) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + i);
-      
-      // Checar se é um dia de treino para o usuário
-      if (workoutDays.includes(date.getDay())) {
-        const dateStr = date.toISOString().split('T')[0];
-        const isCompleted = completedDates.includes(dateStr);
-        const isMissed = !isCompleted && date < today;
+      // Se esse dia da semana é um dia de treino esperado
+      if (workoutDays.includes(dayOfWeek)) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const wasTrained = trainedDays.has(dateStr);
         
-        // Só adicionar se for um dia perdido (no passado) ou futuro
-        if (isMissed || date >= today) {
+        // Só considera "missed" se a data já passou e não houve treino
+        if (currentDate < today && !wasTrained) {
           expectedDays.push({
             date: dateStr,
-            missed: isMissed
+            missed: true
           });
         }
       }
+      
+      // Avança para o próximo dia
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
     return expectedDays;
-    
   } catch (error) {
-    console.error('Erro ao calcular dias esperados de treino:', error);
+    console.error('Erro ao obter dias esperados de treino:', error);
     return [];
   }
 };
 
 /**
- * Obter dias esperados de treino para a agenda
- * @deprecated Use getExpectedWorkoutDays instead
+ * Converte o número de dias por semana em dias específicos da semana
+ * Distribui os dias uniformemente durante a semana
  */
-export const getScheduledWorkoutDays = getExpectedWorkoutDays;
+export const getWorkoutDaysOfWeek = (daysPerWeek: number): number[] => {
+  // Limita entre 3-5 dias por semana
+  const normalizedDays = Math.min(5, Math.max(3, daysPerWeek));
+  
+  switch (normalizedDays) {
+    case 3:
+      return [1, 3, 5]; // Segunda, Quarta, Sexta
+    case 4:
+      return [1, 2, 4, 5]; // Segunda, Terça, Quinta, Sexta
+    case 5:
+      return [1, 2, 3, 4, 5]; // Segunda a Sexta
+    default:
+      return [1, 3, 5]; // Padrão: 3 dias (segunda, quarta, sexta)
+  }
+};

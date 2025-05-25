@@ -1,99 +1,79 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { getWorkoutName } from './history';
 
 /**
- * Atualiza o status de treino (concluído/pendente)
- * Retorna o novo progresso semanal como número
+ * Atualiza o progresso de treino do usuário
  */
-export const updateWorkoutProgress = (workoutDay: number, isCompleted: boolean): number => {
+export const updateWorkoutProgress = (workoutId: number, completed: boolean): number => {
   try {
-    // Versão síncrona que retorna direto o número para evitar erros de tipagem
-    // Atualiza o backend de forma assíncrona sem aguardar
-    updateWorkoutProgressAsync(workoutDay, isCompleted);
+    const userData = localStorage.getItem('traingo-user');
+    if (!userData) return 0;
     
-    // Retorna um valor estimado para atualização imediata da UI
-    return isCompleted ? 25 : 0;
+    const user = JSON.parse(userData);
+    
+    if (!user.workoutProgress) {
+      user.workoutProgress = { completedWorkouts: [], lastWeekProgress: 0 };
+    }
+    
+    // Atualiza o status do treino
+    if (completed) {
+      if (!user.workoutProgress.completedWorkouts.includes(workoutId)) {
+        user.workoutProgress.completedWorkouts.push(workoutId);
+        
+        // Registra a data de conclusão do treino
+        if (!user.workoutHistory) {
+          user.workoutHistory = [];
+        }
+        
+        // Busca o nome do treino
+        const workoutName = getWorkoutName(user, workoutId);
+          
+        // Salva a data atual como data do treino
+        const todayDate = new Date().toISOString().split('T')[0];
+        
+        // Verifica se já existe um registro para hoje com este treino
+        const existingEntryForToday = user.workoutHistory.find(
+          (entry: {date: string, nome: string}) => 
+            entry.date === todayDate && entry.nome === workoutName
+        );
+        
+        if (!existingEntryForToday) {
+          user.workoutHistory.push({
+            date: todayDate,
+            nome: workoutName
+          });
+        }
+      }
+    } else {
+      user.workoutProgress.completedWorkouts = user.workoutProgress.completedWorkouts.filter(
+        (id: number) => id !== workoutId
+      );
+      
+      // Se desfez a conclusão, remove o registro do histórico para o treino atual
+      if (user.workoutHistory) {
+        const todayDate = new Date().toISOString().split('T')[0];
+        // Busca o nome do treino
+        const workoutName = getWorkoutName(user, workoutId);
+          
+        user.workoutHistory = user.workoutHistory.filter(
+          (entry: {date: string, nome: string}) => !(entry.date === todayDate && entry.nome === workoutName)
+        );
+      }
+    }
+    
+    // Calcula a porcentagem de progresso
+    const totalWorkouts = user.workoutPlan?.days || 3;
+    const completedCount = user.workoutProgress.completedWorkouts.length;
+    const progress = Math.round((completedCount / totalWorkouts) * 100);
+    
+    user.workoutProgress.lastWeekProgress = progress;
+    
+    // Salva os dados atualizados
+    localStorage.setItem('traingo-user', JSON.stringify(user));
+    
+    return progress;
   } catch (error) {
-    console.error('[TrainGO] Error updating workout progress:', error);
+    console.error('Erro ao atualizar progresso:', error);
     return 0;
   }
 };
-
-/**
- * Versão assíncrona da função que realmente atualiza o backend
- */
-async function updateWorkoutProgressAsync(workoutDay: number, isCompleted: boolean): Promise<number> {
-  try {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session?.user) {
-      console.error("[TrainGO] User not authenticated");
-      return 0;
-    }
-    
-    const userId = session.session.user.id;
-    
-    if (isCompleted) {
-      // Adicionar treino concluído
-      const today = new Date();
-      
-      const { error } = await supabase
-        .from('progress')
-        .insert({
-          user_id: userId,
-          workout_day: workoutDay,
-          completed_date: today.toISOString().split('T')[0]
-        });
-        
-      if (error) {
-        console.error('[TrainGO] Error updating workout progress:', error);
-        return 0;
-      }
-    } else {
-      // Remover treino concluído
-      const { error } = await supabase
-        .from('progress')
-        .delete()
-        .eq('user_id', userId)
-        .eq('workout_day', workoutDay);
-        
-      if (error) {
-        console.error('[TrainGO] Error updating workout progress:', error);
-        return 0;
-      }
-    }
-    
-    // Calcular e atualizar progresso semanal
-    const { data: progressData } = await supabase
-      .from('progress')
-      .select('workout_day')
-      .eq('user_id', userId);
-      
-    const { data: workoutPlanData } = await supabase
-      .from('user_workouts')
-      .select('days')
-      .eq('user_id', userId)
-      .single();
-      
-    if (progressData && workoutPlanData) {
-      const completed = progressData.length;
-      const total = workoutPlanData.days;
-      const weekProgress = total > 0 ? (completed / total) * 100 : 0;
-      
-      await supabase
-        .from('stats')
-        .update({ 
-          week_progress: weekProgress,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-        
-      return weekProgress;
-    }
-    
-    return 0;
-  } catch (error) {
-    console.error('[TrainGO] Error updating workout progress:', error);
-    return 0;
-  }
-}
-

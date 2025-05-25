@@ -7,9 +7,6 @@ export const healthAdvancedOutdoor: WorkoutPlan = {
   tags: ["health_energy", "advanced", "outdoor", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano ao ar livre para otimizar energia e bem-estar",
-  level: "advanced",
-  environment: "outdoor",
-  objective: "health_energy",
   plan: {
     dia1: [
       { nome: "Corrida intervalar", reps: "15 minutos (1 min rápido, 1 min lento)" },

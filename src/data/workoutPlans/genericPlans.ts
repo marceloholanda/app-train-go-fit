@@ -9,9 +9,6 @@ export const genericBeginnerPlan: WorkoutPlan = {
   tags: ["beginner", "full_body"],
   days: 3,
   description: "Plano básico para iniciantes que desejam melhorar a condição física geral",
-  level: "beginner",
-  environment: "home",
-  objective: "health_energy",
   plan: {
     dia1: [
       { nome: "Caminhada", reps: "15 minutos" },
@@ -40,9 +37,6 @@ export const genericIntermediatePlan: WorkoutPlan = {
   tags: ["returning", "full_body"],
   days: 4,
   description: "Plano para praticantes que estão retornando à atividade física",
-  level: "returning",
-  environment: "gym",
-  objective: "health_energy",
   plan: {
     dia1: [
       { nome: "Cardio moderado", reps: "20 minutos" },
@@ -77,9 +71,6 @@ export const genericAdvancedPlan: WorkoutPlan = {
   tags: ["advanced", "full_body"],
   days: 5,
   description: "Plano intenso para praticantes avançados",
-  level: "advanced",
-  environment: "gym",
-  objective: "gain_muscle",
   plan: {
     dia1: [
       { nome: "HIIT", reps: "20 minutos" },

@@ -1,16 +1,8 @@
 
-import { Exercise } from '@/types/workout';
-
-interface SimpleExercise {
-  nome: string;
-  reps?: string;
-}
-
 /**
  * Gera nomes para os treinos baseados nos exercícios
- * Esta é a implementação específica para a geração de nomes de treino
  */
-export const generateWorkoutName = (dayNumber: number, exercises: SimpleExercise[] | Exercise[]): string => {
+export const generateWorkoutName = (dayNumber: number, exercises: { nome: string; reps: string }[]): string => {
   const lowerExercises = exercises.map(ex => ex.nome.toLowerCase());
   let focusName = 'Full Body';
   

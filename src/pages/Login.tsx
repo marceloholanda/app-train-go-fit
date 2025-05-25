@@ -4,12 +4,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from '@/contexts/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login, isLoading: authLoading } = useAuth();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -26,6 +26,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      // Simulação de login
       await login(formData.email, formData.password);
       
       toast({
@@ -35,8 +36,11 @@ const Login = () => {
       
       navigate('/dashboard');
     } catch (error) {
-      // Error is handled in the login function
-      console.error("Login error:", error);
+      toast({
+        title: "Falha no login",
+        description: "Email ou senha incorretos.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -77,9 +81,9 @@ const Login = () => {
                 <label htmlFor="password" className="block text-sm font-medium">
                   Senha
                 </label>
-                <Link to="/forgot-password" className="text-sm text-traingo-primary hover:underline">
+                <a href="#" className="text-sm text-traingo-primary hover:underline">
                   Esqueci minha senha
-                </Link>
+                </a>
               </div>
               <input
                 id="password"
@@ -93,7 +97,7 @@ const Login = () => {
               />
             </div>
             
-            <Button type="submit" fullWidth isLoading={isLoading || authLoading}>
+            <Button type="submit" fullWidth isLoading={isLoading}>
               Entrar
             </Button>
           </form>
@@ -101,7 +105,7 @@ const Login = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-400">
               Não tem uma conta?{' '}
-              <Link to="/register" className="text-traingo-primary hover:underline">
+              <Link to="/onboarding" className="text-traingo-primary hover:underline">
                 Criar Agora
               </Link>
             </p>

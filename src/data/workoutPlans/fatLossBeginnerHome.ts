@@ -7,9 +7,6 @@ export const fatLossBeginnerHome: WorkoutPlan = {
   tags: ["lose_fat", "beginner", "home", "20_30", "3", "full_body"],
   days: 3,
   description: "Plano ideal para iniciantes que desejam perder gordura corporal treinando em casa",
-  level: "beginner",
-  environment: "home",
-  objective: "lose_fat",
   plan: {
     dia1: [
       { nome: "Polichinelo", reps: "3x30s" },

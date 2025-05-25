@@ -23,27 +23,11 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
   const isPremium = isPremiumUser();
 
   const handleWorkoutClick = (workoutId: number) => {
-    console.log('[TrainGO] WorkoutsList - Navigating to workout:', workoutId);
-    
-    // Validate workout ID before navigation
-    if (!workoutId || isNaN(workoutId) || workoutId < 1) {
-      console.error('[TrainGO] WorkoutsList - Invalid workout ID:', workoutId);
-      toast({
-        title: "Erro na navegação",
-        description: "ID do treino inválido.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     navigate(`/exercise/${workoutId}`);
   };
 
   const toggleWorkoutCompletion = (e: React.MouseEvent, workoutId: number, currentStatus: 'completed' | 'pending') => {
     e.stopPropagation();
-    
-    console.log('[TrainGO] WorkoutsList - Toggling workout completion:', { workoutId, currentStatus });
-    
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
     const newCompleted = newStatus === 'completed';
     
@@ -54,7 +38,7 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
         : workout
     ));
     
-    // Atualiza o progresso da semana (função agora é síncrona)
+    // Atualiza o progresso da semana
     const newProgress = updateWorkoutProgress(workoutId, newCompleted);
     setWeekProgress(newProgress);
     
@@ -79,8 +63,6 @@ const WorkoutsList: React.FC<WorkoutsListProps> = ({
       </div>
     );
   }
-
-  console.log('[TrainGO] WorkoutsList - Rendering workouts:', workouts.map(w => ({ id: w.id, name: w.name })));
 
   return (
     <div className="space-y-4">

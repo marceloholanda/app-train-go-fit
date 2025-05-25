@@ -1,36 +1,35 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { WorkoutDate } from '@/types/workout';
+import { generateWorkoutName } from './mapping';
 
 /**
- * Get workout dates for the specified month and year
+ * Obtém o nome do treino com base no ID
  */
-export const getWorkoutDatesForMonth = async (
-  month: number, 
-  year: number,
-  userId: string
-): Promise<string[]> => {
+export const getWorkoutName = (user: any, workoutId: number): string => {
+  return user.workoutPlan?.plan?.[`dia${workoutId}`] 
+    ? generateWorkoutName(workoutId, user.workoutPlan.plan[`dia${workoutId}`])
+    : `Treino ${workoutId}`;
+};
+
+/**
+ * Retorna datas com treinos concluídos para um determinado mês
+ */
+export const getWorkoutDatesForMonth = (month: number, year: number): string[] => {
   try {
-    // Month in JS is 0-indexed, but we need to adjust for the database query
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0); // Last day of the month
+    const userData = localStorage.getItem('traingo-user');
+    if (!userData) return [];
     
-    const { data, error } = await supabase
-      .from('progress')
-      .select('completed_date')
-      .eq('user_id', userId)
-      .gte('completed_date', startDate.toISOString().split('T')[0])
-      .lte('completed_date', endDate.toISOString().split('T')[0]);
-      
-    if (error) {
-      console.error('Error fetching workout dates:', error);
-      return [];
-    }
+    const user = JSON.parse(userData);
+    if (!user.workoutHistory) return [];
     
-    // Extract just the dates from the response
-    return data.map(item => item.completed_date);
+    // Filtra os treinos realizados no mês especificado
+    return user.workoutHistory
+      .filter((workout: {date: string}) => {
+        const date = new Date(workout.date);
+        return date.getMonth() === month && date.getFullYear() === year;
+      })
+      .map((workout: {date: string}) => workout.date);
   } catch (error) {
-    console.error('Error fetching workout dates:', error);
+    console.error('Erro ao obter datas de treino do mês:', error);
     return [];
   }
 };
