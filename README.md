@@ -20,6 +20,7 @@ O **TrainGO** é um aplicativo desenvolvido em formato PWA de treinos personaliz
 - **ChatGPT**
 - **ClaudeAI**
 - **ManusAI**
+- **Lovable**
 
 ##  Técnicas de Prompt
 
@@ -58,7 +59,7 @@ O **TrainGO** é um aplicativo desenvolvido em formato PWA de treinos personaliz
 - Histórico de treinos concluídos
 - Conquistas desbloqueadas
 
-Para acessar o app basta seguir o link -> https://train-go-fit.lovable.app/
+Para acessar o app basta seguir o link -> train-go-fit.lovable.app
 
 ![image alt](https://github.com/marceloholanda/app-train-go-fit/blob/6efed58ece589478d19e42fa5220e3fd375ac954/dashboard.png)
 
