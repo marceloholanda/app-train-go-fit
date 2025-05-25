@@ -32,6 +32,19 @@ const App = () => {
     }
   }, [currentUser, navigate]);
 
+  // Handle logout redirect
+  useEffect(() => {
+    if (!currentUser) {
+      const currentPath = window.location.pathname;
+      const publicPaths = ['/', '/login', '/register', '/onboarding', '/terms', '/privacy'];
+      
+      if (!publicPaths.includes(currentPath)) {
+        console.log("[TrainGO] User not authenticated, redirecting to login");
+        navigate('/login');
+      }
+    }
+  }, [currentUser, navigate]);
+
   return (
     <div className="bg-background text-foreground">
       <Routes>
